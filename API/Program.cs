@@ -1,26 +1,13 @@
+using API.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<DataContext>(opt =>
-{
-    opt.UseNpgsql(builder.Configuration.GetConnectionString("KoneksiKePostgreSQL"));
-});
-
-builder.Services.AddCors(opt =>
-{
-    opt.AddPolicy("CorsPolicy", policy =>
-    {
-        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000"); // localhost:3000 adalah URL milik client (frontend)
-    });
-});
+builder.Services.AddApplicationServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -44,7 +31,9 @@ var services = scope.ServiceProvider;
 try
 {
     var context = services.GetRequiredService<DataContext>();
+
     await context.Database.MigrateAsync();
+
     await SeedPengumuman.SeedData(context);
 }
 catch (Exception ex)
