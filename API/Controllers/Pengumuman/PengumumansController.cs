@@ -1,6 +1,7 @@
 ﻿using Application.Pengumumans;
 using Domain.Pengumuman;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
