@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Domain.Pengumuman;
+using Domain.Announcement;
 
 namespace Application.Core
 {
@@ -7,8 +7,8 @@ namespace Application.Core
     {
         public MappingProfiles()
         {
-            CreateMap<Pengumuman, PengumumanDto>();
-            CreateMap<PengumumanDto, Pengumuman>();
+            CreateMap<Announcement, AnnouncementDto>();
+            CreateMap<AnnouncementDto, Announcement>();
         }
     }
 }

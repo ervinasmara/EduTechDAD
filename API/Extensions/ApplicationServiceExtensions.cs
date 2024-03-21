@@ -1,4 +1,4 @@
-﻿using Application.Pengumumans;
+﻿using Application.Announcements;
 using Application.Core;
 using Microsoft.EntityFrameworkCore;
 using Persistence;

@@ -2,7 +2,7 @@
 using MediatR;
 using Persistence;
 
-namespace Application.Pengumumans
+namespace Application.Announcements
 {
     public class Delete
     {
@@ -22,15 +22,15 @@ namespace Application.Pengumumans
 
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var pengumuman = await _context.Pengumumans.FindAsync(request.Id);
+                var announcement = await _context.Announcements.FindAsync(request.Id);
 
-                if (pengumuman == null) return null;
+                if (announcement == null) return null;
 
-                _context.Remove(pengumuman);
+                _context.Remove(announcement);
 
                 var result = await _context.SaveChangesAsync() > 0;
 
-                if (!result) return Result<Unit>.Failure("Gagal untuk menghapus Pengumuman");
+                if (!result) return Result<Unit>.Failure("Gagal untuk menghapus Announcement");
 
                 return Result<Unit>.Success(Unit.Value);
             }

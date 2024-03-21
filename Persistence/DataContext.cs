@@ -1,5 +1,5 @@
 ﻿using Domain.Pengguna;
-using Domain.Pengumuman;
+using Domain.Announcement;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +12,6 @@ namespace Persistence
             // Biarkan kosong
         }
 
-        public DbSet<Pengumuman> Pengumumans { get; set; }
+        public DbSet<Announcement> Announcements { get; set; }
     }
 }
