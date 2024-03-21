@@ -1,9 +1,9 @@
-﻿using Domain.Pengguna;
+﻿using Domain.User;
 using Microsoft.AspNetCore.Identity;
 
 namespace Persistence.Seed
 {
-    public class SeedPengguna
+    public class SeedUser
     {
         public static async Task SeedData(DataContext context, UserManager<AppUser> userManager)
         {

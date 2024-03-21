@@ -12,8 +12,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240321072933_Announcement")]
-    partial class Announcement
+    [Migration("20240321085409_IdentityAdded")]
+    partial class IdentityAdded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,7 +42,27 @@ namespace Persistence.Migrations
                     b.ToTable("Announcements");
                 });
 
-            modelBuilder.Entity("Domain.Pengguna.AppUser", b =>
+            modelBuilder.Entity("Domain.User.Admin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NameAdmin")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId")
+                        .IsUnique();
+
+                    b.ToTable("Admins");
+                });
+
+            modelBuilder.Entity("Domain.User.AppUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -107,6 +127,82 @@ namespace Persistence.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.User.Student", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("BirthDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("BirthPlace")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("NameStudent")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nis")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ParentName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId")
+                        .IsUnique();
+
+                    b.ToTable("Students");
+                });
+
+            modelBuilder.Entity("Domain.User.Teacher", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("BirthDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("BirthPlace")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NameTeacher")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nip")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId")
+                        .IsUnique();
+
+                    b.ToTable("Teachers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -241,6 +337,33 @@ namespace Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.User.Admin", b =>
+                {
+                    b.HasOne("Domain.User.AppUser", "User")
+                        .WithOne("Admin")
+                        .HasForeignKey("Domain.User.Admin", "AppUserId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.User.Student", b =>
+                {
+                    b.HasOne("Domain.User.AppUser", "User")
+                        .WithOne("Student")
+                        .HasForeignKey("Domain.User.Student", "AppUserId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.User.Teacher", b =>
+                {
+                    b.HasOne("Domain.User.AppUser", "User")
+                        .WithOne("Teacher")
+                        .HasForeignKey("Domain.User.Teacher", "AppUserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -252,7 +375,7 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Domain.Pengguna.AppUser", null)
+                    b.HasOne("Domain.User.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -261,7 +384,7 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Domain.Pengguna.AppUser", null)
+                    b.HasOne("Domain.User.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -276,7 +399,7 @@ namespace Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Pengguna.AppUser", null)
+                    b.HasOne("Domain.User.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -285,11 +408,20 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Domain.Pengguna.AppUser", null)
+                    b.HasOne("Domain.User.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.User.AppUser", b =>
+                {
+                    b.Navigation("Admin");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Teacher");
                 });
 #pragma warning restore 612, 618
         }

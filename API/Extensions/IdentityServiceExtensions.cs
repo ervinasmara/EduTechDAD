@@ -1,5 +1,5 @@
 ﻿using API.Services;
-using Domain.Pengguna;
+using Domain.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
