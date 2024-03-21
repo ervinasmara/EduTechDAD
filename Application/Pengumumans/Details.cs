@@ -1,17 +1,19 @@
-﻿using Domain.Pengumuman;
+﻿using Application.Core;
+using Domain.Pengumuman;
 using MediatR;
 using Persistence;
+using System.Diagnostics;
 
 namespace Application.Pengumumans
 {
     public class Details
     {
-        public class Query : IRequest<Pengumuman>
+        public class Query : IRequest<Result<Pengumuman>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Pengumuman>
+        public class Handler : IRequestHandler<Query, Result<Pengumuman>>
         {
             private readonly DataContext _context;
 
@@ -20,9 +22,11 @@ namespace Application.Pengumumans
                 _context = context;
             }
 
-            public async Task<Pengumuman> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<Pengumuman>> Handle(Query request, CancellationToken cancellationToken)
             {
-                return await _context.Pengumumans.FindAsync(request.Id);
+                var pengumuman = await _context.Pengumumans.FindAsync(request.Id);
+
+                return Result<Pengumuman>.Success(pengumuman);
             }
         }
     }
