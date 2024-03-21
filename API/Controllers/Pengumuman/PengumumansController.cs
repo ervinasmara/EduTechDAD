@@ -9,13 +9,14 @@ namespace API.Controllers.Pengumumans
 {
     public class PengumumansController : BaseApiController
     {
-
+        [Authorize(Policy = "RequireRole1")]
         [HttpGet]
         public async Task<IActionResult> GetPengumumans(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
 
+        [Authorize(Policy = "RequireRole2")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetPengumuman(Guid id, CancellationToken ct)
         {
@@ -36,6 +37,7 @@ namespace API.Controllers.Pengumumans
             return HandleResult(await Mediator.Send(new Edit.Command { Pengumuman = pengumuman }, ct));
         }
 
+        [Authorize(Policy = "RequireRole3")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePengumuman(Guid id, CancellationToken ct)
         {

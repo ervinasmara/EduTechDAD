@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.Seed;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,16 @@ builder.Services.AddControllers(opt =>
 builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddIdentityService(builder.Configuration);
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireRole1", policy =>
+        policy.RequireClaim(ClaimTypes.Role, "1"));
+    options.AddPolicy("RequireRole2", policy =>
+        policy.RequireClaim(ClaimTypes.Role, "2"));
+    options.AddPolicy("RequireRole3", policy =>
+        policy.RequireClaim(ClaimTypes.Role, "3"));
+});
 
 var app = builder.Build();
 
