@@ -1,44 +1,56 @@
-﻿using Application.Core;
-using Domain.Pengumuman;
-using FluentValidation;
-using MediatR;
+﻿using MediatR;
 using Persistence;
+using FluentValidation;
+using Application.Core;
+using AutoMapper;
+using Domain.Pengumuman;
 
 namespace Application.Pengumumans
 {
     public class Create
     {
-        public class Command : IRequest<Result<Unit>>
+        public class Command : IRequest<Result<PengumumanDto>>
         {
-            public Pengumuman Pengumuman { get; set; }
+            public PengumumanDto PengumumanDto { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
             public CommandValidator()
             {
-                RuleFor(x => x.Pengumuman).SetValidator(new PengumumanValidator());
+                RuleFor(x => x.PengumumanDto).SetValidator(new PengumumanValidator());
             }
         }
 
-        public class Handler : IRequestHandler<Command, Result<Unit>>
+        public class Handler : IRequestHandler<Command, Result<PengumumanDto>>
         {
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            public Handler(DataContext context)
+            public Handler(DataContext context, IMapper mapper)
             {
                 _context = context;
+                _mapper = mapper;
             }
 
-            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<PengumumanDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                _context.Pengumumans.Add(request.Pengumuman);
+                var pengumuman = new Pengumuman
+                {
+                    Deskripsi = request.PengumumanDto.Deskripsi,
+                    Tanggal = request.PengumumanDto.Tanggal,
+                };
 
-                var result = await _context.SaveChangesAsync() > 0;
+                _context.Pengumumans.Add(pengumuman);
 
-                if (!result) return Result<Unit>.Failure("Gagal Untuk Create Pengumuman");
+                var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                return Result<Unit>.Success(Unit.Value);
+                if (!result) return Result<PengumumanDto>.Failure("Gagal Untuk Membuat Pengumuman");
+
+                // Buat DTO dari pengumuman yang telah dibuat
+                var pengumumanDto = _mapper.Map<PengumumanDto>(pengumuman);
+
+                return Result<PengumumanDto>.Success(pengumumanDto);
             }
         }
     }

@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Pengumumans
 {
-    public class PengumumanValidator : AbstractValidator<Pengumuman>
+    public class PengumumanValidator : AbstractValidator<PengumumanDto>
     {
         public PengumumanValidator()
         {

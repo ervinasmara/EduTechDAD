@@ -1,32 +1,32 @@
-﻿using Application.Core;
-using AutoMapper;
-using Domain.Pengumuman;
-using FluentValidation;
-using MediatR;
+﻿using MediatR;
 using Persistence;
+using AutoMapper;
+using FluentValidation;
+using Application.Core;
+using Domain.Pengumuman;
 
 namespace Application.Pengumumans
 {
     public class Edit
     {
-        public class Command : IRequest<Result<Unit>>
+        public class Command : IRequest<Result<PengumumanDto>>
         {
-            public Pengumuman Pengumuman { get; set; }
+            public Guid Id { get; set; }
+            public PengumumanDto PengumumanDto { get; set; }
         }
 
-        public class CommandValidator : AbstractValidator<Command>
+        public class CommandValidatorDto : AbstractValidator<Command>
         {
-            public CommandValidator()
+            public CommandValidatorDto()
             {
-                // Di sini kita akan membuat aturan untuk apa yang akan kita validasi
-                RuleFor(x => x.Pengumuman).SetValidator(new PengumumanValidator());
+                RuleFor(x => x.PengumumanDto).SetValidator(new PengumumanValidator());
             }
         }
 
-        public class Handler : IRequestHandler<Command, Result<Unit>>
+        public class Handler : IRequestHandler<Command, Result<PengumumanDto>>
         {
-            private readonly IMapper _mapper;
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
             public Handler(DataContext context, IMapper mapper)
             {
@@ -34,20 +34,29 @@ namespace Application.Pengumumans
                 _context = context;
             }
 
-            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<PengumumanDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var pengumuman = await _context.Pengumumans.FindAsync(request.Pengumuman.Id);
+                var pengumuman = await _context.Pengumumans.FindAsync(request.Id);
 
-                // Kita dapat menguji untuk melihat apakah pengumuman tersebut nol (null/kosong)
-                if (pengumuman == null) return null;
+                // Periksa apakah pengumuman ditemukan
+                if (pengumuman == null)
+                {
+                    return Result<PengumumanDto>.Failure("Jurusan tidak ditemukan");
+                }
 
-                _mapper.Map(request.Pengumuman, pengumuman);
+                _mapper.Map(request.PengumumanDto, pengumuman);
 
-                var result = await _context.SaveChangesAsync() > 0;
+                var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                if (!result) return Result<Unit>.Failure("Gagal untuk edit Pengumuman");
+                if (!result)
+                {
+                    return Result<PengumumanDto>.Failure("Gagal untuk mengedit Jurusan");
+                }
 
-                return Result<Unit>.Success(Unit.Value);
+                // Buat instance PengumumanDto yang mewakili hasil edit
+                var editedPengumumanDto = _mapper.Map<PengumumanDto>(pengumuman);
+
+                return Result<PengumumanDto>.Success(editedPengumumanDto);
             }
         }
     }
