@@ -26,6 +26,7 @@ namespace API.DTOs
             _context = context;
         }
 
+        // =========================== LOGIN =========================== //
         [AllowAnonymous]
         [HttpPost("login/admin")]
         public async Task<ActionResult<AdminDto>> LoginAdmin(LoginDto loginDto)
@@ -55,13 +56,70 @@ namespace API.DTOs
         }
 
         [AllowAnonymous]
+        [HttpPost("login/teacher")]
+        public async Task<ActionResult<TeacherDto>> LoginTeacher(LoginDto loginDto)
+        {
+            var user = await _userManager.FindByNameAsync(loginDto.Username);
+
+            if (user == null) return Unauthorized();
+
+            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+
+            if (result)
+            {
+                try
+                {
+                    // Buat objek TeacherDto menggunakan CreateUserObject
+                    var teacherDto = await CreateUserObjectTeacher(user);
+
+                    return teacherDto;
+                }
+                catch (Exception ex)
+                {
+                    // Tangani jika data teacher tidak ditemukan
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Unauthorized();
+        }
+
+        [AllowAnonymous]
+        [HttpPost("login/student")]
+        public async Task<ActionResult<StudentDto>> LoginStudent(LoginDto loginDto)
+        {
+            var user = await _userManager.FindByNameAsync(loginDto.Username);
+
+            if (user == null) return Unauthorized();
+
+            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+
+            if (result)
+            {
+                try
+                {
+                    // Buat objek StudentDto menggunakan CreateUserObject
+                    var studentDto = await CreateUserObjectStudent(user);
+
+                    return studentDto;
+                }
+                catch (Exception ex)
+                {
+                    // Tangani jika data student tidak ditemukan
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Unauthorized();
+        }
+
+        // =========================== REGISTER =========================== //
+        [AllowAnonymous]
         [HttpPost("register/admin")]
         public async Task<ActionResult<AdminDto>> RegisterAdmin(RegisterAdminDto adminDto)
         {
             // Pemeriksaan username supaya berbeda dengan yang lain
             if (await _userManager.Users.AnyAsync(x => x.UserName == adminDto.Username))
             {
-                return BadRequest("Username sudah dipakai");
+                return BadRequest("Username already in use");
             }
 
             var user = new AppUser
@@ -91,45 +149,151 @@ namespace API.DTOs
             return BadRequest(result.Errors);
         }
 
-        //[AllowAnonymous]
-        //[HttpPost("register")]
-        //public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
-        //{
-        //    // Pemeriksaan username supaya berbeda dengan yang lain
-        //    if (await _userManager.Users.AnyAsync(x => x.UserName == registerDto.Username))
-        //    {
-        //        return BadRequest("Username sudah dipakai");
-        //    }
+        [AllowAnonymous]
+        [HttpPost("register/teacher")]
+        public async Task<ActionResult<TeacherDto>> RegisterTeacher(RegisterTeacherDto teacherDto)
+        {
+            // Pemeriksaan username supaya berbeda dengan yang lain
+            if (await _userManager.Users.AnyAsync(x => x.UserName == teacherDto.Username))
+            {
+                return BadRequest("Username already in use");
+            }
 
-        //    var user = new AppUser
-        //    {
-        //        UserName = registerDto.Username,
-        //        Role = registerDto.Role,
-        //    };
+            if (teacherDto.BirthDate == DateOnly.MinValue)
+            {
+                return BadRequest("Date of birth required");
+            }
 
-        //    var result = await _userManager.CreateAsync(user, registerDto.Password);
+            var user = new AppUser
+            {
+                UserName = teacherDto.Username,
+                Role = teacherDto.Role,
+            };
 
-        //    if (result.Succeeded)
-        //    {
-        //        return new UserDto
-        //        {
-        //            Role = user.Role,
-        //            Username = user.UserName,
-        //            Token = _tokenService.CreateToken(user),
-        //        };
-        //    }
-        //    return BadRequest(result.Errors);
-        //}
+            var teacher = new Teacher
+            {
+                NameTeacher = teacherDto.NameTeacher,
+                BirthDate = teacherDto.BirthDate,
+                BirthPlace = teacherDto.BirthPlace,
+                Address = teacherDto.Address,
+                PhoneNumber = teacherDto.PhoneNumber,
+                Nip = teacherDto.Nip,
+                AppUserId = user.Id
+            };
 
-        //[Authorize] // UNTUK GET INI HARUS LOGIN
-        //[HttpGet]
-        //public async Task<ActionResult<UserDto>> GetCurrentUser()
-        //{
-        //    var user = await _userManager.FindByNameAsync(User.FindFirstValue(ClaimTypes.Name));
+            var result = await _userManager.CreateAsync(user, teacherDto.Password);
 
-        //    return CreateUserObject(user);
-        //}
+            if (result.Succeeded)
+            {
+                // Simpan teacher ke dalam konteks database Anda
+                _context.Teachers.Add(teacher);
+                await _context.SaveChangesAsync();
 
+                // Gunakan metode CreateUserObjectTeacher untuk membuat objek TeacherDto
+                var teacherDtoResult = await CreateUserObjectTeacher(user);
+                return teacherDtoResult; // Mengembalikan hasil dari Task<ActionResult<TeacherDto>>
+            }
+            return BadRequest(result.Errors);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("register/student")]
+        public async Task<ActionResult<StudentDto>> RegisterStudent(RegisterStudentDto studentDto)
+        {
+            // Pemeriksaan username supaya berbeda dengan yang lain
+            if (await _userManager.Users.AnyAsync(x => x.UserName == studentDto.Username))
+            {
+                return BadRequest("Username already in use");
+            }
+
+            if (studentDto.BirthDate == DateOnly.MinValue)
+            {
+                return BadRequest("Date of birth required");
+            }
+
+            var user = new AppUser
+            {
+                UserName = studentDto.Username,
+                Role = studentDto.Role,
+            };
+
+            var student = new Student
+            {
+                NameStudent = studentDto.NameStudent,
+                BirthDate = studentDto.BirthDate,
+                BirthPlace = studentDto.BirthPlace,
+                Address = studentDto.Address,
+                PhoneNumber = studentDto.PhoneNumber,
+                Nis = studentDto.Nis,
+                ParentName = studentDto.ParentName,
+                Gender = studentDto.Gender,
+                AppUserId = user.Id
+            };
+
+            var result = await _userManager.CreateAsync(user, studentDto.Password);
+
+            if (result.Succeeded)
+            {
+                // Simpan student ke dalam konteks database Anda
+                _context.Students.Add(student);
+                await _context.SaveChangesAsync();
+
+                // Gunakan metode CreateUserObjectStudent untuk membuat objek StudentDto
+                var studentDtoResult = await CreateUserObjectStudent(user);
+                return studentDtoResult; // Mengembalikan hasil dari Task<ActionResult<StudentDto>>
+            }
+            return BadRequest(result.Errors);
+        }
+
+        [Authorize]
+        [HttpGet("admin")]
+        public async Task<ActionResult<AdminDto>> GetUserAdmin()
+        {
+            var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
+            }
+
+            var adminDto = await CreateUserObjectAdmin(user);
+            return adminDto;
+        }
+
+        [Authorize]
+        [HttpGet("teacher")]
+        public async Task<ActionResult<TeacherDto>> GetUserTeacher()
+        {
+            var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
+            }
+
+            var teacherDto = await CreateUserObjectTeacher(user);
+            return teacherDto;
+        }
+
+        [Authorize]
+        [HttpGet("student")]
+        public async Task<ActionResult<StudentDto>> GetUserStudent()
+        {
+            var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
+            }
+
+            var studentDto = await CreateUserObjectStudent(user);
+            return studentDto;
+        }
+
+        // =========================== SHORT CODE =========================== //
         private async Task<AdminDto> CreateUserObjectAdmin(AppUser user)
         {
             // Ambil data admin terkait dari database
@@ -138,7 +302,7 @@ namespace API.DTOs
             if (admin == null)
             {
                 // Handle jika data admin tidak ditemukan
-                throw new Exception("Data admin tidak ditemukan");
+                throw new Exception("Admin data not found");
             }
 
             return new AdminDto
@@ -150,5 +314,56 @@ namespace API.DTOs
             };
         }
 
+        private async Task<TeacherDto> CreateUserObjectTeacher(AppUser user)
+        {
+            // Ambil data teacher terkait dari database
+            var teacher = await _context.Teachers.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
+
+            if (teacher == null)
+            {
+                // Handle jika data teacher tidak ditemukan
+                throw new Exception("Teacher data not found");
+            }
+
+            return new TeacherDto
+            {
+                Role = user.Role,
+                Username = user.UserName,
+                Token = _tokenService.CreateTokenTeacher(user, teacher),
+                NameTeacher = teacher.NameTeacher,
+                BirthDate = teacher.BirthDate,
+                BirthPlace = teacher.BirthPlace,
+                Address = teacher.Address,
+                PhoneNumber = teacher.PhoneNumber,
+                Nip = teacher.Nip,
+            };
+        }
+
+        private async Task<StudentDto> CreateUserObjectStudent(AppUser user)
+        {
+            // Ambil data student terkait dari database
+            var student = await _context.Students.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
+
+            if (student == null)
+            {
+                // Handle jika data student tidak ditemukan
+                throw new Exception("Student data not found");
+            }
+
+            return new StudentDto
+            {
+                Role = user.Role,
+                Username = user.UserName,
+                Token = _tokenService.CreateTokenStudent(user, student),
+                NameStudent = student.NameStudent,
+                BirthDate = student.BirthDate,
+                BirthPlace = student.BirthPlace,
+                Address = student.Address,
+                PhoneNumber = student.PhoneNumber,
+                Nis = student.Nis,
+                ParentName = student.ParentName,
+                Gender = student.Gender,
+            };
+        }
     }
 }

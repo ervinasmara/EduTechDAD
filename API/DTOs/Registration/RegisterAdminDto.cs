@@ -11,10 +11,11 @@ namespace API.DTOs.Registration
         public string Username { get; set; }
 
         [Required]
-        [RegularExpression("(?=.*\\d)(?=.[a-z])(?=.*[A-Z]).{4,8}$", ErrorMessage = "Password Harus Rumit")]
+        [RegularExpression("(?=.*\\d)(?=.[a-z])(?=.*[A-Z]).{4,8}$", ErrorMessage = "Password must be complex")]
         public string Password { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Role is required")]
+        [Range(1, 1, ErrorMessage = "Role must be 1")]
         public int Role { get; set; }
     }
 }

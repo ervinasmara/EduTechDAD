@@ -14,7 +14,37 @@ namespace API.Services
         {
             _config = config;
         }
-        public string CreateTokenAdmin1(AppUser user, Teacher teacher)
+
+        public string CreateTokenAdmin(AppUser user, Admin admin)
+        {
+            // Kita akan membuat daftar klaim yang akan masuk ke dalam dan dikembalikan dengan token kita
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim("NameAdmin", admin.NameAdmin),
+            };
+
+            // Dan kita perlu menggunakan kunci keamanan simetris
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["TokenKey"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature); // ini akan digunakan untuk menandatangani key
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = creds
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
+        }
+
+        public string CreateTokenTeacher(AppUser user, Teacher teacher)
         {
             // Kita akan membuat daftar klaim yang akan masuk ke dalam dan dikembalikan dengan token kita
             var claims = new List<Claim>
@@ -48,7 +78,7 @@ namespace API.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public string CreateTokenAdmin(AppUser user, Admin admin)
+        public string CreateTokenStudent(AppUser user, Student student)
         {
             // Kita akan membuat daftar klaim yang akan masuk ke dalam dan dikembalikan dengan token kita
             var claims = new List<Claim>
@@ -56,7 +86,14 @@ namespace API.Services
                 new Claim(ClaimTypes.Role, user.Role.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.UserName),
-                new Claim("NameAdmin", admin.NameAdmin),
+                new Claim("NameStudent", student.NameStudent),
+                new Claim("BirthDate", student.BirthDate.ToString()),
+                new Claim("BirthPlace", student.BirthPlace),
+                new Claim("Address", student.Address),
+                new Claim("PhoneNumber", student.PhoneNumber),
+                new Claim("Nis", student.Nis),
+                new Claim("ParentName", student.ParentName),
+                new Claim("Gender", student.Gender.ToString()),
             };
 
             // Dan kita perlu menggunakan kunci keamanan simetris
