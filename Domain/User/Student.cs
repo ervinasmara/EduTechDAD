@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Domain.Class;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.User
 {
@@ -18,5 +19,10 @@ namespace Domain.User
         public string AppUserId { get; set; }
         [ForeignKey("AppUserId")]
         public AppUser User { get; set; }
+
+        // Menunjukkan kunci asing ke ClassRoom
+        public Guid ClassRoomId { get; set; }
+        [ForeignKey("ClassRoomId")]
+        public ClassRoom ClassRoom { get; set; }
     }
 }

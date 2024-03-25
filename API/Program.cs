@@ -63,6 +63,7 @@ try
     await context.Database.MigrateAsync();
 
     await SeedAnnouncement.SeedData(context);
+    await SeedClassRoom.SeedData(context);
     //await SeedUser.SeedData(context, userManager);
 }
 catch (Exception ex)
