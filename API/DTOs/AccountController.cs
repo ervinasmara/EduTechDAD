@@ -114,7 +114,7 @@ namespace API.DTOs
         // =========================== REGISTER =========================== //
         [AllowAnonymous]
         [HttpPost("register/admin")]
-        public async Task<ActionResult<AdminDto>> RegisterAdmin(RegisterAdminDto adminDto)
+        public async Task<ActionResult<AdminGetDto>> RegisterAdmin(RegisterAdminDto adminDto)
         {
             // Pemeriksaan username supaya berbeda dengan yang lain
             if (await _userManager.Users.AnyAsync(x => x.UserName == adminDto.Username))
@@ -143,7 +143,7 @@ namespace API.DTOs
                 await _context.SaveChangesAsync();
 
                 // Gunakan metode CreateUserObjectAdmin untuk membuat objek AdminDto
-                var adminDtoResult = await CreateUserObjectAdmin(user);
+                var adminDtoResult = await CreateUserObjectAdminGet(user);
                 return adminDtoResult; // Mengembalikan hasil dari Task<ActionResult<AdminDto>>
             }
             return BadRequest(result.Errors);
@@ -151,7 +151,7 @@ namespace API.DTOs
 
         [AllowAnonymous]
         [HttpPost("register/teacher")]
-        public async Task<ActionResult<TeacherDto>> RegisterTeacher(RegisterTeacherDto teacherDto)
+        public async Task<ActionResult<TeacherGetDto>> RegisterTeacher(RegisterTeacherDto teacherDto)
         {
             // Pemeriksaan username supaya berbeda dengan yang lain
             if (await _userManager.Users.AnyAsync(x => x.UserName == teacherDto.Username))
@@ -190,7 +190,7 @@ namespace API.DTOs
                 await _context.SaveChangesAsync();
 
                 // Gunakan metode CreateUserObjectTeacher untuk membuat objek TeacherDto
-                var teacherDtoResult = await CreateUserObjectTeacher(user);
+                var teacherDtoResult = await CreateUserObjectTeacherGet(user);
                 return teacherDtoResult; // Mengembalikan hasil dari Task<ActionResult<TeacherDto>>
             }
             return BadRequest(result.Errors);
@@ -198,7 +198,7 @@ namespace API.DTOs
 
         [AllowAnonymous]
         [HttpPost("register/student")]
-        public async Task<ActionResult<StudentDto>> RegisterStudent(RegisterStudentDto studentDto)
+        public async Task<ActionResult<StudentGetDto>> RegisterStudent(RegisterStudentDto studentDto)
         {
             // Pemeriksaan username supaya berbeda dengan yang lain
             if (await _userManager.Users.AnyAsync(x => x.UserName == studentDto.Username))
@@ -239,15 +239,16 @@ namespace API.DTOs
                 await _context.SaveChangesAsync();
 
                 // Gunakan metode CreateUserObjectStudent untuk membuat objek StudentDto
-                var studentDtoResult = await CreateUserObjectStudent(user);
+                var studentDtoResult = await CreateUserObjectStudentGet(user);
                 return studentDtoResult; // Mengembalikan hasil dari Task<ActionResult<StudentDto>>
             }
             return BadRequest(result.Errors);
         }
 
+        // =========================== GET USER LOGIN =========================== //
         [Authorize]
         [HttpGet("admin")]
-        public async Task<ActionResult<AdminDto>> GetUserAdmin()
+        public async Task<ActionResult<AdminGetDto>> GetUserAdmin()
         {
             var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
             var user = await _userManager.FindByNameAsync(username);
@@ -257,13 +258,13 @@ namespace API.DTOs
                 return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
             }
 
-            var adminDto = await CreateUserObjectAdmin(user);
+            var adminDto = await CreateUserObjectAdminGet(user);
             return adminDto;
         }
 
         [Authorize]
         [HttpGet("teacher")]
-        public async Task<ActionResult<TeacherDto>> GetUserTeacher()
+        public async Task<ActionResult<TeacherGetDto>> GetUserTeacher()
         {
             var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
             var user = await _userManager.FindByNameAsync(username);
@@ -273,13 +274,13 @@ namespace API.DTOs
                 return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
             }
 
-            var teacherDto = await CreateUserObjectTeacher(user);
+            var teacherDto = await CreateUserObjectTeacherGet(user);
             return teacherDto;
         }
 
         [Authorize]
         [HttpGet("student")]
-        public async Task<ActionResult<StudentDto>> GetUserStudent()
+        public async Task<ActionResult<StudentGetDto>> GetUserStudent()
         {
             var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
             var user = await _userManager.FindByNameAsync(username);
@@ -289,7 +290,7 @@ namespace API.DTOs
                 return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
             }
 
-            var studentDto = await CreateUserObjectStudent(user);
+            var studentDto = await CreateUserObjectStudentGet(user);
             return studentDto;
         }
 
@@ -310,6 +311,25 @@ namespace API.DTOs
                 Role = user.Role,
                 Username = user.UserName,
                 Token = _tokenService.CreateTokenAdmin(user, admin),
+                NameAdmin = admin.NameAdmin,
+            };
+        }
+
+        private async Task<AdminGetDto> CreateUserObjectAdminGet(AppUser user)
+        {
+            // Ambil data admin terkait dari database
+            var admin = await _context.Admins.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
+
+            if (admin == null)
+            {
+                // Handle jika data admin tidak ditemukan
+                throw new Exception("Admin data not found");
+            }
+
+            return new AdminGetDto
+            {
+                Role = user.Role,
+                Username = user.UserName,
                 NameAdmin = admin.NameAdmin,
             };
         }
@@ -339,6 +359,30 @@ namespace API.DTOs
             };
         }
 
+        private async Task<TeacherGetDto> CreateUserObjectTeacherGet(AppUser user)
+        {
+            // Ambil data teacher terkait dari database
+            var teacher = await _context.Teachers.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
+
+            if (teacher == null)
+            {
+                // Handle jika data teacher tidak ditemukan
+                throw new Exception("Teacher data not found");
+            }
+
+            return new TeacherGetDto
+            {
+                Role = user.Role,
+                Username = user.UserName,
+                NameTeacher = teacher.NameTeacher,
+                BirthDate = teacher.BirthDate,
+                BirthPlace = teacher.BirthPlace,
+                Address = teacher.Address,
+                PhoneNumber = teacher.PhoneNumber,
+                Nip = teacher.Nip,
+            };
+        }
+
         private async Task<StudentDto> CreateUserObjectStudent(AppUser user)
         {
             // Ambil data student terkait dari database
@@ -355,6 +399,32 @@ namespace API.DTOs
                 Role = user.Role,
                 Username = user.UserName,
                 Token = _tokenService.CreateTokenStudent(user, student),
+                NameStudent = student.NameStudent,
+                BirthDate = student.BirthDate,
+                BirthPlace = student.BirthPlace,
+                Address = student.Address,
+                PhoneNumber = student.PhoneNumber,
+                Nis = student.Nis,
+                ParentName = student.ParentName,
+                Gender = student.Gender,
+            };
+        }
+
+        private async Task<StudentGetDto> CreateUserObjectStudentGet(AppUser user)
+        {
+            // Ambil data student terkait dari database
+            var student = await _context.Students.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
+
+            if (student == null)
+            {
+                // Handle jika data student tidak ditemukan
+                throw new Exception("Student data not found");
+            }
+
+            return new StudentGetDto
+            {
+                Role = user.Role,
+                Username = user.UserName,
                 NameStudent = student.NameStudent,
                 BirthDate = student.BirthDate,
                 BirthPlace = student.BirthPlace,
