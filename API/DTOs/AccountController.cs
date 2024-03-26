@@ -3,7 +3,7 @@ using API.DTOs.Registration;
 using API.Services;
 using Domain.User;
 using Domain.User.DTOs;
-using Domain.User.DTOs.Edit;
+using API.DTOs.Edit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -322,10 +322,13 @@ namespace API.DTOs
         // =========================== EDIT USER =========================== //
         [AllowAnonymous]
         [HttpPut("edit/student/{id}")]
-        public async Task<IActionResult> UpdateStudent(Guid id, StudentEditDto studentEditDto)
+        public async Task<IActionResult> UpdateStudent(Guid id, EditStudentDto studentEditDto)
         {
             // Mencari siswa berdasarkan ID
-            var student = await _context.Students.Include(s => s.ClassRoom).FirstOrDefaultAsync(s => s.Id == id);
+            var student = await _context.Students
+                .Include(s => s.User)
+                .Include(s => s.ClassRoom)
+                .FirstOrDefaultAsync(s => s.Id == id);
 
             // Jika siswa tidak ditemukan, kembalikan response 404 Not Found
             if (student == null)
@@ -352,17 +355,37 @@ namespace API.DTOs
             _context.Students.Update(student);
             await _context.SaveChangesAsync();
 
+            // Dapatkan AppUser terkait dengan siswa
+            var user = await _userManager.FindByIdAsync(student.AppUserId.ToString());
+
+            // Update password jika diperlukan
+            if (!string.IsNullOrWhiteSpace(studentEditDto.Password))
+            {
+                // Langsung set password baru tanpa token
+                var setPasswordResult = await _userManager.RemovePasswordAsync(user);
+                if (!setPasswordResult.Succeeded)
+                {
+                    return BadRequest(setPasswordResult.Errors);
+                }
+
+                setPasswordResult = await _userManager.AddPasswordAsync(user, studentEditDto.Password);
+                if (!setPasswordResult.Succeeded)
+                {
+                    return BadRequest(setPasswordResult.Errors);
+                }
+            }
+
             // Kembalikan response 200 OK bersama dengan data siswa yang telah diperbarui
-            var updatedStudentDto = new StudentEditDto
+            var updatedStudentDto = new EditStudentDto
             {
                 Address = student.Address,
                 PhoneNumber = student.PhoneNumber,
-                UniqueNumber = student.ClassRoom?.UniqueNumber ?? string.Empty
+                UniqueNumber = student.ClassRoom?.UniqueNumber ?? string.Empty,
+                Password = string.Empty // Tidak ada akses langsung ke Password dari AppUser
             };
 
             return Ok(updatedStudentDto);
         }
-
 
         // =========================== GET USER LOGIN =========================== //
         [Authorize]
@@ -618,8 +641,5 @@ namespace API.DTOs
                 ClassName = className, // Gunakan nilai className yang telah ditentukan
             };
         }
-
-
-
     }
 }

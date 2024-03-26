@@ -2,6 +2,8 @@
 using Domain.Announcement;
 using Domain.Class;
 using Domain.Present;
+using Domain.User;
+using Domain.User.DTOs;
 
 namespace Application.Core
 {
@@ -15,6 +17,7 @@ namespace Application.Core
             CreateMap<ClassRoomDto, ClassRoom>();
             CreateMap<Attendance, AttendanceDto>();
             CreateMap<AttendanceDto, Attendance>();
+            CreateMap<Student, StudentGetAllDto>();
         }
     }
 }
