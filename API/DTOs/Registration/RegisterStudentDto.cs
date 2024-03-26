@@ -44,5 +44,8 @@ namespace API.DTOs.Registration
         [Required(ErrorMessage = "Role is required")]
         [Range(3, 3, ErrorMessage = "Role must be 3")]
         public int Role { get; set; }
+
+        [Required(ErrorMessage = "UniqueNumber is required")]
+        public string UniqueNumber { get; set; }
     }
 }

@@ -28,6 +28,34 @@ namespace API.DTOs
 
         // =========================== LOGIN =========================== //
         [AllowAnonymous]
+        [HttpPost("login/superadmin")]
+        public async Task<ActionResult<SuperAdminDto>> LoginSuperAdmin(LoginDto loginDto)
+        {
+            var user = await _userManager.FindByNameAsync(loginDto.Username);
+
+            if (user == null) return Unauthorized();
+
+            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+
+            if (result)
+            {
+                try
+                {
+                    // Buat objek SuperAdminDto menggunakan CreateUserObject
+                    var superAdminDto = await CreateUserObjectSuperAdmin(user);
+
+                    return superAdminDto;
+                }
+                catch (Exception ex)
+                {
+                    // Tangani jika data superAdmin tidak ditemukan
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Unauthorized();
+        }
+
+        [AllowAnonymous]
         [HttpPost("login/admin")]
         public async Task<ActionResult<AdminDto>> LoginAdmin(LoginDto loginDto)
         {
@@ -112,6 +140,43 @@ namespace API.DTOs
         }
 
         // =========================== REGISTER =========================== //
+        [AllowAnonymous]
+        [HttpPost("register/superAdmin")]
+        public async Task<ActionResult<SuperAdminGetDto>> RegisterSuperAdmin(RegisterSuperAdminDto superAdminDto)
+        {
+            // Pemeriksaan username supaya berbeda dengan yang lain
+            if (await _userManager.Users.AnyAsync(x => x.UserName == superAdminDto.Username))
+            {
+                return BadRequest("Username already in use");
+            }
+
+            var user = new AppUser
+            {
+                UserName = superAdminDto.Username,
+                Role = superAdminDto.Role,
+            };
+
+            var superAdmin = new SuperAdmin
+            {
+                NameSuperAdmin = superAdminDto.NameSuperAdmin,
+                AppUserId = user.Id
+            };
+
+            var result = await _userManager.CreateAsync(user, superAdminDto.Password);
+
+            if (result.Succeeded)
+            {
+                // Simpan superAdmin ke dalam konteks database Anda
+                _context.SuperAdmins.Add(superAdmin);
+                await _context.SaveChangesAsync();
+
+                // Gunakan metode CreateUserObjectSuperAdmin untuk membuat objek SuperAdminDto
+                var superAdminDtoResult = await CreateUserObjectSuperAdminGet(user);
+                return superAdminDtoResult; // Mengembalikan hasil dari Task<ActionResult<SuperAdminDto>>
+            }
+            return BadRequest(result.Errors);
+        }
+
         [AllowAnonymous]
         [HttpPost("register/admin")]
         public async Task<ActionResult<AdminGetDto>> RegisterAdmin(RegisterAdminDto adminDto)
@@ -211,6 +276,12 @@ namespace API.DTOs
                 return BadRequest("Date of birth required");
             }
 
+            var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumber == studentDto.UniqueNumber);
+            if (selectedClass == null)
+            {
+                return BadRequest("Selected UniqueName not found");
+            }
+
             var user = new AppUser
             {
                 UserName = studentDto.Username,
@@ -227,7 +298,8 @@ namespace API.DTOs
                 Nis = studentDto.Nis,
                 ParentName = studentDto.ParentName,
                 Gender = studentDto.Gender,
-                AppUserId = user.Id
+                AppUserId = user.Id,
+                ClassRoomId = selectedClass.Id
             };
 
             var result = await _userManager.CreateAsync(user, studentDto.Password);
@@ -245,7 +317,63 @@ namespace API.DTOs
             return BadRequest(result.Errors);
         }
 
+        // =========================== EDIT USER =========================== //
+        //[AllowAnonymous]
+        //[HttpPut("edit/student/{id}")]
+        //public async Task<ActionResult<StudentDto>> EditStudent(Guid id, EditStudentDto editStudentDto)
+        //{
+        //    var student = await _context.Students.Include(s => s.ClassMajor).FirstOrDefaultAsync(s => s.Id == id);
+        //    if (student == null)
+        //    {
+        //        return NotFound("Student not found");
+        //    }
+
+        //    // Update informasi siswa
+        //    student.NameStudent = editStudentDto.NameStudent ?? student.NameStudent; // jika null, tetap gunakan nilai sebelumnya
+        //    student.BirthDate = editStudentDto.BirthDate != DateOnly.MinValue ? editStudentDto.BirthDate : student.BirthDate;
+        //    student.BirthPlace = editStudentDto.BirthPlace ?? student.BirthPlace;
+        //    student.Address = editStudentDto.Address ?? student.Address;
+        //    student.PhoneNumber = editStudentDto.PhoneNumber ?? student.PhoneNumber;
+        //    student.Nis = editStudentDto.Nis ?? student.Nis;
+        //    student.ParentName = editStudentDto.ParentName ?? student.ParentName;
+        //    student.Gender = editStudentDto.Gender != 0 ? editStudentDto.Gender : student.Gender;
+
+        //    if (!string.IsNullOrEmpty(editStudentDto.ClassName))
+        //    {
+        //        var selectedClass = await _context.ClassMajors.FirstOrDefaultAsync(c => c.ClassName == editStudentDto.ClassName);
+        //        if (selectedClass == null)
+        //        {
+        //            return BadRequest("Selected ClassName not found");
+        //        }
+        //        student.ClassMajorId = selectedClass.Id;
+        //    }
+
+        //    // Simpan perubahan
+        //    _context.Students.Update(student);
+        //    await _context.SaveChangesAsync();
+
+        //    // Buat dan kembalikan DTO siswa yang diperbarui
+        //    var updatedStudentDto = await CreateUserObjectStudent(student.User, includeToken: false);
+        //    return updatedStudentDto;
+        //}
+
         // =========================== GET USER LOGIN =========================== //
+        [Authorize]
+        [HttpGet("superadmin")]
+        public async Task<ActionResult<SuperAdminGetDto>> GetUserSuperAdmin()
+        {
+            var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
+            }
+
+            var superAdminDto = await CreateUserObjectSuperAdminGet(user);
+            return superAdminDto;
+        }
+
         [Authorize]
         [HttpGet("admin")]
         public async Task<ActionResult<AdminGetDto>> GetUserAdmin()
@@ -295,6 +423,45 @@ namespace API.DTOs
         }
 
         // =========================== SHORT CODE =========================== //
+        private async Task<SuperAdminDto> CreateUserObjectSuperAdmin(AppUser user)
+        {
+            // Ambil data admin terkait dari database
+            var superAdmin = await _context.SuperAdmins.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
+
+            if (superAdmin == null)
+            {
+                // Handle jika data superAdmin tidak ditemukan
+                throw new Exception("SuperAdmin data not found");
+            }
+
+            return new SuperAdminDto
+            {
+                Role = user.Role,
+                Username = user.UserName,
+                Token = _tokenService.CreateTokenSuperAdmin(user, superAdmin),
+                NameSuperAdmin = superAdmin.NameSuperAdmin,
+            };
+        }
+
+        private async Task<SuperAdminGetDto> CreateUserObjectSuperAdminGet(AppUser user)
+        {
+            // Ambil data admin terkait dari database
+            var superAdmin = await _context.SuperAdmins.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
+
+            if (superAdmin == null)
+            {
+                // Handle jika data superAdmin tidak ditemukan
+                throw new Exception("SuperAdmin data not found");
+            }
+
+            return new SuperAdminGetDto
+            {
+                Role = user.Role,
+                Username = user.UserName,
+                NameSuperAdmin = superAdmin.NameSuperAdmin,
+            };
+        }
+
         private async Task<AdminDto> CreateUserObjectAdmin(AppUser user)
         {
             // Ambil data admin terkait dari database
@@ -413,13 +580,18 @@ namespace API.DTOs
         private async Task<StudentGetDto> CreateUserObjectStudentGet(AppUser user)
         {
             // Ambil data student terkait dari database
-            var student = await _context.Students.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
+            var student = await _context.Students
+                .Include(s => s.ClassRoom) // Sertakan entitas ClassRoom
+                .FirstOrDefaultAsync(g => g.AppUserId == user.Id);
 
             if (student == null)
             {
                 // Handle jika data student tidak ditemukan
                 throw new Exception("Student data not found");
             }
+
+            // Ambil nama kelas jika ada, atau beri nilai default jika tidak ada
+            var className = student.ClassRoom != null ? student.ClassRoom.ClassName : "Unknown";
 
             return new StudentGetDto
             {
@@ -433,6 +605,7 @@ namespace API.DTOs
                 Nis = student.Nis,
                 ParentName = student.ParentName,
                 Gender = student.Gender,
+                ClassName = className, // Gunakan nilai className yang telah ditentukan
             };
         }
     }
