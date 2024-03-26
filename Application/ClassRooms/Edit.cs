@@ -41,7 +41,7 @@ namespace Application.ClassRooms
                 // Periksa apakah classRoom ditemukan
                 if (classRoom == null)
                 {
-                    return Result<ClassRoomDto>.Failure("Jurusan tidak ditemukan");
+                    return Result<ClassRoomDto>.Failure("ClassRoom tidak ditemukan");
                 }
 
                 _mapper.Map(request.ClassRoomDto, classRoom);
@@ -50,7 +50,7 @@ namespace Application.ClassRooms
 
                 if (!result)
                 {
-                    return Result<ClassRoomDto>.Failure("Gagal untuk mengedit Jurusan");
+                    return Result<ClassRoomDto>.Failure("Gagal untuk mengedit ClassRoom");
                 }
 
                 // Buat instance ClassRoomDto yang mewakili hasil edit

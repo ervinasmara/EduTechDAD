@@ -322,40 +322,7 @@ namespace API.DTOs
         // =========================== EDIT USER =========================== //
         [AllowAnonymous]
         [HttpPut("edit/student/{id}")]
-        public async Task<ActionResult<StudentDto>> EditStudent(Guid id, EditStudentDto editStudentDto)
-        {
-            var student = await _context.Students.Include(s => s.ClassRoom).FirstOrDefaultAsync(s => s.Id == id);
-            if (student == null)
-            {
-                return NotFound("Student not found");
-            }
-
-            // Update informasi siswa
-            student.Address = editStudentDto.Address ?? student.Address;
-            student.PhoneNumber = editStudentDto.PhoneNumber ?? student.PhoneNumber;
-
-            if (!string.IsNullOrEmpty(editStudentDto.UniqueNumber))
-            {
-                var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumber == editStudentDto.UniqueNumber);
-                if (selectedClass == null)
-                {
-                    return BadRequest("Selected UniqueNumber not found");
-                }
-                student.ClassRoomId = selectedClass.Id;
-            }
-
-            // Simpan perubahan
-            _context.Students.Update(student);
-            await _context.SaveChangesAsync();
-
-            // Buat dan kembalikan DTO siswa yang diperbarui
-            var updatedStudentDto = await CreateUserObjectStudent(student.User);
-            return updatedStudentDto;
-        }
-
-        [AllowAnonymous]
-        [HttpPut("222/{id}")]
-        public async Task<IActionResult> UpdateStudent222(Guid id, StudentEditDto studentEditDto)
+        public async Task<IActionResult> UpdateStudent(Guid id, StudentEditDto studentEditDto)
         {
             // Mencari siswa berdasarkan ID
             var student = await _context.Students.Include(s => s.ClassRoom).FirstOrDefaultAsync(s => s.Id == id);
@@ -593,7 +560,9 @@ namespace API.DTOs
         private async Task<StudentDto> CreateUserObjectStudent(AppUser user)
         {
             // Ambil data student terkait dari database
-            var student = await _context.Students.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
+            var student = await _context.Students
+                .Include(s => s.ClassRoom)
+                .FirstOrDefaultAsync(g => g.AppUserId == user.Id);
 
             if (student == null)
             {
@@ -614,6 +583,7 @@ namespace API.DTOs
                 Nis = student.Nis,
                 ParentName = student.ParentName,
                 Gender = student.Gender,
+                ClassName = student.ClassRoom.ClassName,
             };
         }
 

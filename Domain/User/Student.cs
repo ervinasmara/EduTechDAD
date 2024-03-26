@@ -1,4 +1,5 @@
 ﻿using Domain.Class;
+using Domain.Present;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.User
@@ -24,5 +25,6 @@ namespace Domain.User
         public Guid ClassRoomId { get; set; }
         [ForeignKey("ClassRoomId")]
         public ClassRoom ClassRoom { get; set; }
+        public Attendance Attendance { get; set; }
     }
 }

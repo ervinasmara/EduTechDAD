@@ -3,6 +3,7 @@ using Domain.Announcement;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Domain.Class;
+using Domain.Present;
 
 namespace Persistence
 {
@@ -16,9 +17,14 @@ namespace Persistence
                 .HasOne(s => s.ClassRoom)
                 .WithMany(c => c.Students)
                 .HasForeignKey(s => s.ClassRoomId)
-                .OnDelete(DeleteBehavior.Restrict); // Menetapkan perilaku penghapusan
-        }
+                .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Attendance>()
+                .HasOne(a => a.Student)
+                .WithOne(s => s.Attendance)
+                .HasForeignKey<Attendance>(a => a.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
 
         public DataContext(DbContextOptions options) : base(options)
         {
@@ -31,5 +37,6 @@ namespace Persistence
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<ClassRoom> ClassRooms { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
     }
 }
