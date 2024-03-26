@@ -278,6 +278,12 @@ namespace API.DTOs
                 return BadRequest("Date of birth required");
             }
 
+            // Memeriksa keunikan Nis
+            if (await _context.Students.AnyAsync(s => s.Nis == studentDto.Nis))
+            {
+                return BadRequest("Nis already in use");
+            }
+
             var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumber == studentDto.UniqueNumber);
             if (selectedClass == null)
             {

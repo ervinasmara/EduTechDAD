@@ -64,6 +64,7 @@ try
 
     await SeedAnnouncement.SeedData(context);
     await SeedClassRoom.SeedData(context);
+    await SeedLesson.SeedData(context);
     //await SeedUser.SeedData(context, userManager);
 }
 catch (Exception ex)

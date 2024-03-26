@@ -35,19 +35,29 @@ namespace Application.ClassRooms
 
             public async Task<Result<ClassRoomDto>> Handle(Command request, CancellationToken cancellationToken)
             {
+                var uniqueNumber = request.ClassRoomDto.UniqueNumber;
+
+                // Cek apakah UniqueNumber sudah ada di database
+                var isUnique = !_context.ClassRooms.Any(x => x.UniqueNumber == uniqueNumber);
+
+                if (!isUnique)
+                {
+                    return Result<ClassRoomDto>.Failure("UniqueNumber already exists");
+                }
+
                 var classRoom = new ClassRoom
                 {
                     ClassName = request.ClassRoomDto.ClassName,
-                    UniqueNumber = request.ClassRoomDto.UniqueNumber,
+                    UniqueNumber = uniqueNumber,
                 };
 
                 _context.ClassRooms.Add(classRoom);
 
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                if (!result) return Result<ClassRoomDto>.Failure("Gagal Untuk Membuat ClassRoom");
+                if (!result)
+                    return Result<ClassRoomDto>.Failure("Failed to Create ClassRoom");
 
-                // Buat DTO dari classRoom yang telah dibuat
                 var classRoomDto = _mapper.Map<ClassRoomDto>(classRoom);
 
                 return Result<ClassRoomDto>.Success(classRoomDto);

@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Domain.Class;
 using Domain.Present;
+using Domain.Learn.Subject;
+using Domain.Learn.Study;
 
 namespace Persistence
 {
@@ -13,12 +15,21 @@ namespace Persistence
         {
             base.OnModelCreating(modelBuilder);
 
+            // One To Many, 1 classRoom have many student
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.ClassRoom)
                 .WithMany(c => c.Students)
                 .HasForeignKey(s => s.ClassRoomId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // One To Many, 1 Lesson have many course
+            modelBuilder.Entity<Course>()
+                .HasOne(s => s.Lesson)
+                .WithMany(c => c.Courses)
+                .HasForeignKey(s => s.LessonId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // One To One
             modelBuilder.Entity<Attendance>()
                 .HasOne(a => a.Student)
                 .WithOne(s => s.Attendance)
@@ -38,5 +49,7 @@ namespace Persistence
         public DbSet<Student> Students { get; set; }
         public DbSet<ClassRoom> ClassRooms { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<Lesson> Lessons { get; set; }
+        public DbSet<Course> Courses { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Application.User;
+﻿using Application.User.Student;
+using Application.User.Teacher;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,9 +16,21 @@ namespace API.Controllers.User
         }
 
         [HttpGet("student/{id}")]
-        public async Task<ActionResult> GetClassRoom(Guid id, CancellationToken ct)
+        public async Task<ActionResult> GetStudentById(Guid id, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new DetailsStudent.Query { Id = id }, ct));
+        }
+
+        [HttpGet("teachers")]
+        public async Task<IActionResult> GetTeachers(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new ListTeacher.Query(), ct));
+        }
+
+        [HttpGet("teacher/{id}")]
+        public async Task<ActionResult> GetTeacherById(Guid id, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new DetailsTeacher.Query { Id = id }, ct));
         }
     }
 }

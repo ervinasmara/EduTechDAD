@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Domain.Announcement;
 using Domain.Class;
+using Domain.Learn.Study;
 using Domain.Present;
 using Domain.User;
 using Domain.User.DTOs;
@@ -18,6 +19,8 @@ namespace Application.Core
             CreateMap<Attendance, AttendanceDto>();
             CreateMap<AttendanceDto, Attendance>();
             CreateMap<Student, StudentGetAllDto>();
+            CreateMap<Course, CourseDto>();
+            CreateMap<CourseDto, Course>();
         }
     }
 }
