@@ -1,7 +1,9 @@
-﻿using API.DTOs.Registration;
+﻿using API.Controllers;
+using API.DTOs.Registration;
 using API.Services;
 using Domain.User;
 using Domain.User.DTOs;
+using Domain.User.DTOs.Edit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +15,7 @@ namespace API.DTOs
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AccountController : ControllerBase
+    public class AccountController : BaseApiController
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly TokenService _tokenService;
@@ -318,44 +320,82 @@ namespace API.DTOs
         }
 
         // =========================== EDIT USER =========================== //
-        //[AllowAnonymous]
-        //[HttpPut("edit/student/{id}")]
-        //public async Task<ActionResult<StudentDto>> EditStudent(Guid id, EditStudentDto editStudentDto)
-        //{
-        //    var student = await _context.Students.Include(s => s.ClassMajor).FirstOrDefaultAsync(s => s.Id == id);
-        //    if (student == null)
-        //    {
-        //        return NotFound("Student not found");
-        //    }
+        [AllowAnonymous]
+        [HttpPut("edit/student/{id}")]
+        public async Task<ActionResult<StudentDto>> EditStudent(Guid id, EditStudentDto editStudentDto)
+        {
+            var student = await _context.Students.Include(s => s.ClassRoom).FirstOrDefaultAsync(s => s.Id == id);
+            if (student == null)
+            {
+                return NotFound("Student not found");
+            }
 
-        //    // Update informasi siswa
-        //    student.NameStudent = editStudentDto.NameStudent ?? student.NameStudent; // jika null, tetap gunakan nilai sebelumnya
-        //    student.BirthDate = editStudentDto.BirthDate != DateOnly.MinValue ? editStudentDto.BirthDate : student.BirthDate;
-        //    student.BirthPlace = editStudentDto.BirthPlace ?? student.BirthPlace;
-        //    student.Address = editStudentDto.Address ?? student.Address;
-        //    student.PhoneNumber = editStudentDto.PhoneNumber ?? student.PhoneNumber;
-        //    student.Nis = editStudentDto.Nis ?? student.Nis;
-        //    student.ParentName = editStudentDto.ParentName ?? student.ParentName;
-        //    student.Gender = editStudentDto.Gender != 0 ? editStudentDto.Gender : student.Gender;
+            // Update informasi siswa
+            student.Address = editStudentDto.Address ?? student.Address;
+            student.PhoneNumber = editStudentDto.PhoneNumber ?? student.PhoneNumber;
 
-        //    if (!string.IsNullOrEmpty(editStudentDto.ClassName))
-        //    {
-        //        var selectedClass = await _context.ClassMajors.FirstOrDefaultAsync(c => c.ClassName == editStudentDto.ClassName);
-        //        if (selectedClass == null)
-        //        {
-        //            return BadRequest("Selected ClassName not found");
-        //        }
-        //        student.ClassMajorId = selectedClass.Id;
-        //    }
+            if (!string.IsNullOrEmpty(editStudentDto.UniqueNumber))
+            {
+                var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumber == editStudentDto.UniqueNumber);
+                if (selectedClass == null)
+                {
+                    return BadRequest("Selected UniqueNumber not found");
+                }
+                student.ClassRoomId = selectedClass.Id;
+            }
 
-        //    // Simpan perubahan
-        //    _context.Students.Update(student);
-        //    await _context.SaveChangesAsync();
+            // Simpan perubahan
+            _context.Students.Update(student);
+            await _context.SaveChangesAsync();
 
-        //    // Buat dan kembalikan DTO siswa yang diperbarui
-        //    var updatedStudentDto = await CreateUserObjectStudent(student.User, includeToken: false);
-        //    return updatedStudentDto;
-        //}
+            // Buat dan kembalikan DTO siswa yang diperbarui
+            var updatedStudentDto = await CreateUserObjectStudent(student.User);
+            return updatedStudentDto;
+        }
+
+        [AllowAnonymous]
+        [HttpPut("222/{id}")]
+        public async Task<IActionResult> UpdateStudent222(Guid id, StudentEditDto studentEditDto)
+        {
+            // Mencari siswa berdasarkan ID
+            var student = await _context.Students.Include(s => s.ClassRoom).FirstOrDefaultAsync(s => s.Id == id);
+
+            // Jika siswa tidak ditemukan, kembalikan response 404 Not Found
+            if (student == null)
+                return NotFound();
+
+            // Update properti Address dan PhoneNumber
+            student.Address = studentEditDto.Address;
+            student.PhoneNumber = studentEditDto.PhoneNumber;
+
+            // Jika UniqueNumber berubah, cari ClassRoom baru berdasarkan UniqueNumber
+            if (student.ClassRoom?.UniqueNumber != studentEditDto.UniqueNumber)
+            {
+                var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumber == studentEditDto.UniqueNumber);
+                if (classRoom == null)
+                {
+                    return BadRequest("Invalid UniqueNumber");
+                }
+
+                // Update ClassRoom untuk siswa
+                student.ClassRoom = classRoom;
+            }
+
+            // Simpan perubahan ke database
+            _context.Students.Update(student);
+            await _context.SaveChangesAsync();
+
+            // Kembalikan response 200 OK bersama dengan data siswa yang telah diperbarui
+            var updatedStudentDto = new StudentEditDto
+            {
+                Address = student.Address,
+                PhoneNumber = student.PhoneNumber,
+                UniqueNumber = student.ClassRoom?.UniqueNumber ?? string.Empty
+            };
+
+            return Ok(updatedStudentDto);
+        }
+
 
         // =========================== GET USER LOGIN =========================== //
         [Authorize]
@@ -580,7 +620,7 @@ namespace API.DTOs
         private async Task<StudentGetDto> CreateUserObjectStudentGet(AppUser user)
         {
             // Ambil data student terkait dari database
-            var student = await _context.Students
+            var student = await _context.Students.AsNoTracking()
                 .Include(s => s.ClassRoom) // Sertakan entitas ClassRoom
                 .FirstOrDefaultAsync(g => g.AppUserId == user.Id);
 
@@ -608,5 +648,8 @@ namespace API.DTOs
                 ClassName = className, // Gunakan nilai className yang telah ditentukan
             };
         }
+
+
+
     }
 }

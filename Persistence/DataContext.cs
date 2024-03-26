@@ -8,6 +8,18 @@ namespace Persistence
 {
     public class DataContext : IdentityDbContext<AppUser>
     {
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Student>()
+                .HasOne(s => s.ClassRoom)
+                .WithMany(c => c.Students)
+                .HasForeignKey(s => s.ClassRoomId)
+                .OnDelete(DeleteBehavior.Restrict); // Menetapkan perilaku penghapusan
+        }
+
+
         public DataContext(DbContextOptions options) : base(options)
         {
             // Biarkan kosong
