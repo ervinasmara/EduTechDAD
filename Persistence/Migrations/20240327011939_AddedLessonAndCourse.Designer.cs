@@ -12,7 +12,7 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240326135450_AddedLessonAndCourse")]
+    [Migration("20240327011939_AddedLessonAndCourse")]
     partial class AddedLessonAndCourse
     {
         /// <inheritdoc />

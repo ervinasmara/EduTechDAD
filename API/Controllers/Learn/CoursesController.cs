@@ -1,4 +1,6 @@
 ﻿using Application.Learn.Study;
+using Domain.Class;
+using Domain.Learn.Study;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,11 +9,11 @@ namespace API.Controllers.Learn
     [AllowAnonymous]
     public class CoursesController : BaseApiController
     {
-        //[HttpGet]
-        //public async Task<IActionResult> GetCourses(CancellationToken ct)
-        //{
-        //    return HandleResult(await Mediator.Send(new List.Query(), ct));
-        //}
+        [HttpGet]
+        public async Task<IActionResult> GetCourses(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new List.Query(), ct));
+        }
 
         [HttpPost]
         public async Task<IActionResult> Course([FromForm] Create.Command command, CancellationToken ct)
@@ -39,5 +41,37 @@ namespace API.Controllers.Learn
             }
         }
 
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> EditCourseDto([FromForm] Edit.Command command, CancellationToken ct)
+        //{
+        //    return HandleResult(await Mediator.Send(command, ct));
+        //}
+
+        //[HttpPut("2/{id}")]
+        //public async Task<IActionResult> EditCourseDto2(Guid id, [FromForm] CourseDto courseDto, CancellationToken ct)
+        //{
+        //    // Manual mapping dari CourseDto ke Edit.Command
+        //    var command = new Edit.Command
+        //    {
+        //        Id = id,
+        //        CourseName = courseDto.CourseName,
+        //        Description = courseDto.Description,
+        //        FileData = null, // Anda perlu memutuskan bagaimana menangani ini
+        //        LinkCourse = courseDto.LinkCourse,
+        //        UniqueNumber = courseDto.UniqueNumber
+        //    };
+
+        //    // Kirim command ke handler menggunakan Mediator
+        //    var result = await Mediator.Send(command, ct);
+        //    return HandleResult(result);
+        //}
+
+        //[HttpPut("haha/{id}")]
+        //public async Task<IActionResult> EditCourseEditDto(Guid id, [FromForm] CourseEditDto courseEditDto, CancellationToken ct)
+        //{
+        //    var result = await Mediator.Send(new EditCourse.Command { Id = id, CourseEditDto = courseEditDto }, ct);
+
+        //    return HandleResult(result);
+        //}
     }
 }

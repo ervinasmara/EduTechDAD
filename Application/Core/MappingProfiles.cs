@@ -21,6 +21,8 @@ namespace Application.Core
             CreateMap<Student, StudentGetAllDto>();
             CreateMap<Course, CourseDto>();
             CreateMap<CourseDto, Course>();
+            CreateMap<Course, CourseGetAllDto>();
+            CreateMap<CourseGetAllDto, Course>();
         }
     }
 }

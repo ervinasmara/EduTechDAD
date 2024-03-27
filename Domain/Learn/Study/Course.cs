@@ -8,7 +8,7 @@ namespace Domain.Learn.Study
         public Guid Id { get; set; }
         public string CourseName { get; set; }
         public string Description { get; set; }
-        public byte[] FileData { get; set; }
+        public byte[]? FileData { get; set; }
         public string? LinkCourse { get; set; }
 
         // Kunci asing ke Lesson
