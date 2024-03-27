@@ -30,7 +30,7 @@ namespace API.Controllers.Learn
             {
                 var downloadFile = result.Value;
                 var fileBytes = downloadFile.FileData;
-                var contentType = "application/pdf";
+                var contentType = "application/octet-stream";
                 var fileName = downloadFile.FileName; // Nama file yang diunduh berdasarkan CourseName
 
                 return File(fileBytes, contentType, fileName);
