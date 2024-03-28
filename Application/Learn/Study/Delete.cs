@@ -1,8 +1,13 @@
 ﻿using Application.Core;
 using MediatR;
 using Persistence;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Application.ClassRooms
+namespace Application.Learn.Study
 {
     public class Delete
     {
@@ -22,15 +27,15 @@ namespace Application.ClassRooms
 
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var classRoom = await _context.ClassRooms.FindAsync(request.Id);
+                var course = await _context.Courses.FindAsync(request.Id);
 
-                if (classRoom == null) return null;
+                if (course == null) return null;
 
-                _context.Remove(classRoom);
+                _context.Remove(course);
 
                 var result = await _context.SaveChangesAsync() > 0;
 
-                if (!result) return Result<Unit>.Failure("Failed to delete ClassRoom");
+                if (!result) return Result<Unit>.Failure("Gagal untuk menghapus Course");
 
                 return Result<Unit>.Success(Unit.Value);
             }

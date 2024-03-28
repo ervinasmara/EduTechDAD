@@ -26,7 +26,7 @@ namespace API.Extensions
             {
                 opt.AddPolicy("CorsPolicy", policy =>
                 {
-                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000;http://localhost:5000"); // localhost:3000 adalah URL milik client (frontend)
+                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
                 });
             });
 

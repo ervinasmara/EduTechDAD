@@ -2,7 +2,7 @@
 using MediatR;
 using Persistence;
 
-namespace Application.ClassRooms
+namespace Application.Learn.Subject
 {
     public class Delete
     {
@@ -22,15 +22,15 @@ namespace Application.ClassRooms
 
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var classRoom = await _context.ClassRooms.FindAsync(request.Id);
+                var lesson = await _context.Lessons.FindAsync(request.Id);
 
-                if (classRoom == null) return null;
+                if (lesson == null) return null;
 
-                _context.Remove(classRoom);
+                _context.Remove(lesson);
 
                 var result = await _context.SaveChangesAsync() > 0;
 
-                if (!result) return Result<Unit>.Failure("Failed to delete ClassRoom");
+                if (!result) return Result<Unit>.Failure("Failed to delete Lesson");
 
                 return Result<Unit>.Success(Unit.Value);
             }
