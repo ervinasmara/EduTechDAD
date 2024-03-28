@@ -73,5 +73,27 @@ namespace API.Controllers.Learn
 
         //    return HandleResult(result);
         //}
+
+        [HttpPut("edit/{id}")]
+        public async Task<IActionResult> EditCourse(Guid id, [FromForm] EditCourse18.Command command)
+        {
+            command.Id = id;
+            var result = await Mediator.Send(command);
+
+            if (result.IsSuccess)
+            {
+                return Ok(result.Value); // Jika berhasil, kembalikan data CourseDto yang telah diubah
+            }
+
+            return BadRequest(result.Error); // Jika gagal, kembalikan pesan kesalahan
+        }
+
+        [HttpPut("coba1/{id}")]
+        public async Task<IActionResult> EditCourseDtoss(Guid id,[FromForm] CourseEditDto courseEditDto, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new EditCoba1.Command { Id = id, CourseEditDto = courseEditDto }, ct);
+
+            return HandleResult(result);
+        }
     }
 }

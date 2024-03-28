@@ -15,7 +15,7 @@ namespace Domain.Learn.Study
     {
         public string CourseName { get; set; }
         public string Description { get; set; }
-        public byte[] FileData { get; set; } // Menggunakan IFormFile untuk mengonsumsi file dari permintaan HTTP
+        public IFormFile FileData { get; set; } // Menggunakan IFormFile untuk mengonsumsi file dari permintaan HTTP
         public string LinkCourse { get; set; }
         public string UniqueNumber { get; set; }
     }

@@ -31,6 +31,14 @@ namespace Application.User.Student
                         Id = s.Id,
                         NameStudent = s.NameStudent,
                         Nis = s.Nis,
+                        BirthDate = s.BirthDate,
+                        BirthPlace = s.BirthPlace,
+                        Address = s.Address,
+                        PhoneNumber = s.PhoneNumber,
+                        ParentName = s.ParentName,
+                        Username = s.User.UserName,
+                        Role = s.User.Role,
+                        Gender = s.Gender,
                         ClassName = s.ClassRoom.ClassName,
                         UniqueNumber = s.ClassRoom.UniqueNumber
                     })

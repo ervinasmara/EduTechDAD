@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using System.Security.Claims;
+using Application.User.Student;
 
 namespace API.DTOs
 {
@@ -28,6 +29,18 @@ namespace API.DTOs
             _context = context;
         }
 
+        // =========================== GET DATA =========================== //
+        [HttpGet("students"), AllowAnonymous]
+        public async Task<IActionResult> GetStudents(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new ListStudent.Query(), ct));
+        }
+
+        [HttpGet("student/{id}"), AllowAnonymous]
+        public async Task<ActionResult> GetStudentById(Guid id, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new DetailsStudent.Query { Id = id }, ct));
+        }
         // =========================== LOGIN =========================== //
         [AllowAnonymous]
         [HttpPost("login/superadmin")]
