@@ -41,7 +41,7 @@ namespace Application.Presents
                 // Periksa apakah attendance ditemukan
                 if (attendance == null)
                 {
-                    return Result<AttendanceDto>.Failure("Presensi tidak ditemukan");
+                    return Result<AttendanceDto>.Failure("Attendance has not found");
                 }
 
                 _mapper.Map(request.AttendanceDto, attendance);
@@ -50,7 +50,7 @@ namespace Application.Presents
 
                 if (!result)
                 {
-                    return Result<AttendanceDto>.Failure("Gagal untuk mengedit Presensi");
+                    return Result<AttendanceDto>.Failure("Failed to edit Attendance");
                 }
 
                 // Buat instance AttendanceDto yang mewakili hasil edit

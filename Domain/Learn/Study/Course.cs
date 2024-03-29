@@ -1,4 +1,5 @@
 ﻿using Domain.Learn.Subject;
+using Domain.Task;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Learn.Study
@@ -15,5 +16,8 @@ namespace Domain.Learn.Study
         public Guid LessonId { get; set; }
         [ForeignKey("LessonId")]
         public Lesson Lesson { get; set; }
+
+        // Properti navigasi ke Assignment
+        public ICollection<Assignment> Assignments { get; set; }
     }
 }

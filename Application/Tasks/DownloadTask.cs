@@ -3,9 +3,9 @@ using Domain.Task;
 using MediatR;
 using Persistence;
 
-namespace Application.Learn.Study
+namespace Application.Tasks
 {
-    public class Download
+    public class DownloadTask
     {
         public class Query : IRequest<Result<DownloadFileDto>>
         {
@@ -24,13 +24,13 @@ namespace Application.Learn.Study
 
             public async Task<Result<DownloadFileDto>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var course = await _context.Courses.FindAsync(request.Id);
-                if (course == null)
+                var assignment = await _context.Assignments.FindAsync(request.Id);
+                if (assignment == null)
                 {
                     return Result<DownloadFileDto>.Failure("File not found.");
                 }
 
-                var fileExtension = GetFileExtension(course.FileData);
+                var fileExtension = GetFileExtension(assignment.FileData);
                 if (fileExtension == null)
                 {
                     return Result<DownloadFileDto>.Failure("File extension not recognized.");
@@ -38,8 +38,8 @@ namespace Application.Learn.Study
 
                 var downloadFile = new DownloadFileDto
                 {
-                    FileData = course.FileData,
-                    FileName = $"{course.CourseName}.{fileExtension}" // Menggunakan ekstensi file yang dideteksi
+                    FileData = assignment.FileData,
+                    FileName = $"{assignment.AssignmentName}.{fileExtension}" // Menggunakan ekstensi file yang dideteksi
                 };
 
                 return Result<DownloadFileDto>.Success(downloadFile);

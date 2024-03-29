@@ -45,7 +45,7 @@ namespace Application.Announcements
 
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                if (!result) return Result<AnnouncementDto>.Failure("Gagal Untuk Membuat Announcement");
+                if (!result) return Result<AnnouncementDto>.Failure("Failed to create Announcement");
 
                 // Buat DTO dari announcement yang telah dibuat
                 var announcementDto = _mapper.Map<AnnouncementDto>(announcement);

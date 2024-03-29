@@ -41,7 +41,7 @@ namespace Application.Announcements
                 // Periksa apakah announcement ditemukan
                 if (announcement == null)
                 {
-                    return Result<AnnouncementDto>.Failure("Jurusan tidak ditemukan");
+                    return Result<AnnouncementDto>.Failure("Announcement not found");
                 }
 
                 _mapper.Map(request.AnnouncementDto, announcement);
@@ -50,7 +50,7 @@ namespace Application.Announcements
 
                 if (!result)
                 {
-                    return Result<AnnouncementDto>.Failure("Gagal untuk mengedit Jurusan");
+                    return Result<AnnouncementDto>.Failure("Failed to edit Announcement");
                 }
 
                 // Buat instance AnnouncementDto yang mewakili hasil edit

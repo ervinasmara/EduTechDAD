@@ -8,7 +8,7 @@ namespace Application.Announcements
 {
     public class List
     {
-        public class Query : IRequest<Result<List<Announcement>>> // Dan ini akan berasal dari atau menggunakan IRequest dari Mediator
+        public class Query : IRequest<Result<List<Announcement>>>
         {
             /* Kita tidak memerlukan parameter tambahan untuk meneruskan ke query*/
         }
@@ -16,7 +16,7 @@ namespace Application.Announcements
         public class Handler : IRequestHandler<Query, Result<List<Announcement>>>
         {
             private readonly DataContext _context;
-            public Handler(DataContext context) // Memanggil DataContext dan menyebutnya sebagai context
+            public Handler(DataContext context)
             {
                 _context = context;
             }

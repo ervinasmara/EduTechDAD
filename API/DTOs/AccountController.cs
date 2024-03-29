@@ -9,8 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using System.Security.Claims;
 using Application.User.Student;
+using Application.User.Teacher;
 
 namespace API.DTOs
 {
@@ -41,7 +41,64 @@ namespace API.DTOs
         {
             return HandleResult(await Mediator.Send(new DetailsStudent.Query { Id = id }, ct));
         }
+
+        [HttpGet("teachers"), AllowAnonymous]
+        public async Task<IActionResult> GetTeachers(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new ListTeacher.Query(), ct));
+        }
+
+        [HttpGet("teacher/{id}"), AllowAnonymous]
+        public async Task<ActionResult> GetTeacherById(Guid id, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new DetailsTeacher.Query { Id = id }, ct));
+        }
         // =========================== LOGIN =========================== //
+        //[AllowAnonymous]
+        //[HttpPost("login")]
+        //public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
+        //{
+        //    var user = await _userManager.FindByNameAsync(loginDto.Username);
+
+        //    if (user == null)
+        //        return Unauthorized();
+
+        //    var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+
+        //    if (result)
+        //    {
+        //        try
+        //        {
+        //            UserDto userDto;
+
+        //            // Tentukan jenis pengguna berdasarkan rolenya
+        //            if (user.Role == 4)
+        //            {
+        //                // Buat objek SuperAdminDto
+        //                userDto = await CreateUserObjectSuperAdmin(user);
+        //            }
+        //            else if (user.Role == "admin")
+        //            {
+        //                // Buat objek AdminDto
+        //                userDto = await CreateUserObjectAdmin(user);
+        //            }
+        //            else
+        //            {
+        //                // Tangani jika peran tidak valid
+        //                return BadRequest("Invalid role");
+        //            }
+
+        //            return userDto;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            return BadRequest(ex.Message);
+        //        }
+        //    }
+
+        //    return Unauthorized();
+        //}
+
         [AllowAnonymous]
         [HttpPost("login/superadmin")]
         public async Task<ActionResult<SuperAdminDto>> LoginSuperAdmin(LoginDto loginDto)

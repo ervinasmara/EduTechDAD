@@ -1,5 +1,4 @@
 ﻿using Application.Core;
-using AutoMapper;
 using Domain.User.DTOs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

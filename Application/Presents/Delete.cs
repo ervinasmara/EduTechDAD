@@ -30,7 +30,7 @@ namespace Application.Presents
 
                 var result = await _context.SaveChangesAsync() > 0;
 
-                if (!result) return Result<Unit>.Failure("Gagal untuk menghapus Attendance");
+                if (!result) return Result<Unit>.Failure("Failed to delete Attendance");
 
                 return Result<Unit>.Success(Unit.Value);
             }

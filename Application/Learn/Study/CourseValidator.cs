@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Learn.Study
 {
-    public class CourseValidator : AbstractValidator<CourseEditDto>
+    public class CourseValidator : AbstractValidator<CourseDto>
     {
         public CourseValidator()
         {

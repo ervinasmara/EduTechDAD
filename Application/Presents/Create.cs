@@ -46,7 +46,7 @@ namespace Application.Presents
 
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                if (!result) return Result<AttendanceDto>.Failure("Gagal Untuk Membuat Attendance");
+                if (!result) return Result<AttendanceDto>.Failure("Failed to create Attendance");
 
                 // Buat DTO dari classRoom yang telah dibuat
                 var classRoomDto = _mapper.Map<AttendanceDto>(classRoom);

@@ -7,7 +7,7 @@ using Persistence;
 
 namespace Application.Learn.Study
 {
-    public class Create
+    public class CreateCourse
     {
         public class Command : IRequest<Result<CourseDto>>
         {
