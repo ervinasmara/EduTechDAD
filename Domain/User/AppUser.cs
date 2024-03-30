@@ -11,6 +11,7 @@ namespace Domain.User
          * 3 = Student
         */
 
+        public SuperAdmin SuperAdmin { get; set; }
         public Admin Admin { get; set; }
         public Teacher Teacher { get; set; }
         public Student Student { get; set; }

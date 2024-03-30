@@ -1,4 +1,5 @@
 ﻿using Domain.Learn.Study;
+using Domain.Submission;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Task
@@ -18,5 +19,8 @@ namespace Domain.Task
         public Guid CourseId { get; set; }
         [ForeignKey("CourseId")]
         public Course Course { get; set; }
+
+        // Relasi dengan AssignmentSubmission
+        public ICollection<AssignmentSubmission> AssignmentSubmissions { get; set; }
     }
 }

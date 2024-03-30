@@ -12,8 +12,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240330121750_AddedAgenda")]
-    partial class AddedAgenda
+    [Migration("20240330153255_AddedAssignmentSubmissions")]
+    partial class AddedAssignmentSubmissions
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -154,6 +154,45 @@ namespace Persistence.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("Attendances");
+                });
+
+            modelBuilder.Entity("Domain.Submission.AssignmentSubmission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AssignmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("FileData")
+                        .HasColumnType("bytea");
+
+                    b.Property<float?>("Grade")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("SubmissionTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignmentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("AssignmentSubmissions");
                 });
 
             modelBuilder.Entity("Domain.Task.Assignment", b =>
@@ -340,7 +379,8 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserId");
+                    b.HasIndex("AppUserId")
+                        .IsUnique();
 
                     b.ToTable("SuperAdmins");
                 });
@@ -553,6 +593,25 @@ namespace Persistence.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("Domain.Submission.AssignmentSubmission", b =>
+                {
+                    b.HasOne("Domain.Task.Assignment", "Assignment")
+                        .WithMany("AssignmentSubmissions")
+                        .HasForeignKey("AssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.User.Student", "Student")
+                        .WithMany("AssignmentSubmissions")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Assignment");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("Domain.Task.Assignment", b =>
                 {
                     b.HasOne("Domain.Learn.Study.Course", "Course")
@@ -593,8 +652,8 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.User.SuperAdmin", b =>
                 {
                     b.HasOne("Domain.User.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("AppUserId");
+                        .WithOne("SuperAdmin")
+                        .HasForeignKey("Domain.User.SuperAdmin", "AppUserId");
 
                     b.Navigation("User");
                 });
@@ -678,17 +737,26 @@ namespace Persistence.Migrations
                     b.Navigation("Courses");
                 });
 
+            modelBuilder.Entity("Domain.Task.Assignment", b =>
+                {
+                    b.Navigation("AssignmentSubmissions");
+                });
+
             modelBuilder.Entity("Domain.User.AppUser", b =>
                 {
                     b.Navigation("Admin");
 
                     b.Navigation("Student");
 
+                    b.Navigation("SuperAdmin");
+
                     b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Domain.User.Student", b =>
                 {
+                    b.Navigation("AssignmentSubmissions");
+
                     b.Navigation("Attendances");
                 });
 #pragma warning restore 612, 618

@@ -1,5 +1,6 @@
 ﻿using Domain.Class;
 using Domain.Present;
+using Domain.Submission;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.User
@@ -28,5 +29,8 @@ namespace Domain.User
 
         // Relasi dengan presensi
         public ICollection<Attendance> Attendances { get; set; }
+
+        // Relasi dengan AssignmentSubmission
+        public ICollection<AssignmentSubmission> AssignmentSubmissions { get; set; }
     }
 }

@@ -58,50 +58,44 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new DetailsTeacher.Query { Id = id }, ct));
         }
         // =========================== LOGIN =========================== //
-        //[AllowAnonymous]
-        //[HttpPost("login")]
-        //public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
-        //{
-        //    var user = await _userManager.FindByNameAsync(loginDto.Username);
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<ActionResult<object>> Login(LoginDto loginDto)
+        {
+            var user = await _userManager.FindByNameAsync(loginDto.Username);
 
-        //    if (user == null)
-        //        return Unauthorized();
+            if (user == null) return Unauthorized();
 
-        //    var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
 
-        //    if (result)
-        //    {
-        //        try
-        //        {
-        //            UserDto userDto;
+            if (result)
+            {
+                try
+                {
+                    // Tentukan jenis pengguna yang login berdasarkan peran
+                    switch (user.Role)
+                    {
+                        case 1: // Admin
+                            return await CreateUserObjectAdmin(user);
+                        case 2: // Teacher
+                            return await CreateUserObjectTeacher(user);
+                        case 3: // Student
+                            return await CreateUserObjectStudent(user);
+                        case 4: // Super Admin
+                            return await CreateUserObjectSuperAdmin(user);
+                        default:
+                            return BadRequest("Invalid role");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Tangani jika data pengguna tidak ditemukan atau ada kesalahan lainnya
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Unauthorized();
+        }
 
-        //            // Tentukan jenis pengguna berdasarkan rolenya
-        //            if (user.Role == 4)
-        //            {
-        //                // Buat objek SuperAdminDto
-        //                userDto = await CreateUserObjectSuperAdmin(user);
-        //            }
-        //            else if (user.Role == "admin")
-        //            {
-        //                // Buat objek AdminDto
-        //                userDto = await CreateUserObjectAdmin(user);
-        //            }
-        //            else
-        //            {
-        //                // Tangani jika peran tidak valid
-        //                return BadRequest("Invalid role");
-        //            }
-
-        //            return userDto;
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            return BadRequest(ex.Message);
-        //        }
-        //    }
-
-        //    return Unauthorized();
-        //}
 
         [AllowAnonymous]
         [HttpPost("login/superAdmin")]
@@ -468,6 +462,40 @@ namespace API.DTOs
         }
 
         // =========================== GET USER LOGIN =========================== //
+        [HttpGet("userinfo")]
+        public async Task<ActionResult<object>> GetUserInfo()
+        {
+            var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
+            }
+
+            object userDto;
+
+            switch (user.Role)
+            {
+                case 1:
+                    userDto = await CreateUserObjectAdminGet(user);
+                    break;
+                case 2:
+                    userDto = await CreateUserObjectTeacherGet(user);
+                    break;
+                case 3:
+                    userDto = await CreateUserObjectStudentGet(user);
+                    break;
+                case 4:
+                    userDto = await CreateUserObjectSuperAdminGet(user);
+                    break;
+                default:
+                    return BadRequest("Role not valid"); // Kembalikan 400 Bad Request jika peran tidak valid
+            }
+
+            return userDto;
+        }
+
         [Authorize(Policy = "RequireRole4")]
         [HttpGet("superadmin")]
         public async Task<ActionResult<SuperAdminGetDto>> GetUserSuperAdmin()

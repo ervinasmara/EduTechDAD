@@ -8,6 +8,7 @@ using Domain.Learn.Subject;
 using Domain.Learn.Study;
 using Domain.Task;
 using Domain.Learn.Agenda;
+using Domain.Submission;
 
 namespace Persistence
 {
@@ -58,6 +59,20 @@ namespace Persistence
                 .WithMany(c => c.Schedules)
                 .HasForeignKey(s => s.CourseId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // One To Many, 1 Assignment have many AssignmentSubmission
+            modelBuilder.Entity<AssignmentSubmission>()
+                .HasOne(s => s.Assignment)
+                .WithMany(a => a.AssignmentSubmissions)
+                .HasForeignKey(s => s.AssignmentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // One To Many, 1 Student have many AssignmentSubmission
+            modelBuilder.Entity<AssignmentSubmission>()
+                .HasOne(z => z.Student)
+                .WithMany(s => s.AssignmentSubmissions)
+                .HasForeignKey(z => z.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         public DataContext(DbContextOptions options) : base(options)
@@ -76,5 +91,6 @@ namespace Persistence
         public DbSet<Course> Courses { get; set; }
         public DbSet<Assignment> Assignments { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
+        public DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
     }
 }

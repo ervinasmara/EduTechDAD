@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence;
@@ -11,9 +12,11 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240330131910_UpdateAppUser")]
+    partial class UpdateAppUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,45 +154,6 @@ namespace Persistence.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("Attendances");
-                });
-
-            modelBuilder.Entity("Domain.Submission.AssignmentSubmission", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("AssignmentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Comment")
-                        .HasColumnType("text");
-
-                    b.Property<byte[]>("FileData")
-                        .HasColumnType("bytea");
-
-                    b.Property<float?>("Grade")
-                        .HasColumnType("real");
-
-                    b.Property<string>("Link")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("SubmissionTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssignmentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("AssignmentSubmissions");
                 });
 
             modelBuilder.Entity("Domain.Task.Assignment", b =>
@@ -590,25 +554,6 @@ namespace Persistence.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("Domain.Submission.AssignmentSubmission", b =>
-                {
-                    b.HasOne("Domain.Task.Assignment", "Assignment")
-                        .WithMany("AssignmentSubmissions")
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.User.Student", "Student")
-                        .WithMany("AssignmentSubmissions")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Assignment");
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("Domain.Task.Assignment", b =>
                 {
                     b.HasOne("Domain.Learn.Study.Course", "Course")
@@ -734,11 +679,6 @@ namespace Persistence.Migrations
                     b.Navigation("Courses");
                 });
 
-            modelBuilder.Entity("Domain.Task.Assignment", b =>
-                {
-                    b.Navigation("AssignmentSubmissions");
-                });
-
             modelBuilder.Entity("Domain.User.AppUser", b =>
                 {
                     b.Navigation("Admin");
@@ -752,8 +692,6 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.User.Student", b =>
                 {
-                    b.Navigation("AssignmentSubmissions");
-
                     b.Navigation("Attendances");
                 });
 #pragma warning restore 612, 618

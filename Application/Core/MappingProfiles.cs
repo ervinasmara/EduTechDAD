@@ -1,14 +1,12 @@
-﻿using Application.Learn.Study;
-using AutoMapper;
+﻿using AutoMapper;
 using Domain.Announcement;
 using Domain.Class;
 using Domain.Learn.Agenda;
 using Domain.Learn.Study;
 using Domain.Learn.Subject;
 using Domain.Present;
+using Domain.Submission;
 using Domain.Task;
-using Domain.User;
-using Domain.User.DTOs;
 
 namespace Application.Core
 {
@@ -30,6 +28,13 @@ namespace Application.Core
             CreateMap<Schedule, ScheduleDto>();
             CreateMap<ScheduleDto, Schedule>();
             CreateMap<Schedule, ScheduleGetDto>();
+            CreateMap<AssignmentSubmission, AssignmentSubmissionStatusDto>();
+            CreateMap<AssignmentSubmission, AssignmentSubmissionStudentDto>();
+            CreateMap<AssignmentSubmission, AssignmentSubmissionTeacherDto>();
+            CreateMap<AssignmentSubmission, AssignmentSubmissionGetByIdAssignmentDto>();
+
+            CreateMap<AssignmentSubmission, AssignmentSubmissionStudentDto>()
+                .ForMember(dest => dest.FileData, opt => opt.Ignore());
 
             // Konfigurasi pemetaan untuk Course
             CreateMap<Course, CourseDto>();
