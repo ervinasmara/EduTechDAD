@@ -2,6 +2,7 @@
 using AutoMapper;
 using Domain.Announcement;
 using Domain.Class;
+using Domain.Learn.Agenda;
 using Domain.Learn.Study;
 using Domain.Learn.Subject;
 using Domain.Present;
@@ -26,6 +27,9 @@ namespace Application.Core
             CreateMap<Assignment, AssignmentGetAllDto>();
             CreateMap<Lesson, LessonDto>();
             CreateMap<LessonDto, Lesson>();
+            CreateMap<Schedule, ScheduleDto>();
+            CreateMap<ScheduleDto, Schedule>();
+            CreateMap<Schedule, ScheduleGetDto>();
 
             // Konfigurasi pemetaan untuk Course
             CreateMap<Course, CourseDto>();

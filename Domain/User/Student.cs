@@ -25,6 +25,8 @@ namespace Domain.User
         public Guid ClassRoomId { get; set; }
         [ForeignKey("ClassRoomId")]
         public ClassRoom ClassRoom { get; set; }
+
+        // Relasi dengan presensi
         public ICollection<Attendance> Attendances { get; set; }
     }
 }
