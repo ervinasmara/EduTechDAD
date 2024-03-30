@@ -8,7 +8,7 @@ namespace Application.ClassRooms
         public ClassRoomValidator()
         {
             RuleFor(x => x.ClassName).NotEmpty();
-            RuleFor(x => x.UniqueNumber)
+            RuleFor(x => x.UniqueNumberOfClassRoom)
                 .NotEmpty()
                 .Matches(@"^\d{3}$") // Memastikan panjang string adalah 3 digit
                 .WithMessage("UniqueNumber must be 3 digits")

@@ -37,11 +37,11 @@ namespace Persistence
                 .HasForeignKey(s => s.CourseId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // One To One
+            // One To Many, 1 Student have many Attendance
             modelBuilder.Entity<Attendance>()
                 .HasOne(a => a.Student)
-                .WithOne(s => s.Attendance)
-                .HasForeignKey<Attendance>(a => a.StudentId)
+                .WithMany(s => s.Attendances)
+                .HasForeignKey(a => a.StudentId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
 

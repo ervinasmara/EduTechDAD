@@ -33,7 +33,7 @@ namespace Application.Learn.Study
                 foreach (var course in courses)
                 {
                     var courseDto = _mapper.Map<CourseGetAllDto>(course);
-                    courseDto.UniqueNumber = course.Lesson.UniqueNumber; // Set UniqueNumber dari Lesson
+                    courseDto.UniqueNumberOfLesson = course.Lesson.UniqueNumberOfLesson; // Set UniqueNumberOfLesson dari Lesson
                     courseDtos.Add(courseDto);
                 }
 

@@ -8,7 +8,7 @@ namespace Application.Learn.Subject
         public LessonValidator()
         {
             RuleFor(x => x.LessonName).NotEmpty();
-            RuleFor(x => x.UniqueNumber)
+            RuleFor(x => x.UniqueNumberOfLesson)
                 .NotEmpty()
                 .Matches(@"^\d{2}$") // Memastikan panjang string adalah 2 digit
                 .WithMessage("UniqueNumber must be 2 digits")

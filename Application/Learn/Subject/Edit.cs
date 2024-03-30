@@ -4,6 +4,7 @@ using AutoMapper;
 using FluentValidation;
 using Application.Core;
 using Domain.Learn.Subject;
+using Domain.Class;
 
 namespace Application.Learn.Subject
 {
@@ -42,6 +43,15 @@ namespace Application.Learn.Subject
                 if (lesson == null)
                 {
                     return Result<LessonDto>.Failure("Lesson Not Found");
+                }
+
+                // Cek apakah UniqueNumberOfLesson sudah ada di database
+                var uniqueNumberOfLesson = request.LessonDto.UniqueNumberOfLesson;
+                var isUnique = !_context.Lessons.Any(x => x.UniqueNumberOfLesson == uniqueNumberOfLesson && x.Id != request.Id);
+
+                if (!isUnique)
+                {
+                    return Result<LessonDto>.Failure("UniqueNumberOfLesson already exists");
                 }
 
                 _mapper.Map(request.LessonDto, lesson);

@@ -1,12 +1,11 @@
 ﻿using Application.Learn.Study;
-using Domain.Class;
 using Domain.Learn.Study;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Learn
 {
-    [AllowAnonymous]
+    [Authorize(Policy = "RequireRole2OrRole4")]
     public class CoursesController : BaseApiController
     {
         [HttpGet]
@@ -30,7 +29,7 @@ namespace API.Controllers.Learn
             {
                 var downloadFile = result.Value;
                 var fileBytes = downloadFile.FileData;
-                var contentType = "application/octet-stream";
+                var contentType = downloadFile.ContentType;
                 var fileName = downloadFile.FileName; // Nama file yang diunduh berdasarkan CourseName
 
                 return File(fileBytes, contentType, fileName);

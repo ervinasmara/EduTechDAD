@@ -12,7 +12,7 @@ namespace Domain.Task
         public string AssignmentDescription { get; set; }
         public byte[]? FileData { get; set; }
         public string? AssignmentLink { get; set; }
-        public int? Status { get; set; }
+        public int Status { get; set; } = 1;
 
         // Kunci asing ke Course
         public Guid CourseId { get; set; }

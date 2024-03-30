@@ -5,21 +5,40 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Attendances
 {
-    [AllowAnonymous]
+    [Authorize(Policy = "RequireRole1OrRole4")]
     public class AttendancesController : BaseApiController
     {
-        //[Authorize(Policy = "RequireRole1")]
         [HttpGet]
         public async Task<IActionResult> GetAttendances(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
 
-        //[Authorize(Policy = "RequireRole2")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAttendance(Guid id, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new Details.Query { Id = id }, ct));
+        }
+
+        [HttpGet("byclassroom/{classRoomId}")]
+        public async Task<IActionResult> GetAttendanceByClassRoomId(Guid classRoomId)
+        {
+            var result = await Mediator.Send(new ListByClassRoomId.Query { ClassRoomId = classRoomId });
+
+            if (result.IsSuccess)
+            {
+                var attendanceDtos = result.Value;
+                if (attendanceDtos != null && attendanceDtos.Any())
+                {
+                    return Ok(attendanceDtos);
+                }
+                else
+                {
+                    return NotFound("No attendance records found for the specified class room.");
+                }
+            }
+
+            return BadRequest(result.Error);
         }
 
         [HttpPost]
@@ -36,7 +55,6 @@ namespace API.Controllers.Attendances
             return HandleResult(result);
         }
 
-        //[Authorize(Policy = "RequireRole3")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAttendance(Guid id, CancellationToken ct)
         {

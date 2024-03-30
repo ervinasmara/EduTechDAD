@@ -48,10 +48,10 @@ namespace Application.Learn.Study
                         }
                     }
 
-                    // Menemukan Lesson yang sesuai berdasarkan UniqueNumber
-                    var lesson = _context.Lessons.FirstOrDefault(x => x.UniqueNumber == request.CourseDto.UniqueNumber);
+                    // Menemukan Lesson yang sesuai berdasarkan UniqueNumberOfLesson
+                    var lesson = _context.Lessons.FirstOrDefault(x => x.UniqueNumberOfLesson == request.CourseDto.UniqueNumberOfLesson);
                     if (lesson == null)
-                        return Result<CourseDto>.Failure($"Lesson with UniqueNumber {request.CourseDto.UniqueNumber} not found.");
+                        return Result<CourseDto>.Failure($"Lesson with UniqueNumberOfLesson {request.CourseDto.UniqueNumberOfLesson} not found.");
 
                     // Membuat objek Course dari data yang diterima
                     var course = new Course
@@ -69,7 +69,7 @@ namespace Application.Learn.Study
 
                     // Mengembalikan CourseDto yang baru dibuat
                     var courseDto = _mapper.Map<CourseDto>(course);
-                    courseDto.UniqueNumber = lesson.UniqueNumber;
+                    courseDto.UniqueNumberOfLesson = lesson.UniqueNumberOfLesson;
                     return Result<CourseDto>.Success(courseDto);
                 }
                 catch (Exception ex)

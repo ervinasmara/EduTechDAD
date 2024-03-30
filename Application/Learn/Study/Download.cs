@@ -39,7 +39,8 @@ namespace Application.Learn.Study
                 var downloadFile = new DownloadFileDto
                 {
                     FileData = course.FileData,
-                    FileName = $"{course.CourseName}.{fileExtension}" // Menggunakan ekstensi file yang dideteksi
+                    FileName = $"{course.CourseName}.{fileExtension}", // Menggunakan ekstensi file yang dideteksi
+                    ContentType = GetContentType(fileExtension)
                 };
 
                 return Result<DownloadFileDto>.Success(downloadFile);
@@ -74,6 +75,26 @@ namespace Application.Learn.Study
                 else
                 {
                     return null; // Ekstensi file tidak dikenali
+                }
+            }
+            private string GetContentType(string fileExtension)
+            {
+                // Penetapan tipe konten berdasarkan ekstensi file
+                switch (fileExtension.ToLower())
+                {
+                    case "jpg":
+                    case "jpeg":
+                        return "image/jpeg";
+                    case "png":
+                        return "image/png";
+                    case "pdf":
+                        return "application/pdf";
+                    case "zip":
+                        return "application/zip";
+                    case "rar":
+                        return "application/vnd.rar";
+                    default:
+                        return "application/octet-stream";
                 }
             }
         }

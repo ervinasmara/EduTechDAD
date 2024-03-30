@@ -35,20 +35,20 @@ namespace Application.ClassRooms
 
             public async Task<Result<ClassRoomDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var uniqueNumber = request.ClassRoomDto.UniqueNumber;
+                var uniqueNumber = request.ClassRoomDto.UniqueNumberOfClassRoom;
 
-                // Cek apakah UniqueNumber sudah ada di database
-                var isUnique = !_context.ClassRooms.Any(x => x.UniqueNumber == uniqueNumber);
+                // Cek apakah UniqueNumberOfClassRoom sudah ada di database
+                var isUnique = !_context.ClassRooms.Any(x => x.UniqueNumberOfClassRoom == uniqueNumber);
 
                 if (!isUnique)
                 {
-                    return Result<ClassRoomDto>.Failure("UniqueNumber already exists");
+                    return Result<ClassRoomDto>.Failure("UniqueNumberOfClassRoom already exists");
                 }
 
                 var classRoom = new ClassRoom
                 {
                     ClassName = request.ClassRoomDto.ClassName,
-                    UniqueNumber = uniqueNumber,
+                    UniqueNumberOfClassRoom = uniqueNumber,
                 };
 
                 _context.ClassRooms.Add(classRoom);

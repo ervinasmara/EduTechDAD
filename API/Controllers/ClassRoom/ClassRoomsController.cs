@@ -5,17 +5,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.ClassRooms
 {
-    [AllowAnonymous]
+    [Authorize(Policy = "RequireRole1OrRole4")]
     public class ClassRoomsController : BaseApiController
     {
-        //[Authorize(Policy = "RequireRole1")]
         [HttpGet]
         public async Task<IActionResult> GetClassRooms(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
 
-        //[Authorize(Policy = "RequireRole2")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetClassRoom(Guid id, CancellationToken ct)
         {
@@ -36,7 +34,6 @@ namespace API.Controllers.ClassRooms
             return HandleResult(result);
         }
 
-        //[Authorize(Policy = "RequireRole3")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClassRoom(Guid id, CancellationToken ct)
         {

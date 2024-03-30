@@ -63,13 +63,13 @@ namespace Application.Learn.Study
                 course.FileData = fileData ?? course.FileData;
 
                 // Menemukan Lesson terkait
-                var lesson = await _context.Lessons.FirstOrDefaultAsync(x => x.UniqueNumber == request.CourseDto.UniqueNumber);
+                var lesson = await _context.Lessons.FirstOrDefaultAsync(x => x.UniqueNumberOfLesson == request.CourseDto.UniqueNumberOfLesson);
                 if (lesson == null)
                 {
-                    return Result<CourseDto>.Failure("Lesson with specified UniqueNumber not found");
+                    return Result<CourseDto>.Failure("Lesson with specified UniqueNumberOfLesson not found");
                 }
 
-                // Memperbarui UniqueNumber dengan nilai dari Lesson yang sesuai
+                // Memperbarui UniqueNumberOfLesson dengan nilai dari Lesson yang sesuai
                 course.Lesson = lesson;
 
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
@@ -81,6 +81,7 @@ namespace Application.Learn.Study
 
                 // Buat instance CourseDto yang mewakili hasil edit
                 var editedCourseDto = _mapper.Map<CourseDto>(course);
+                editedCourseDto.UniqueNumberOfLesson = request.CourseDto.UniqueNumberOfLesson;
 
                 return Result<CourseDto>.Success(editedCourseDto);
             }

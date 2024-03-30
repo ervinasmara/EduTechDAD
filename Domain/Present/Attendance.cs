@@ -1,6 +1,5 @@
 ﻿using Domain.User;
 using System.ComponentModel.DataAnnotations.Schema;
-using static Domain.Present.AttendanceDto;
 
 namespace Domain.Present
 {

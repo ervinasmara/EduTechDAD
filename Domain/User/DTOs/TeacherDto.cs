@@ -29,6 +29,10 @@
     {
         public Guid Id { get; set; }
         public string NameTeacher { get; set; }
+        public DateOnly BirthDate { get; set; }
+        public string BirthPlace { get; set; }
+        public string Address { get; set; }
+        public string PhoneNumber { get; set; }
         public string Nip { get; set; }
     }
 

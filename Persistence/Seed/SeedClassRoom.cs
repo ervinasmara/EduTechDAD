@@ -13,17 +13,17 @@ namespace Persistence.Seed
                 new ClassRoom
                 {
                     ClassName = "TKJ",
-                    UniqueNumber = "001",
+                    UniqueNumberOfClassRoom = "001",
                 },
                 new ClassRoom
                 {
                     ClassName = "TKR",
-                    UniqueNumber = "002",
+                    UniqueNumberOfClassRoom = "002",
                 },
                 new ClassRoom
                 {
                     ClassName = "RPL",
-                    UniqueNumber = "003",
+                    UniqueNumberOfClassRoom = "003",
                 },
             };
 

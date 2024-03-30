@@ -44,6 +44,15 @@ namespace Application.ClassRooms
                     return Result<ClassRoomDto>.Failure("ClassRoom Not Found");
                 }
 
+                // Cek apakah UniqueNumberOfClassRoom sudah ada di database
+                var uniqueNumber = request.ClassRoomDto.UniqueNumberOfClassRoom;
+                var isUnique = !_context.ClassRooms.Any(x => x.UniqueNumberOfClassRoom == uniqueNumber && x.Id != request.Id);
+
+                if (!isUnique)
+                {
+                    return Result<ClassRoomDto>.Failure("UniqueNumberOfClassRoom already exists");
+                }
+
                 _mapper.Map(request.ClassRoomDto, classRoom);
 
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;

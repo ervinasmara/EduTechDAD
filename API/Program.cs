@@ -1,8 +1,6 @@
 using API.Extensions;
 using API.Middleware;
-using Domain.User;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -29,6 +27,26 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim(ClaimTypes.Role, "2"));
     options.AddPolicy("RequireRole3", policy =>
         policy.RequireClaim(ClaimTypes.Role, "3"));
+    options.AddPolicy("RequireRole4", policy =>
+        policy.RequireClaim(ClaimTypes.Role, "4"));
+
+    // Penggabungan role 1 & 4
+    options.AddPolicy("RequireRole1OrRole4", policy =>
+    policy.RequireAssertion(context =>
+        context.User.HasClaim(ClaimTypes.Role, "1") ||
+        context.User.HasClaim(ClaimTypes.Role, "4")));
+
+    // Penggabungan role 2 & 4
+    options.AddPolicy("RequireRole2OrRole4", policy =>
+    policy.RequireAssertion(context =>
+        context.User.HasClaim(ClaimTypes.Role, "2") ||
+        context.User.HasClaim(ClaimTypes.Role, "4")));
+
+    // Penggabungan role 3 & 4
+    options.AddPolicy("RequireRole3OrRole4", policy =>
+    policy.RequireAssertion(context =>
+        context.User.HasClaim(ClaimTypes.Role, "3") ||
+        context.User.HasClaim(ClaimTypes.Role, "4")));
 });
 
 var app = builder.Build();

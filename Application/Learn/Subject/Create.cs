@@ -35,20 +35,20 @@ namespace Application.Learn.Subject
 
             public async Task<Result<LessonDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var uniqueNumber = request.LessonDto.UniqueNumber;
+                var uniqueNumber = request.LessonDto.UniqueNumberOfLesson;
 
-                // Cek apakah UniqueNumber sudah ada di database
-                var isUnique = !_context.Lessons.Any(x => x.UniqueNumber == uniqueNumber);
+                // Cek apakah UniqueNumberOfLesson sudah ada di database
+                var isUnique = !_context.Lessons.Any(x => x.UniqueNumberOfLesson == uniqueNumber);
 
                 if (!isUnique)
                 {
-                    return Result<LessonDto>.Failure("UniqueNumber already exists");
+                    return Result<LessonDto>.Failure("UniqueNumberOfLesson already exists");
                 }
 
                 var classRoom = new Lesson
                 {
                     LessonName = request.LessonDto.LessonName,
-                    UniqueNumber = uniqueNumber,
+                    UniqueNumberOfLesson = uniqueNumber,
                 };
 
                 _context.Lessons.Add(classRoom);

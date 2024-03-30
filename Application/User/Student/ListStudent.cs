@@ -39,7 +39,7 @@ namespace Application.User.Student
                         Role = s.User.Role,
                         Gender = s.Gender,
                         ClassName = s.ClassRoom.ClassName,
-                        UniqueNumber = s.ClassRoom.UniqueNumber
+                        UniqueNumberOfClassRoom = s.ClassRoom.UniqueNumberOfClassRoom
                     })
                     .ToListAsync(cancellationToken);
 

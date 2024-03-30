@@ -45,7 +45,7 @@
         public string Username { get; set; }
         public int Role { get; set; }
         public string ClassName { get; set; }
-        public string UniqueNumber { get; set; }
+        public string UniqueNumberOfClassRoom { get; set; }
     }
 
     public class StudentGetByIdDto

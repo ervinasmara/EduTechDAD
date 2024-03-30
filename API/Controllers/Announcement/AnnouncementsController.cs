@@ -5,17 +5,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Announcements
 {
-    [AllowAnonymous]
+    [Authorize(Policy = "RequireRole1OrRole4")]
     public class AnnouncementsController : BaseApiController
     {
-        //[Authorize(Policy = "RequireRole1")]
         [HttpGet]
         public async Task<IActionResult> GetAnnouncements(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
 
-        //[Authorize(Policy = "RequireRole2")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAnnouncement(Guid id, CancellationToken ct)
         {
@@ -36,7 +34,6 @@ namespace API.Controllers.Announcements
             return HandleResult(result);
         }
 
-        //[Authorize(Policy = "RequireRole3")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAnnouncement(Guid id, CancellationToken ct)
         {

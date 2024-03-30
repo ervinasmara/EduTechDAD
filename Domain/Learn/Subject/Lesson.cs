@@ -6,7 +6,7 @@ namespace Domain.Learn.Subject
     {
         public Guid Id { get; set; }
         public string LessonName { get; set; }
-        public string UniqueNumber { get; set; }
+        public string UniqueNumberOfLesson { get; set; }
 
         // Properti navigasi ke Course
         public ICollection<Course> Courses { get; set; }

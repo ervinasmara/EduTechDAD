@@ -29,6 +29,10 @@ namespace Application.User.Teacher
                     {
                         Id = s.Id,
                         NameTeacher = s.NameTeacher,
+                        BirthDate = s.BirthDate,
+                        BirthPlace = s.BirthPlace,
+                        Address = s.Address,
+                        PhoneNumber = s.PhoneNumber,
                         Nip = s.Nip,
                     })
                     .ToListAsync(cancellationToken);

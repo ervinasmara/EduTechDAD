@@ -8,7 +8,7 @@ namespace Domain.Learn.Study
         public string Description { get; set; }
         public IFormFile? FileData { get; set; }
         public string? LinkCourse { get; set; }
-        public string UniqueNumber { get; set; }
+        public string UniqueNumberOfLesson { get; set; }
     }
 
     public class CourseEditDto
@@ -17,7 +17,7 @@ namespace Domain.Learn.Study
         public string Description { get; set; }
         public IFormFile FileData { get; set; }
         public string LinkCourse { get; set; }
-        public string UniqueNumber { get; set; }
+        public string UniqueNumberOfLesson { get; set; }
     }
 
 
@@ -28,6 +28,6 @@ namespace Domain.Learn.Study
         public string Description { get; set; }
         public byte[] FileData { get; set; }
         public string? LinkCourse { get; set; }
-        public string UniqueNumber { get; set; }
+        public string UniqueNumberOfLesson { get; set; }
     }
 }

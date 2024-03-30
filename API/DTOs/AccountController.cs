@@ -30,25 +30,29 @@ namespace API.DTOs
         }
 
         // =========================== GET DATA =========================== //
-        [HttpGet("students"), AllowAnonymous]
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpGet("students")]
         public async Task<IActionResult> GetStudents(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new ListStudent.Query(), ct));
         }
 
-        [HttpGet("student/{id}"), AllowAnonymous]
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpGet("student/{id}")]
         public async Task<ActionResult> GetStudentById(Guid id, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new DetailsStudent.Query { Id = id }, ct));
         }
 
-        [HttpGet("teachers"), AllowAnonymous]
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpGet("teachers")]
         public async Task<IActionResult> GetTeachers(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new ListTeacher.Query(), ct));
         }
 
-        [HttpGet("teacher/{id}"), AllowAnonymous]
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpGet("teacher/{id}")]
         public async Task<ActionResult> GetTeacherById(Guid id, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new DetailsTeacher.Query { Id = id }, ct));
@@ -100,7 +104,7 @@ namespace API.DTOs
         //}
 
         [AllowAnonymous]
-        [HttpPost("login/superadmin")]
+        [HttpPost("login/superAdmin")]
         public async Task<ActionResult<SuperAdminDto>> LoginSuperAdmin(LoginDto loginDto)
         {
             var user = await _userManager.FindByNameAsync(loginDto.Username);
@@ -212,7 +216,7 @@ namespace API.DTOs
         }
 
         // =========================== REGISTER =========================== //
-        [AllowAnonymous]
+        [Authorize(Policy = "RequireRole4")]
         [HttpPost("register/superAdmin")]
         public async Task<ActionResult<SuperAdminGetDto>> RegisterSuperAdmin(RegisterSuperAdminDto superAdminDto)
         {
@@ -249,7 +253,7 @@ namespace API.DTOs
             return BadRequest(result.Errors);
         }
 
-        [AllowAnonymous]
+        [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("register/admin")]
         public async Task<ActionResult<AdminGetDto>> RegisterAdmin(RegisterAdminDto adminDto)
         {
@@ -286,7 +290,7 @@ namespace API.DTOs
             return BadRequest(result.Errors);
         }
 
-        [AllowAnonymous]
+        [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("register/teacher")]
         public async Task<ActionResult<TeacherGetDto>> RegisterTeacher(RegisterTeacherDto teacherDto)
         {
@@ -333,7 +337,7 @@ namespace API.DTOs
             return BadRequest(result.Errors);
         }
 
-        [AllowAnonymous]
+        [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("register/student")]
         public async Task<ActionResult<StudentGetDto>> RegisterStudent(RegisterStudentDto studentDto)
         {
@@ -354,10 +358,10 @@ namespace API.DTOs
                 return BadRequest("Nis already in use");
             }
 
-            var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumber == studentDto.UniqueNumber);
+            var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == studentDto.UniqueNumberOfClassRoom);
             if (selectedClass == null)
             {
-                return BadRequest("Selected UniqueName not found");
+                return BadRequest("Selected UniqueNumberOfClass not found");
             }
 
             var user = new AppUser
@@ -396,7 +400,7 @@ namespace API.DTOs
         }
 
         // =========================== EDIT USER =========================== //
-        [AllowAnonymous]
+        [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPut("edit/student/{id}")]
         public async Task<IActionResult> UpdateStudent(Guid id, EditStudentDto studentEditDto)
         {
@@ -414,13 +418,13 @@ namespace API.DTOs
             student.Address = studentEditDto.Address;
             student.PhoneNumber = studentEditDto.PhoneNumber;
 
-            // Jika UniqueNumber berubah, cari ClassRoom baru berdasarkan UniqueNumber
-            if (student.ClassRoom?.UniqueNumber != studentEditDto.UniqueNumber)
+            // Jika UniqueNumberOfClassRoom berubah, cari ClassRoom baru berdasarkan UniqueNumberOfClassRoom
+            if (student.ClassRoom?.UniqueNumberOfClassRoom != studentEditDto.UniqueNumberOfClassRoom)
             {
-                var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumber == studentEditDto.UniqueNumber);
+                var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == studentEditDto.UniqueNumberOfClassRoom);
                 if (classRoom == null)
                 {
-                    return BadRequest("Invalid UniqueNumber");
+                    return BadRequest("Invalid UniqueNumberOfClassRoom");
                 }
 
                 // Update ClassRoom untuk siswa
@@ -456,7 +460,7 @@ namespace API.DTOs
             {
                 Address = student.Address,
                 PhoneNumber = student.PhoneNumber,
-                UniqueNumber = student.ClassRoom?.UniqueNumber ?? string.Empty,
+                UniqueNumberOfClassRoom = student.ClassRoom?.UniqueNumberOfClassRoom ?? string.Empty,
                 Password = string.Empty // Tidak ada akses langsung ke Password dari AppUser
             };
 
@@ -464,7 +468,7 @@ namespace API.DTOs
         }
 
         // =========================== GET USER LOGIN =========================== //
-        [Authorize]
+        [Authorize(Policy = "RequireRole4")]
         [HttpGet("superadmin")]
         public async Task<ActionResult<SuperAdminGetDto>> GetUserSuperAdmin()
         {
@@ -480,7 +484,7 @@ namespace API.DTOs
             return superAdminDto;
         }
 
-        [Authorize]
+        [Authorize(Policy = "RequireRole1")]
         [HttpGet("admin")]
         public async Task<ActionResult<AdminGetDto>> GetUserAdmin()
         {
@@ -496,7 +500,7 @@ namespace API.DTOs
             return adminDto;
         }
 
-        [Authorize]
+        [Authorize(Policy = "RequireRole2")]
         [HttpGet("teacher")]
         public async Task<ActionResult<TeacherGetDto>> GetUserTeacher()
         {
@@ -512,7 +516,7 @@ namespace API.DTOs
             return teacherDto;
         }
 
-        [Authorize]
+        [Authorize(Policy = "RequireRole3")]
         [HttpGet("student")]
         public async Task<ActionResult<StudentGetDto>> GetUserStudent()
         {

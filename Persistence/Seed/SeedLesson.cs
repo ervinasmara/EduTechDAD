@@ -13,17 +13,17 @@ namespace Persistence.Seed
                 new Lesson
                 {
                     LessonName = "PAI",
-                    UniqueNumber = "01",
+                    UniqueNumberOfLesson = "01",
                 },
                 new Lesson
                 {
                     LessonName = "PPKN",
-                    UniqueNumber = "02",
+                    UniqueNumberOfLesson = "02",
                 },
                 new Lesson
                 {
                     LessonName = "Bahasa Indonesia",
-                    UniqueNumber = "03",
+                    UniqueNumberOfLesson = "03",
                 },
             };
 
