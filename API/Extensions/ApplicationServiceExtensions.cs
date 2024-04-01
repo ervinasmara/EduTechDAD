@@ -45,7 +45,7 @@ namespace API.Extensions
                     });
                 });
 
-                services.AddEndpointsApiExplorer();
+            services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
             services.AddDbContext<DataContext>(opt =>
             {
@@ -57,7 +57,7 @@ namespace API.Extensions
             {
                 opt.AddPolicy("CorsPolicy", policy =>
                 {
-                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
+                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5000");
                 });
             });
 

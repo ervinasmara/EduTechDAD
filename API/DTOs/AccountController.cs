@@ -96,7 +96,7 @@ namespace API.DTOs
             return Unauthorized();
         }
 
-
+        /*
         [AllowAnonymous]
         [HttpPost("login/superAdmin")]
         public async Task<ActionResult<SuperAdminDto>> LoginSuperAdmin(LoginDto loginDto)
@@ -208,6 +208,7 @@ namespace API.DTOs
             }
             return Unauthorized();
         }
+        */
 
         // =========================== REGISTER =========================== //
         [Authorize(Policy = "RequireRole4")]
@@ -393,6 +394,139 @@ namespace API.DTOs
             return BadRequest(result.Errors);
         }
 
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPost("seedexcel")]
+        public async Task<IActionResult> UploadExcel3(IFormFile file)
+        {
+            if (file == null || file.Length <= 0)
+            {
+                return BadRequest("Invalid file");
+            }
+
+            try
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await file.CopyToAsync(stream);
+                    stream.Position = 0;
+
+                    // Proses file Excel di sini
+                    // Misalnya, Anda dapat menggunakan library seperti EPPlus untuk membaca file Excel
+                    // Install EPPlus melalui NuGet Package Manager: Install-Package EPPlus
+
+                    // Misalnya, baca data dari file Excel dan simpan ke database
+                    using (var package = new OfficeOpenXml.ExcelPackage(stream))
+                    {
+                        var worksheet = package.Workbook.Worksheets[0]; // Misalnya, data berada di worksheet pertama
+                        var rowCount = worksheet.Dimension.Rows;
+
+                        for (int row = 2; row <= rowCount; row++) // Mulai dari baris kedua, karena baris pertama mungkin berisi header
+                        {
+                            var studentDto = new RegisterStudentDto
+                            {
+                                NameStudent = worksheet.Cells[row, 1].Value.ToString(),
+                                BirthDate = DateOnly.Parse(worksheet.Cells[row, 2].Value.ToString()),
+                                BirthPlace = worksheet.Cells[row, 3].Value.ToString(),
+                                Address = worksheet.Cells[row, 4].Value.ToString(),
+                                PhoneNumber = worksheet.Cells[row, 5].Value.ToString(),
+                                Nis = worksheet.Cells[row, 6].Value.ToString(),
+                                ParentName = worksheet.Cells[row, 7].Value.ToString(),
+                                Gender = Convert.ToInt32(worksheet.Cells[row, 8].Value.ToString()),
+                                UniqueNumberOfClassRoom = worksheet.Cells[row, 9].Value.ToString(),
+                                Username = worksheet.Cells[row, 6].Value.ToString(), // Menggunakan NIS sebagai username
+                                Password = worksheet.Cells[row, 10].Value.ToString(), // Tentukan kata sandi default atau sesuaikan dengan kebutuhan Anda
+                                Role = 3 // Tentukan peran default atau sesuaikan dengan kebutuhan Anda
+                            };
+
+
+                            // Simpan data student dari file Excel
+                            var result = await RegisterStudentExcel(studentDto);
+
+                            if (result is BadRequestObjectResult badRequest)
+                            {
+                                return badRequest;
+                            }
+                        }
+                    }
+                }
+
+                return Ok("Data from Excel uploaded and saved successfully");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while uploading Excel file: {ex.Message}");
+            }
+        }
+
+        private async Task<IActionResult> RegisterStudentExcel(RegisterStudentDto studentDto)
+        {
+            // Pemeriksaan username supaya berbeda dengan yang lain
+            if (await _userManager.Users.AnyAsync(x => x.UserName == studentDto.Username))
+            {
+                return BadRequest($"Username {studentDto.Username} already in use");
+            }
+
+            if (studentDto.BirthDate == DateOnly.MinValue)
+            {
+                return BadRequest("Date of birth required");
+            }
+
+            if (string.IsNullOrEmpty(studentDto.Username))
+            {
+                return BadRequest("Username is required");
+            }
+
+            if (string.IsNullOrEmpty(studentDto.Password))
+            {
+                return BadRequest("Password is required");
+            }
+
+            // Memeriksa keunikan Nis
+            if (await _context.Students.AnyAsync(s => s.Nis == studentDto.Nis))
+            {
+                return BadRequest($"Nis {studentDto.Nis} already in use");
+            }
+
+            var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == studentDto.UniqueNumberOfClassRoom);
+            if (selectedClass == null)
+            {
+                return BadRequest("Selected UniqueNumberOfClass not found");
+            }
+
+            var user = new AppUser
+            {
+                UserName = studentDto.Username,
+                Role = studentDto.Role,
+            };
+
+            var student = new Student
+            {
+                NameStudent = studentDto.NameStudent,
+                BirthDate = studentDto.BirthDate,
+                BirthPlace = studentDto.BirthPlace,
+                Address = studentDto.Address,
+                PhoneNumber = studentDto.PhoneNumber,
+                Nis = studentDto.Nis,
+                ParentName = studentDto.ParentName,
+                Gender = studentDto.Gender,
+                AppUserId = user.Id,
+                ClassRoomId = selectedClass.Id
+            };
+
+            var result = await _userManager.CreateAsync(user, studentDto.Password);
+
+            if (result.Succeeded)
+            {
+                // Simpan student ke dalam konteks database Anda
+                _context.Students.Add(student);
+                await _context.SaveChangesAsync();
+
+                return Ok("Student registered successfully");
+            }
+
+            return BadRequest(result.Errors);
+        }
+
         // =========================== EDIT USER =========================== //
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPut("edit/student/{id}")]
@@ -462,6 +596,7 @@ namespace API.DTOs
         }
 
         // =========================== GET USER LOGIN =========================== //
+        [Authorize]
         [HttpGet("userinfo")]
         public async Task<ActionResult<object>> GetUserInfo()
         {
@@ -496,6 +631,7 @@ namespace API.DTOs
             return userDto;
         }
 
+        /*
         [Authorize(Policy = "RequireRole4")]
         [HttpGet("superadmin")]
         public async Task<ActionResult<SuperAdminGetDto>> GetUserSuperAdmin()
@@ -559,6 +695,7 @@ namespace API.DTOs
             var studentDto = await CreateUserObjectStudentGet(user);
             return studentDto;
         }
+        */
 
         // =========================== SHORT CODE =========================== //
         private async Task<SuperAdminDto> CreateUserObjectSuperAdmin(AppUser user)
