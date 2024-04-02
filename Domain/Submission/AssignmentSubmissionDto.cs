@@ -2,13 +2,15 @@
 
 namespace Domain.Submission
 {
-    public class AssignmentSubmissionGetByIdAssignmentDto
+    public class AssignmentSubmissionGetByIdCRandA
     {
+        public Guid Id { get; set; }
         public DateTime SubmissionTime { get; set; }
         public int Status { get; set; }
         public string Link { get; set; }
         public float Grade { get; set; }
         public string Comment { get; set; }
+        public string StudentId { get; set; }
         public byte[] FileData { get; set; }
     }
 

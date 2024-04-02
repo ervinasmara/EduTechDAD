@@ -22,16 +22,18 @@ namespace Application.Core
             CreateMap<AttendanceDto, Attendance>();
             CreateMap<Assignment, AssignmentDto>();
             CreateMap<AssignmentDto, Assignment>();
-            CreateMap<Assignment, AssignmentGetAllDto>();
+            CreateMap<Assignment, AssignmentGetDto>();
             CreateMap<Lesson, LessonDto>();
             CreateMap<LessonDto, Lesson>();
+            CreateMap<Lesson, LessonCreateDto>();
+            CreateMap<LessonCreateDto, Lesson>();
             CreateMap<Schedule, ScheduleDto>();
             CreateMap<ScheduleDto, Schedule>();
             CreateMap<Schedule, ScheduleGetDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionStatusDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionStudentDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionTeacherDto>();
-            CreateMap<AssignmentSubmission, AssignmentSubmissionGetByIdAssignmentDto>();
+            CreateMap<AssignmentSubmission, AssignmentSubmissionGetByIdCRandA>();
 
             CreateMap<AssignmentSubmission, AssignmentSubmissionStudentDto>()
                 .ForMember(dest => dest.FileData, opt => opt.Ignore());
@@ -39,8 +41,8 @@ namespace Application.Core
             // Konfigurasi pemetaan untuk Course
             CreateMap<Course, CourseDto>();
             CreateMap<CourseDto, Course>();
-            CreateMap<Course, CourseGetAllDto>();
-            CreateMap<CourseGetAllDto, Course>();
+            CreateMap<Course, CourseGetDto>();
+            CreateMap<CourseGetDto, Course>();
 
             // Mapping untuk Course dan CourseDto
             CreateMap<Course, CourseDto>()

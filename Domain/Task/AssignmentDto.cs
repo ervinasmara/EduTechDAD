@@ -13,10 +13,11 @@ namespace Domain.Task
         public Guid CourseId { get; set; }
     }
 
-    public class AssignmentGetAllDto
+    public class AssignmentGetDto
     {
         public Guid Id { get; set; }
         public string AssignmentName { get; set; }
+        public string AssignmentFileName { get; set; }
         public DateOnly AssignmentDate { get; set; }
         public DateOnly AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }

@@ -5,21 +5,30 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Learn
 {
-    [Authorize(Policy = "RequireRole2OrRole4")]
     public class CoursesController : BaseApiController
     {
+        [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet]
         public async Task<IActionResult> GetCourses(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
 
+        [Authorize(Policy = "RequireRole2,3,4")]
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetCourse(Guid id, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new Details.Query { Id = id }, ct));
+        }
+
+        [Authorize(Policy = "RequireRole2OrRole4")]
         [HttpPost]
         public async Task<IActionResult> Course([FromForm] Create.Command command, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(command, ct));
         }
 
+        [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet("download/{id}")]
         public async Task<IActionResult> Download(Guid id, CancellationToken cancellationToken)
         {
@@ -40,6 +49,7 @@ namespace API.Controllers.Learn
             }
         }
 
+        [Authorize(Policy = "RequireRole2OrRole4")]
         [HttpPut("{id}")]
         public async Task<IActionResult> EditCourse(Guid id,[FromForm] CourseDto courseDto, CancellationToken ct)
         {
@@ -48,6 +58,7 @@ namespace API.Controllers.Learn
             return HandleResult(result);
         }
 
+        [Authorize(Policy = "RequireRole2OrRole4")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClassRoom(Guid id, CancellationToken ct)
         {

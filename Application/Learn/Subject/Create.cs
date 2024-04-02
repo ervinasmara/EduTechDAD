@@ -4,25 +4,26 @@ using FluentValidation;
 using Application.Core;
 using AutoMapper;
 using Domain.Learn.Subject;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Learn.Subject
 {
     public class Create
     {
-        public class Command : IRequest<Result<LessonDto>>
+        public class Command : IRequest<Result<LessonCreateDto>>
         {
-            public LessonDto LessonDto { get; set; }
+            public LessonCreateDto LessonCreateDto { get; set; }
         }
 
         public class CommandLesson : AbstractValidator<Command>
         {
             public CommandLesson()
             {
-                RuleFor(x => x.LessonDto).SetValidator(new LessonValidator());
+                RuleFor(x => x.LessonCreateDto).SetValidator(new LessonCreateValidator());
             }
         }
 
-        public class Handler : IRequestHandler<Command, Result<LessonDto>>
+        public class Handler : IRequestHandler<Command, Result<LessonCreateDto>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -33,21 +34,27 @@ namespace Application.Learn.Subject
                 _mapper = mapper;
             }
 
-            public async Task<Result<LessonDto>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<LessonCreateDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var uniqueNumber = request.LessonDto.UniqueNumberOfLesson;
+                var lastLesson = await _context.Lessons
+                                                .OrderByDescending(x => x.UniqueNumberOfLesson)
+                                                .FirstOrDefaultAsync(cancellationToken);
 
-                // Cek apakah UniqueNumberOfLesson sudah ada di database
-                var isUnique = !_context.Lessons.Any(x => x.UniqueNumberOfLesson == uniqueNumber);
+                int newUniqueNumber = 1; // Nilai awal jika tidak ada lesson sebelumnya
 
-                if (!isUnique)
+                if (lastLesson != null)
                 {
-                    return Result<LessonDto>.Failure("UniqueNumberOfLesson already exists");
+                    // Ambil nomor terakhir dan tambahkan 1
+                    var lastUniqueNumber = int.Parse(lastLesson.UniqueNumberOfLesson);
+                    newUniqueNumber = lastUniqueNumber + 1;
                 }
+
+                // Buat UniqueNumberOfLesson dengan format 2 digit
+                var uniqueNumber = newUniqueNumber.ToString("00");
 
                 var classRoom = new Lesson
                 {
-                    LessonName = request.LessonDto.LessonName,
+                    LessonName = request.LessonCreateDto.LessonName,
                     UniqueNumberOfLesson = uniqueNumber,
                 };
 
@@ -56,12 +63,13 @@ namespace Application.Learn.Subject
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
                 if (!result)
-                    return Result<LessonDto>.Failure("Failed to Create Lesson");
+                    return Result<LessonCreateDto>.Failure("Failed to Create Lesson");
 
-                var classRoomDto = _mapper.Map<LessonDto>(classRoom);
+                var classRoomDto = _mapper.Map<LessonCreateDto>(classRoom);
 
-                return Result<LessonDto>.Success(classRoomDto);
+                return Result<LessonCreateDto>.Success(classRoomDto);
             }
+
         }
     }
 }

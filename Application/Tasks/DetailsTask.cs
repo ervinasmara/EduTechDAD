@@ -1,20 +1,20 @@
 ﻿using Application.Core;
 using AutoMapper;
-using Domain.Learn.Study;
+using Domain.Task;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Learn.Study
+namespace Application.Tasks
 {
-    public class List
+    public class DetailsTask
     {
-        public class Query : IRequest<Result<List<CourseGetDto>>>
+        public class Query : IRequest<Result<AssignmentGetDto>>
         {
-            // Tidak memerlukan parameter tambahan untuk meneruskan ke query
+            public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<CourseGetDto>>>
+        public class Handler : IRequestHandler<Query, Result<AssignmentGetDto>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -25,20 +25,28 @@ namespace Application.Learn.Study
                 _mapper = mapper;
             }
 
-            public async Task<Result<List<CourseGetDto>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<AssignmentGetDto>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var courses = await _context.Courses.Include(c => c.Lesson).ToListAsync(cancellationToken);
-                var courseDtos = new List<CourseGetDto>();
+                var assignment = await _context.Assignments.Include(c => c.Course).FirstOrDefaultAsync(a => a.Id == request.Id, cancellationToken);
 
-                foreach (var course in courses)
+                if (assignment == null)
+                    return Result<AssignmentGetDto>.Failure("Assignment not found.");
+
+                var assignmentDto = _mapper.Map<AssignmentGetDto>(assignment);
+                assignmentDto.CourseName = assignment.Course.CourseName;
+
+                // Set AssignmentFileName based on AssignmentName and FileData extension
+                if (!string.IsNullOrEmpty(assignment.AssignmentName) && assignment.FileData != null)
                 {
-                    var courseDto = _mapper.Map<CourseGetDto>(course);
-                    courseDto.UniqueNumberOfLesson = course.Lesson.UniqueNumberOfLesson; // Set UniqueNumberOfLesson dari Lesson
-                    courseDto.FileName = $"{course.CourseName}.{GetFileExtension(course.FileData)}"; // Combine filename with extension
-                    courseDtos.Add(courseDto);
+                    assignmentDto.AssignmentFileName = $"{assignment.AssignmentName}.{GetFileExtension(assignment.FileData)}";
+                }
+                else
+                {
+                    // Handle null values appropriately
+                    assignmentDto.AssignmentFileName = "UnknownFileName";
                 }
 
-                return Result<List<CourseGetDto>>.Success(courseDtos);
+                return Result<AssignmentGetDto>.Success(assignmentDto);
             }
 
             private string GetFileExtension(byte[] fileData)

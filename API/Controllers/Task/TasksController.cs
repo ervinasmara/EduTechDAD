@@ -9,9 +9,15 @@ namespace API.Controllers.Tasks
     {
         [Authorize(Policy = "RequireRole2OrRole4")]
         [HttpGet]
-        public async Task<IActionResult> GetAsignments(CancellationToken ct)
+        public async Task<IActionResult> GetAssignments(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new ListTasks.Query(), ct));
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetAssignmentById(Guid id, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new DetailsTask.Query { Id = id }, ct));
         }
 
         [Authorize(Policy = "RequireRole2OrRole4")]
@@ -66,7 +72,7 @@ namespace API.Controllers.Tasks
         }
 
         [AllowAnonymous]
-        [HttpPut("status/{id}")]
+        [HttpPut("statusdeadline/{id}")]
         public async Task<IActionResult> EditStatus(Guid id)
         {
             var command = new EditStatus.Command { Id = id };

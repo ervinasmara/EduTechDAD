@@ -7,14 +7,14 @@ using Persistence;
 
 namespace Application.Learn.Study
 {
-    public class List
+    public class Details
     {
-        public class Query : IRequest<Result<List<CourseGetDto>>>
+        public class Query : IRequest<Result<CourseGetDto>> // Mengubah DTO menjadi CourseGetDto
         {
-            // Tidak memerlukan parameter tambahan untuk meneruskan ke query
+            public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<CourseGetDto>>>
+        public class Handler : IRequestHandler<Query, Result<CourseGetDto>> // Mengubah Course menjadi CourseGetDto
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -25,21 +25,42 @@ namespace Application.Learn.Study
                 _mapper = mapper;
             }
 
-            public async Task<Result<List<CourseGetDto>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<CourseGetDto>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var courses = await _context.Courses.Include(c => c.Lesson).ToListAsync(cancellationToken);
-                var courseDtos = new List<CourseGetDto>();
+                var course = await _context.Courses
+                                            .Include(c => c.Lesson)
+                                            .FirstOrDefaultAsync(c => c.Id == request.Id);
 
-                foreach (var course in courses)
+                if (course == null)
+                    return Result<CourseGetDto>.Failure("Course not found.");
+
+                var courseDto = _mapper.Map<CourseGetDto>(course); // Memetakan Course ke CourseGetDto
+
+                // Set FileName based on CourseName and FileData extension
+                if (!string.IsNullOrEmpty(course.CourseName) && course.FileData != null)
                 {
-                    var courseDto = _mapper.Map<CourseGetDto>(course);
-                    courseDto.UniqueNumberOfLesson = course.Lesson.UniqueNumberOfLesson; // Set UniqueNumberOfLesson dari Lesson
-                    courseDto.FileName = $"{course.CourseName}.{GetFileExtension(course.FileData)}"; // Combine filename with extension
-                    courseDtos.Add(courseDto);
+                    courseDto.FileName = $"{course.CourseName}.{GetFileExtension(course.FileData)}";
+                }
+                else
+                {
+                    // Handle null values appropriately
+                    courseDto.FileName = "UnknownFileName";
                 }
 
-                return Result<List<CourseGetDto>>.Success(courseDtos);
+                // Set UniqueNumberOfLesson from Lesson entity
+                if (course.Lesson != null)
+                {
+                    courseDto.UniqueNumberOfLesson = course.Lesson.UniqueNumberOfLesson;
+                }
+                else
+                {
+                    // Handle null values appropriately
+                    courseDto.UniqueNumberOfLesson = "UnknownUniqueNumberOfLesson";
+                }
+
+                return Result<CourseGetDto>.Success(courseDto);
             }
+
 
             private string GetFileExtension(byte[] fileData)
             {

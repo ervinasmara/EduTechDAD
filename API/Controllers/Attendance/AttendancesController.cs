@@ -14,6 +14,19 @@ namespace API.Controllers.Attendances
             return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
 
+        [HttpGet("{year:int}/{month:int}/{day:int}")]
+        public async Task<ActionResult> GetAttendanceByDate2(int year, int month, int day, CancellationToken ct)
+        {
+            var date = new DateOnly(year, month, day);
+            return HandleResult(await Mediator.Send(new GetAttendanceByDate.Query { Year = year, Month = month, Day = day }, ct));
+        }
+
+        //[HttpGet("{date}")]
+        //public async Task<ActionResult> GetAttendanceByDate(DateOnly date, CancellationToken ct)
+        //{
+        //    return HandleResult(await Mediator.Send(new GetAttendanceByDate.Query { Date = date }, ct));
+        //}
+
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAttendance(Guid id, CancellationToken ct)
         {

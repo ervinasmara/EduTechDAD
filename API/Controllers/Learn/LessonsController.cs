@@ -21,9 +21,9 @@ namespace API.Controllers.Lessons
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateLessonDto(LessonDto lessonDto, CancellationToken ct)
+        public async Task<IActionResult> CreateLessonDto(LessonCreateDto lessonDto, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new Create.Command { LessonDto = lessonDto }, ct));
+            return HandleResult(await Mediator.Send(new Create.Command { LessonCreateDto = lessonDto }, ct));
         }
 
         [HttpPut("{id}")]

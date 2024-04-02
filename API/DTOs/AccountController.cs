@@ -30,28 +30,28 @@ namespace API.DTOs
         }
 
         // =========================== GET DATA =========================== //
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1,2,3,4")]
         [HttpGet("students")]
         public async Task<IActionResult> GetStudents(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new ListStudent.Query(), ct));
         }
 
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1,2,3,4")]
         [HttpGet("student/{id}")]
         public async Task<ActionResult> GetStudentById(Guid id, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new DetailsStudent.Query { Id = id }, ct));
         }
 
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1,2,4")]
         [HttpGet("teachers")]
         public async Task<IActionResult> GetTeachers(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new ListTeacher.Query(), ct));
         }
 
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1,2,4")]
         [HttpGet("teacher/{id}")]
         public async Task<ActionResult> GetTeacherById(Guid id, CancellationToken ct)
         {
@@ -410,11 +410,7 @@ namespace API.DTOs
                     await file.CopyToAsync(stream);
                     stream.Position = 0;
 
-                    // Proses file Excel di sini
-                    // Misalnya, Anda dapat menggunakan library seperti EPPlus untuk membaca file Excel
-                    // Install EPPlus melalui NuGet Package Manager: Install-Package EPPlus
-
-                    // Misalnya, baca data dari file Excel dan simpan ke database
+                    // Baca data dari file Excel dan simpan ke database
                     using (var package = new OfficeOpenXml.ExcelPackage(stream))
                     {
                         var worksheet = package.Workbook.Worksheets[0]; // Misalnya, data berada di worksheet pertama
