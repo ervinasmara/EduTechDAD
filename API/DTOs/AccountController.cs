@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Application.User.Student;
 using Application.User.Teacher;
+using System.Text.RegularExpressions;
 
 namespace API.DTOs
 {
@@ -336,22 +337,22 @@ namespace API.DTOs
         [HttpPost("register/student")]
         public async Task<ActionResult<StudentGetDto>> RegisterStudent(RegisterStudentDto studentDto)
         {
-            // Pemeriksaan username supaya berbeda dengan yang lain
-            if (await _userManager.Users.AnyAsync(x => x.UserName == studentDto.Username))
-            {
-                return BadRequest("Username already in use");
-            }
-
             if (studentDto.BirthDate == DateOnly.MinValue)
             {
                 return BadRequest("Date of birth required");
             }
 
-            // Memeriksa keunikan Nis
-            if (await _context.Students.AnyAsync(s => s.Nis == studentDto.Nis))
+            // Mengambil NIS terakhir dari database
+            var lastNis = await _context.Students.MaxAsync(s => s.Nis);
+            int newNisNumber = 1;
+            if (!string.IsNullOrEmpty(lastNis))
             {
-                return BadRequest("Nis already in use");
+                // Mengambil angka dari NIS terakhir dan menambahkannya satu
+                newNisNumber = int.Parse(lastNis) + 1;
             }
+
+            // Membuat NIS baru dengan format yang diinginkan
+            var newNis = newNisNumber.ToString("00000");
 
             var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == studentDto.UniqueNumberOfClassRoom);
             if (selectedClass == null)
@@ -359,9 +360,18 @@ namespace API.DTOs
                 return BadRequest("Selected UniqueNumberOfClass not found");
             }
 
+            // Membuat username sama dengan NIS
+            var username = newNis;
+
+            // Memeriksa apakah username sudah digunakan
+            if (await _userManager.Users.AnyAsync(x => x.UserName == username))
+            {
+                return BadRequest("Username already in use");
+            }
+
             var user = new AppUser
             {
-                UserName = studentDto.Username,
+                UserName = username,
                 Role = studentDto.Role,
             };
 
@@ -372,14 +382,23 @@ namespace API.DTOs
                 BirthPlace = studentDto.BirthPlace,
                 Address = studentDto.Address,
                 PhoneNumber = studentDto.PhoneNumber,
-                Nis = studentDto.Nis,
+                Nis = newNis, // Menggunakan NIS yang baru di-generate
                 ParentName = studentDto.ParentName,
                 Gender = studentDto.Gender,
                 AppUserId = user.Id,
                 ClassRoomId = selectedClass.Id
             };
 
-            var result = await _userManager.CreateAsync(user, studentDto.Password);
+            // Membuat password berdasarkan NIS yang baru di-generate
+            var password = $"{newNis}Edu#";
+
+            // Validasi password sesuai dengan ekspresi reguler sebelum menyimpannya
+            if (!Regex.IsMatch(password, "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}"))
+            {
+                return BadRequest("Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one digit.");
+            }
+
+            var result = await _userManager.CreateAsync(user, password);
 
             if (result.Succeeded)
             {
@@ -418,7 +437,7 @@ namespace API.DTOs
 
                         for (int row = 2; row <= rowCount; row++) // Mulai dari baris kedua, karena baris pertama mungkin berisi header
                         {
-                            var studentDto = new RegisterStudentDto
+                            var studentDto = new RegisterStudentExcelDto
                             {
                                 NameStudent = worksheet.Cells[row, 1].Value.ToString(),
                                 BirthDate = DateOnly.Parse(worksheet.Cells[row, 2].Value.ToString()),
@@ -454,7 +473,7 @@ namespace API.DTOs
             }
         }
 
-        private async Task<IActionResult> RegisterStudentExcel(RegisterStudentDto studentDto)
+        private async Task<IActionResult> RegisterStudentExcel(RegisterStudentExcelDto studentDto)
         {
             // Pemeriksaan username supaya berbeda dengan yang lain
             if (await _userManager.Users.AnyAsync(x => x.UserName == studentDto.Username))

@@ -7,13 +7,14 @@ namespace API.Controllers.Tasks
 {
     public class AssignmentsController : BaseApiController
     {
-        [Authorize(Policy = "RequireRole2OrRole4")]
+        [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet]
         public async Task<IActionResult> GetAssignments(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new ListTasks.Query(), ct));
         }
 
+        [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAssignmentById(Guid id, CancellationToken ct)
         {
@@ -50,7 +51,7 @@ namespace API.Controllers.Tasks
             }
         }
 
-        [Authorize(Policy = "RequireRole3OrRole4")]
+        [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet("download/{id}")]
         public async Task<IActionResult> DownloadTask(Guid id, CancellationToken cancellationToken)
         {
@@ -71,7 +72,7 @@ namespace API.Controllers.Tasks
             }
         }
 
-        [AllowAnonymous]
+        [Authorize(Policy = "RequireRole2OrRole4")]
         [HttpPut("statusdeadline/{id}")]
         public async Task<IActionResult> EditStatus(Guid id)
         {
