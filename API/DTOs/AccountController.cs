@@ -45,6 +45,13 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new DetailsStudent.Query { Id = id }, ct));
         }
 
+        [Authorize(Policy = "RequireRole1,2,3,4")]
+        [HttpGet("byclassroom/{uniqueNumberOfClassRoom}")]
+        public async Task<ActionResult> GetStudentsByClassRoom(string uniqueNumberOfClassRoom, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new DetailsStudentByClassRoom.Query { UniqueNumberOfClassRoom = uniqueNumberOfClassRoom }, ct));
+        }
+
         [Authorize(Policy = "RequireRole1,2,4")]
         [HttpGet("teachers")]
         public async Task<IActionResult> GetTeachers(CancellationToken ct)

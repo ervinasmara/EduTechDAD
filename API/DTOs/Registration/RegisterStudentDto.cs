@@ -16,7 +16,8 @@ namespace API.DTOs.Registration
         [Required]
         public string Address { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Phone number is required")]
+        [RegularExpression("^[0-9]{8,13}$", ErrorMessage = "Phone number must be between 8 and 13 digits and contain only numbers.")]
         public string PhoneNumber { get; set; }
 
         [Required]
@@ -33,7 +34,7 @@ namespace API.DTOs.Registration
 
         [Required(ErrorMessage = "Role is required")]
         [Range(3, 3, ErrorMessage = "Role must be 3")]
-        public int Role { get; set; }
+        public int Role { get; set; } = 3;
 
         [Required(ErrorMessage = "UniqueNumberOfClassRoom is required")]
         public string UniqueNumberOfClassRoom { get; set; }
@@ -53,7 +54,8 @@ namespace API.DTOs.Registration
         [Required]
         public string Address { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Phone number is required")]
+        [RegularExpression("^[0-9]{8,13}$", ErrorMessage = "Phone number must be between 8 and 13 digits and contain only numbers.")]
         public string PhoneNumber { get; set; }
 
         [Required]
@@ -80,7 +82,7 @@ namespace API.DTOs.Registration
 
         [Required(ErrorMessage = "Role is required")]
         [Range(3, 3, ErrorMessage = "Role must be 3")]
-        public int Role { get; set; }
+        public int Role { get; set; } = 3;
 
         [Required(ErrorMessage = "UniqueNumberOfClassRoom is required")]
         public string UniqueNumberOfClassRoom { get; set; }

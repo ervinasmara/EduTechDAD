@@ -38,6 +38,7 @@ namespace Application.User.Student
                         Username = s.User.UserName,
                         Role = s.User.Role,
                         Gender = s.Gender,
+                        ClassRoomId = s.ClassRoom.Id,
                         ClassName = s.ClassRoom.ClassName,
                         UniqueNumberOfClassRoom = s.ClassRoom.UniqueNumberOfClassRoom
                     })

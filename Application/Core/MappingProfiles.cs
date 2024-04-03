@@ -33,7 +33,9 @@ namespace Application.Core
             CreateMap<AssignmentSubmission, AssignmentSubmissionStatusDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionStudentDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionTeacherDto>();
+            CreateMap<AssignmentSubmission, AssignmentSubmissionGetDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionGetByIdCRandA>();
+            //CreateMap<AssignmentSubmissionGetByIdCRandA, AssignmentSubmission>();
 
             CreateMap<AssignmentSubmission, AssignmentSubmissionStudentDto>()
                 .ForMember(dest => dest.FileData, opt => opt.Ignore());

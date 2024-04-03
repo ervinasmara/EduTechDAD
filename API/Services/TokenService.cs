@@ -111,6 +111,7 @@ namespace API.Services
         {
             // Mencari entitas ClassRoom yang terkait dengan siswa
             var className = student.ClassRoom?.ClassName ?? "Unknown"; // Jika ClassRoom null, maka ClassName diatur menjadi "Unknown"
+            var classRoomId = student.ClassRoom.Id;
 
             // Kita akan membuat daftar klaim yang akan masuk ke dalam dan dikembalikan dengan token kita
             var claims = new List<Claim>
@@ -118,6 +119,7 @@ namespace API.Services
                 new Claim(ClaimTypes.Role, user.Role.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.UserName),
+                new Claim("StudentId", student.Id.ToString()),
                 new Claim("NameStudent", student.NameStudent),
                 new Claim("BirthDate", student.BirthDate.ToString()),
                 new Claim("BirthPlace", student.BirthPlace),
@@ -126,6 +128,7 @@ namespace API.Services
                 new Claim("Nis", student.Nis),
                 new Claim("ParentName", student.ParentName),
                 new Claim("Gender", student.Gender.ToString()),
+                new Claim("ClassRoomId", classRoomId.ToString()), // Ubah classRoomId menjadi string sebelum menambahkannya sebagai klaim
                 new Claim("ClassName", className),
             };
 

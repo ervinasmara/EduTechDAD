@@ -6,11 +6,11 @@ using Persistence;
 
 namespace Application.Presents
 {
-    public class ListByClassRoomId
+    public class ListByClassRoomUniqueNumber
     {
         public class Query : IRequest<Result<List<AttendanceDto>>>
         {
-            public Guid ClassRoomId { get; set; }
+            public string UniqueNumberOfClassRoom { get; set; }
         }
 
         public class Handler : IRequestHandler<Query, Result<List<AttendanceDto>>>
@@ -23,8 +23,16 @@ namespace Application.Presents
 
             public async Task<Result<List<AttendanceDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
+                var classRoom = await _context.ClassRooms
+                    .FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == request.UniqueNumberOfClassRoom);
+
+                if (classRoom == null)
+                {
+                    return Result<List<AttendanceDto>>.Failure("ClassRoom not found.");
+                }
+
                 var studentsInClassRoom = await _context.Students
-                    .Where(s => s.ClassRoomId == request.ClassRoomId)
+                    .Where(s => s.ClassRoomId == classRoom.Id)
                     .ToListAsync(cancellationToken);
 
                 var attendanceDtos = new List<AttendanceDto>();

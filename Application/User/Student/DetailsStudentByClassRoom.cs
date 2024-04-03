@@ -6,14 +6,14 @@ using Persistence;
 
 namespace Application.User.Student
 {
-    public class DetailsStudent
+    public class DetailsStudentByClassRoom
     {
-        public class Query : IRequest<Result<StudentGetByIdDto>>
+        public class Query : IRequest<Result<List<StudentGetByIdDto>>>
         {
-            public Guid Id { get; set; }
+            public string UniqueNumberOfClassRoom { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<StudentGetByIdDto>>
+        public class Handler : IRequestHandler<Query, Result<List<StudentGetByIdDto>>>
         {
             private readonly DataContext _context;
 
@@ -22,19 +22,20 @@ namespace Application.User.Student
                 _context = context;
             }
 
-            public async Task<Result<StudentGetByIdDto>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<List<StudentGetByIdDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var student = await _context.Students
+                var students = await _context.Students
                     .Include(s => s.User)
                     .Include(s => s.ClassRoom)
-                    .FirstOrDefaultAsync(s => s.Id == request.Id);
+                    .Where(s => s.ClassRoom.UniqueNumberOfClassRoom == request.UniqueNumberOfClassRoom)
+                    .ToListAsync(cancellationToken);
 
-                if (student == null)
+                if (students == null || !students.Any())
                 {
-                    return Result<StudentGetByIdDto>.Failure("Student not found.");
+                    return Result<List<StudentGetByIdDto>>.Failure("Classroom not found.");
                 }
 
-                var studentDto = new StudentGetByIdDto
+                var studentDtos = students.Select(student => new StudentGetByIdDto
                 {
                     NameStudent = student.NameStudent,
                     Nis = student.Nis,
@@ -47,9 +48,9 @@ namespace Application.User.Student
                     ClassRoomId = student.ClassRoom.Id,
                     ClassName = student.ClassRoom?.ClassName ?? "No Class",
                     Gender = student.Gender
-                };
+                }).ToList();
 
-                return Result<StudentGetByIdDto>.Success(studentDto);
+                return Result<List<StudentGetByIdDto>>.Success(studentDtos);
             }
         }
     }

@@ -9,13 +9,13 @@ namespace Application.Submission
 {
     public class GetAssignmentSubmissionByClassRoomAndAssignment
     {
-        public class Query : IRequest<Result<AssignmentSubmissionGetByIdCRandA>>
+        public class Query : IRequest<Result<List<AssignmentSubmissionGetByIdCRandA>>>
         {
             public Guid ClassRoomId { get; set; }
             public Guid AssignmentId { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<AssignmentSubmissionGetByIdCRandA>>
+        public class Handler : IRequestHandler<Query, Result<List<AssignmentSubmissionGetByIdCRandA>>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -26,18 +26,18 @@ namespace Application.Submission
                 _mapper = mapper;
             }
 
-            public async Task<Result<AssignmentSubmissionGetByIdCRandA>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<List<AssignmentSubmissionGetByIdCRandA>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var assignmentSubmission = await _context.AssignmentSubmissions
+                var assignmentSubmissions = await _context.AssignmentSubmissions
                     .Where(s => s.AssignmentId == request.AssignmentId && s.Student.ClassRoomId == request.ClassRoomId)
-                    .FirstOrDefaultAsync(cancellationToken);
+                    .ToListAsync(cancellationToken);
 
-                if (assignmentSubmission == null)
-                    return Result<AssignmentSubmissionGetByIdCRandA>.Failure("Assignment submission not found.");
+                if (assignmentSubmissions == null || assignmentSubmissions.Count == 0)
+                    return Result<List<AssignmentSubmissionGetByIdCRandA>>.Failure("No assignment submissions found.");
 
-                var assignmentSubmissionDto = _mapper.Map<AssignmentSubmissionGetByIdCRandA>(assignmentSubmission);
+                var assignmentSubmissionDtos = _mapper.Map<List<AssignmentSubmissionGetByIdCRandA>>(assignmentSubmissions);
 
-                return Result<AssignmentSubmissionGetByIdCRandA>.Success(assignmentSubmissionDto);
+                return Result<List<AssignmentSubmissionGetByIdCRandA>>.Success(assignmentSubmissionDtos);
             }
         }
     }

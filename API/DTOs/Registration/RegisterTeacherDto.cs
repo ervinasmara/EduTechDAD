@@ -16,7 +16,8 @@ namespace API.DTOs.Registration
         [Required]
         public string Address { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Phone number is required")]
+        [RegularExpression("^[0-9]{8,13}$", ErrorMessage = "Phone number must be between 8 and 13 digits and contain only numbers.")]
         public string PhoneNumber { get; set; }
 
         [Required]

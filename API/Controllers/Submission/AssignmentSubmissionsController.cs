@@ -7,13 +7,20 @@ namespace API.Controllers.Submissions
 {
     public class AssignmentSubmissionsController : BaseApiController
     {
-        //[HttpGet]
-        //public async Task<IActionResult> GetAssignmentSubmissions(CancellationToken ct)
-        //{
-        //    return HandleResult(await Mediator.Send(new List.Query(), ct));
-        //}
+        [HttpGet]
+        public async Task<IActionResult> GetAssignmentSubmissions(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new ListSubmission.Query(), ct));
+        }
 
-        [Authorize(Policy = "RequireRole2OrRole4")]
+        [Authorize(Policy = "RequireRole2,3,4")]
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetAnnouncement(Guid id, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new DetailsSubmission.Query { Id = id }, ct));
+        }
+
+        [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet("{classRoomId}/{assignmentId}")]
         public async Task<ActionResult> GetAssignmentSubmissionByClassRoomAndAssignment(Guid classRoomId, Guid assignmentId, CancellationToken ct)
         {

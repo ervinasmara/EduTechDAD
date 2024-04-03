@@ -4,6 +4,7 @@ using AutoMapper;
 using Domain.Submission;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.Submission
@@ -48,6 +49,13 @@ namespace Application.Submission
                     if (student == null)
                         return Result<AssignmentSubmissionStatusDto>.Failure($"Student with ID {request.AssignmentSubmissionStatusDto.StudentId} not found.");
 
+                    // Cek apakah sudah ada AssignmentSubmission dengan AssignmentId dan StudentId yang sama
+                    var existingSubmission = await _context.AssignmentSubmissions
+                        .FirstOrDefaultAsync(s => s.AssignmentId == assignment.Id && s.StudentId == request.AssignmentSubmissionStatusDto.StudentId);
+
+                    if (existingSubmission != null)
+                        return Result<AssignmentSubmissionStatusDto>.Failure($"Assignment submission for assignment ID {assignment.Id} and student ID {request.AssignmentSubmissionStatusDto.StudentId} already exists.");
+
                     // Buat entitas AssignmentSubmission dengan status default = 1
                     var assignmentSubmission = new AssignmentSubmission
                     {
@@ -72,5 +80,4 @@ namespace Application.Submission
             }
         }
     }
-
 }

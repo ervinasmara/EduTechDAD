@@ -44,6 +44,7 @@
         public int Gender { get; set; }
         public string Username { get; set; }
         public int Role { get; set; }
+        public Guid ClassRoomId { get; set; }
         public string ClassName { get; set; }
         public string UniqueNumberOfClassRoom { get; set; }
     }
@@ -58,6 +59,7 @@
         public string PhoneNumber { get; set; }
         public string ParentName { get; set; }
         public string Username { get; set; }
+        public Guid ClassRoomId { get; set; }
         public string ClassName { get; set; }
         public int Gender { get; set; }
     }

@@ -33,26 +33,12 @@ namespace API.Controllers.Attendances
             return HandleResult(await Mediator.Send(new Details.Query { Id = id }, ct));
         }
 
-        [HttpGet("byclassroom/{classRoomId}")]
-        public async Task<IActionResult> GetAttendanceByClassRoomId(Guid classRoomId)
+        [HttpGet("byclassroom/{uniqueNumberOfClassRoom}")]
+        public async Task<ActionResult> GetAttendance(string uniqueNumberOfClassRoom, CancellationToken ct)
         {
-            var result = await Mediator.Send(new ListByClassRoomId.Query { ClassRoomId = classRoomId });
-
-            if (result.IsSuccess)
-            {
-                var attendanceDtos = result.Value;
-                if (attendanceDtos != null && attendanceDtos.Any())
-                {
-                    return Ok(attendanceDtos);
-                }
-                else
-                {
-                    return NotFound("No attendance records found for the specified class room.");
-                }
-            }
-
-            return BadRequest(result.Error);
+            return HandleResult(await Mediator.Send(new ListByClassRoomUniqueNumber.Query { UniqueNumberOfClassRoom = uniqueNumberOfClassRoom }, ct));
         }
+
 
         [HttpPost]
         public async Task<IActionResult> CreateAttendanceDto(AttendanceDto announcementDto, CancellationToken ct)

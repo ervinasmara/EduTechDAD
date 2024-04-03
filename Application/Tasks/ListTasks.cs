@@ -35,6 +35,9 @@ namespace Application.Tasks
                     var assignmentDto = _mapper.Map<AssignmentGetDto>(assignment);
                     assignmentDto.CourseName = assignment.Course.CourseName;
 
+                    // Mengisi AssignmentFileData sesuai dengan data yang ada di database
+                    assignmentDto.AssignmentFileData = assignment.FileData;
+
                     // Set AssignmentFileName based on AssignmentName and AssignmentFileData extension
                     if (!string.IsNullOrEmpty(assignment.AssignmentName) && assignment.FileData != null)
                     {
@@ -51,6 +54,7 @@ namespace Application.Tasks
 
                 return Result<List<AssignmentGetDto>>.Success(assignmentDtos);
             }
+
             private string GetFileExtension(byte[] fileData)
             {
                 if (fileData == null || fileData.Length < 4)
