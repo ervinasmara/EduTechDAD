@@ -39,7 +39,7 @@ namespace Application.Learn.Agenda
 
                 var schedules = await _context.Schedules
                     .Where(s => s.ClassRoomId == request.ClassRoomId)
-                    .Include(s => s.Course)
+                    .Include(s => s.Lesson)
                     .ToListAsync(cancellationToken);
 
                 var scheduleDtos = _mapper.Map<List<ScheduleGetDto>>(schedules);

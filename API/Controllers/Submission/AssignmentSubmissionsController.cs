@@ -35,19 +35,28 @@ namespace API.Controllers.Submissions
         }
 
         [Authorize(Policy = "RequireRole2OrRole4")]
-        [HttpPut("teacher/{id}")]
-        public async Task<IActionResult> EditAssignmentSubmissionTeachert(Guid id, AssignmentSubmissionTeacherDto announcementSubmissionTeacherDto, CancellationToken ct)
+        [HttpPut("teacher/{assignmentSubmissionId}")]
+        public async Task<IActionResult> EditAssignmentSubmissionTeachert(Guid assignmentSubmissionId, AssignmentSubmissionTeacherDto announcementSubmissionTeacherDto, CancellationToken ct)
         {
-            var result = await Mediator.Send(new UpdateTeacher.Command { Id = id, AssignmentSubmissionTeacherDto = announcementSubmissionTeacherDto }, ct);
+            var result = await Mediator.Send(new UpdateTeacher.Command { Id = assignmentSubmissionId, AssignmentSubmissionTeacherDto = announcementSubmissionTeacherDto }, ct);
 
             return HandleResult(result);
         }
 
         [Authorize(Policy = "RequireRole3OrRole4")]
-        [HttpPut("student/{id}")]
-        public async Task<IActionResult> EditAssignmentSubmissionStudent(Guid id, AssignmentSubmissionStudentDto announcementSubmissionStudentDto, CancellationToken ct)
+        [HttpPut("student/{assignmentSubmissionId}")]
+        public async Task<IActionResult> EditAssignmentSubmissionStudent(Guid assignmentSubmissionId, AssignmentSubmissionStudentDto announcementSubmissionStudentDto, CancellationToken ct)
         {
-            var result = await Mediator.Send(new UpdateStudent.Command { Id = id, AssignmentSubmissionStudentDto = announcementSubmissionStudentDto }, ct);
+            var result = await Mediator.Send(new UpdateStudent.Command { Id = assignmentSubmissionId, AssignmentSubmissionStudentDto = announcementSubmissionStudentDto }, ct);
+
+            return HandleResult(result);
+        }
+
+        [Authorize(Policy = "RequireRole3OrRole4")]
+        [HttpPut("student/{studentId}/assignment/{assignmentId}")]
+        public async Task<IActionResult> EditAssignmentSubmissionStudent(Guid studentId, Guid assignmentId, AssignmentSubmissionStudentDto announcementSubmissionStudentDto, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new UpdateStudent2Id.Command { StudentId = studentId, AssignmentId = assignmentId, AssignmentSubmissionStudentDto = announcementSubmissionStudentDto }, ct);
 
             return HandleResult(result);
         }

@@ -41,10 +41,10 @@ namespace Application.Learn.Agenda
                 if (schedule == null)
                     return Result<ScheduleDto>.Failure("Schedule not found");
 
-                // Cek apakah Course dengan CourseId yang diberikan ada di database
-                var course = await _context.Courses.FindAsync(request.ScheduleDto.CourseId);
-                if (course == null)
-                    return Result<ScheduleDto>.Failure("Course not found with the provided CourseId");
+                // Cek apakah Lesson dengan LessonId yang diberikan ada di database
+                var lesson = await _context.Lessons.FindAsync(request.ScheduleDto.LessonId);
+                if (lesson == null)
+                    return Result<ScheduleDto>.Failure("Lesson not found with the provided LessonId");
 
                 // Cek apakah ClassRoom dengan ClassRoomId yang diberikan ada di database
                 var classRoom = await _context.ClassRooms.FindAsync(request.ScheduleDto.ClassRoomId);
@@ -54,7 +54,7 @@ namespace Application.Learn.Agenda
                 schedule.Day = request.ScheduleDto.Day;
                 schedule.StartTime = request.ScheduleDto.StartTime;
                 schedule.EndTime = request.ScheduleDto.EndTime;
-                schedule.CourseId = request.ScheduleDto.CourseId;
+                schedule.LessonId = request.ScheduleDto.LessonId;
                 schedule.ClassRoomId = request.ScheduleDto.ClassRoomId;
 
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;

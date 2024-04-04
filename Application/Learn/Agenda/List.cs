@@ -28,7 +28,7 @@ namespace Application.Learn.Agenda
             public async Task<Result<List<ScheduleGetDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var schedules = await _context.Schedules
-                    .Include(s => s.Course)
+                    .Include(s => s.Lesson)
                     .Include(s => s.ClassRoom)
                     .ToListAsync(cancellationToken);
 

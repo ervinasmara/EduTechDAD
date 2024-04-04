@@ -1,5 +1,5 @@
 ﻿using Domain.Class;
-using Domain.Learn.Study;
+using Domain.Learn.Subject;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Learn.Agenda
@@ -11,10 +11,10 @@ namespace Domain.Learn.Agenda
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
 
-        // Kunci asing ke Course (Materi)
-        public Guid CourseId { get; set; }
-        [ForeignKey("CourseId")]
-        public Course Course { get; set; }
+        // Kunci asing ke Lesson (Materi)
+        public Guid LessonId { get; set; }
+        [ForeignKey("LessonId")]
+        public Lesson Lesson { get; set; }
 
         // Kunci asing ke ClassRoom (Kelas)
         public Guid ClassRoomId { get; set; }

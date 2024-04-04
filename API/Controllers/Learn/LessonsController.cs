@@ -5,27 +5,30 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Lessons
 {
-    [Authorize(Policy = "RequireRole1OrRole4")]
     public class LessonsController : BaseApiController
     {
+        [Authorize(Policy = "RequireRole1,2,3,4")]
         [HttpGet]
         public async Task<IActionResult> GetLessons(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
 
+        [Authorize(Policy = "RequireRole1,2,3,4")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetLesson(Guid id, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new Details.Query { Id = id }, ct));
         }
 
+        [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost]
         public async Task<IActionResult> CreateLessonDto(LessonCreateDto lessonDto, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new Create.Command { LessonCreateDto = lessonDto }, ct));
         }
 
+        [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPut("{id}")]
         public async Task<IActionResult> EditLessonDto(Guid id, LessonDto lessonDto, CancellationToken ct)
         {
@@ -34,6 +37,7 @@ namespace API.Controllers.Lessons
             return HandleResult(result);
         }
 
+        [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLesson(Guid id, CancellationToken ct)
         {

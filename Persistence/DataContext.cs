@@ -53,11 +53,11 @@ namespace Persistence
                 .HasForeignKey(s => s.ClassRoomId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // One To Many, 1 Course have many Schedule
+            // One To Many, 1 Lesson have many Schedule
             modelBuilder.Entity<Schedule>()
-                .HasOne(s => s.Course)
+                .HasOne(s => s.Lesson)
                 .WithMany(c => c.Schedules)
-                .HasForeignKey(s => s.CourseId)
+                .HasForeignKey(s => s.LessonId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // One To Many, 1 Assignment have many AssignmentSubmission

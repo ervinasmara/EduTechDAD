@@ -35,10 +35,10 @@ namespace Application.Learn.Agenda
 
             public async Task<Result<ScheduleDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                // Cek apakah Course dengan CourseId yang diberikan ada di database
-                var course = await _context.Courses.FindAsync(request.ScheduleDto.CourseId);
-                if (course == null)
-                    return Result<ScheduleDto>.Failure("Course not found with the provided CourseId");
+                // Cek apakah Lesson dengan LessonId yang diberikan ada di database
+                var lesson = await _context.Lessons.FindAsync(request.ScheduleDto.LessonId);
+                if (lesson == null)
+                    return Result<ScheduleDto>.Failure("Lesson not found with the provided LessonId");
 
                 // Cek apakah ClassRoom dengan ClassRoomId yang diberikan ada di database
                 var classRoom = await _context.ClassRooms.FindAsync(request.ScheduleDto.ClassRoomId);
@@ -50,7 +50,7 @@ namespace Application.Learn.Agenda
                     Day = request.ScheduleDto.Day,
                     StartTime = request.ScheduleDto.StartTime,
                     EndTime = request.ScheduleDto.EndTime,
-                    CourseId = request.ScheduleDto.CourseId,
+                    LessonId = request.ScheduleDto.LessonId,
                     ClassRoomId = request.ScheduleDto.ClassRoomId
                 };
 

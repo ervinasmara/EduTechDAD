@@ -65,14 +65,14 @@ namespace Persistence.Migrations
                     b.Property<Guid>("ClassRoomId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uuid");
-
                     b.Property<int>("Day")
                         .HasColumnType("integer");
 
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("interval");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uuid");
 
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("interval");
@@ -81,7 +81,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("ClassRoomId");
 
-                    b.HasIndex("CourseId");
+                    b.HasIndex("LessonId");
 
                     b.ToTable("Schedules");
                 });
@@ -557,15 +557,15 @@ namespace Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Learn.Study.Course", "Course")
+                    b.HasOne("Domain.Learn.Subject.Lesson", "Lesson")
                         .WithMany("Schedules")
-                        .HasForeignKey("CourseId")
+                        .HasForeignKey("LessonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ClassRoom");
 
-                    b.Navigation("Course");
+                    b.Navigation("Lesson");
                 });
 
             modelBuilder.Entity("Domain.Learn.Study.Course", b =>
@@ -725,13 +725,13 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Learn.Study.Course", b =>
                 {
                     b.Navigation("Assignments");
-
-                    b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("Domain.Learn.Subject.Lesson", b =>
                 {
                     b.Navigation("Courses");
+
+                    b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("Domain.Task.Assignment", b =>

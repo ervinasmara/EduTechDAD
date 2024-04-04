@@ -12,8 +12,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240329154749_UpdateNameUniqueNumber")]
-    partial class UpdateNameUniqueNumber
+    [Migration("20240404063226_FromLessonToSchedule")]
+    partial class FromLessonToSchedule
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,6 +57,36 @@ namespace Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ClassRooms");
+                });
+
+            modelBuilder.Entity("Domain.Learn.Agenda.Schedule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClassRoomId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Day")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("interval");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uuid");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("interval");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassRoomId");
+
+                    b.HasIndex("LessonId");
+
+                    b.ToTable("Schedules");
                 });
 
             modelBuilder.Entity("Domain.Learn.Study.Course", b =>
@@ -126,6 +156,45 @@ namespace Persistence.Migrations
                     b.ToTable("Attendances");
                 });
 
+            modelBuilder.Entity("Domain.Submission.AssignmentSubmission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AssignmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("FileData")
+                        .HasColumnType("bytea");
+
+                    b.Property<float?>("Grade")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("SubmissionTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignmentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("AssignmentSubmissions");
+                });
+
             modelBuilder.Entity("Domain.Task.Assignment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -153,7 +222,7 @@ namespace Persistence.Migrations
                     b.Property<byte[]>("FileData")
                         .HasColumnType("bytea");
 
-                    b.Property<int?>("Status")
+                    b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -310,7 +379,8 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserId");
+                    b.HasIndex("AppUserId")
+                        .IsUnique();
 
                     b.ToTable("SuperAdmins");
                 });
@@ -482,6 +552,25 @@ namespace Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Learn.Agenda.Schedule", b =>
+                {
+                    b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
+                        .WithMany("Schedules")
+                        .HasForeignKey("ClassRoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Learn.Subject.Lesson", "Lesson")
+                        .WithMany("Schedules")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ClassRoom");
+
+                    b.Navigation("Lesson");
+                });
+
             modelBuilder.Entity("Domain.Learn.Study.Course", b =>
                 {
                     b.HasOne("Domain.Learn.Subject.Lesson", "Lesson")
@@ -500,6 +589,25 @@ namespace Persistence.Migrations
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Domain.Submission.AssignmentSubmission", b =>
+                {
+                    b.HasOne("Domain.Task.Assignment", "Assignment")
+                        .WithMany("AssignmentSubmissions")
+                        .HasForeignKey("AssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.User.Student", "Student")
+                        .WithMany("AssignmentSubmissions")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Assignment");
 
                     b.Navigation("Student");
                 });
@@ -544,8 +652,8 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.User.SuperAdmin", b =>
                 {
                     b.HasOne("Domain.User.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("AppUserId");
+                        .WithOne("SuperAdmin")
+                        .HasForeignKey("Domain.User.SuperAdmin", "AppUserId");
 
                     b.Navigation("User");
                 });
@@ -612,6 +720,8 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Class.ClassRoom", b =>
                 {
+                    b.Navigation("Schedules");
+
                     b.Navigation("Students");
                 });
 
@@ -623,6 +733,13 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Learn.Subject.Lesson", b =>
                 {
                     b.Navigation("Courses");
+
+                    b.Navigation("Schedules");
+                });
+
+            modelBuilder.Entity("Domain.Task.Assignment", b =>
+                {
+                    b.Navigation("AssignmentSubmissions");
                 });
 
             modelBuilder.Entity("Domain.User.AppUser", b =>
@@ -631,11 +748,15 @@ namespace Persistence.Migrations
 
                     b.Navigation("Student");
 
+                    b.Navigation("SuperAdmin");
+
                     b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Domain.User.Student", b =>
                 {
+                    b.Navigation("AssignmentSubmissions");
+
                     b.Navigation("Attendances");
                 });
 #pragma warning restore 612, 618

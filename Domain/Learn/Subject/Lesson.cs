@@ -1,4 +1,5 @@
-﻿using Domain.Learn.Study;
+﻿using Domain.Learn.Agenda;
+using Domain.Learn.Study;
 
 namespace Domain.Learn.Subject
 {
@@ -10,5 +11,8 @@ namespace Domain.Learn.Subject
 
         // Properti navigasi ke Course
         public ICollection<Course> Courses { get; set; }
+        
+        // Relasi dengan jadwal
+        public ICollection<Schedule> Schedules { get; set; }
     }
 }

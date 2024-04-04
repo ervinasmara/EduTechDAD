@@ -1,6 +1,4 @@
-﻿using Domain.Learn.Agenda;
-using Domain.Learn.Subject;
-using Domain.Submission;
+﻿using Domain.Learn.Subject;
 using Domain.Task;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -21,8 +19,5 @@ namespace Domain.Learn.Study
 
         // Properti navigasi ke Assignment
         public ICollection<Assignment> Assignments { get; set; }
-
-        // Relasi dengan jadwal
-        public ICollection<Schedule> Schedules { get; set; }
     }
 }
