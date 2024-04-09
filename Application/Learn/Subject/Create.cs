@@ -36,9 +36,15 @@ namespace Application.Learn.Subject
 
             public async Task<Result<LessonCreateDto>> Handle(Command request, CancellationToken cancellationToken)
             {
+                var teacher = await _context.Teachers.FindAsync(request.LessonCreateDto.TeacherId);
+
+                // Periksa apakah teacher dengan TeacherId yang diberikan ada
+                if (teacher == null)
+                    return Result<LessonCreateDto>.Failure("TeacherId not found");
+
                 var lastLesson = await _context.Lessons
-                                                .OrderByDescending(x => x.UniqueNumberOfLesson)
-                                                .FirstOrDefaultAsync(cancellationToken);
+                    .OrderByDescending(x => x.UniqueNumberOfLesson)
+                    .FirstOrDefaultAsync(cancellationToken);
 
                 int newUniqueNumber = 1; // Nilai awal jika tidak ada lesson sebelumnya
 
@@ -52,24 +58,24 @@ namespace Application.Learn.Subject
                 // Buat UniqueNumberOfLesson dengan format 2 digit
                 var uniqueNumber = newUniqueNumber.ToString("00");
 
-                var classRoom = new Lesson
+                var lesson = new Lesson
                 {
                     LessonName = request.LessonCreateDto.LessonName,
                     UniqueNumberOfLesson = uniqueNumber,
+                    TeacherId = request.LessonCreateDto.TeacherId // Set TeacherId berdasarkan DTO
                 };
 
-                _context.Lessons.Add(classRoom);
+                _context.Lessons.Add(lesson);
 
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
                 if (!result)
                     return Result<LessonCreateDto>.Failure("Failed to Create Lesson");
 
-                var classRoomDto = _mapper.Map<LessonCreateDto>(classRoom);
+                var lessonDto = _mapper.Map<LessonCreateDto>(lesson);
 
-                return Result<LessonCreateDto>.Success(classRoomDto);
+                return Result<LessonCreateDto>.Success(lessonDto);
             }
-
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace Application.User.DTOs
+﻿using Application.Learn.Subject;
+using AutoMapper;
+
+namespace Application.User.DTOs
 {
     public class TeacherDto
     {
@@ -13,7 +16,7 @@
         public string Token { get; set; }
     }
 
-    public class TeacherGetDto
+    public class TeacherRegisterDto
     {
         public int Role { get; set; }
         public string Username { get; set; }
@@ -34,6 +37,7 @@
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
         public string Nip { get; set; }
+        public ICollection<LessonGetTeacherDto> LessonTeacher { get; set; }
     }
 
     public class TeacherGetByIdDto

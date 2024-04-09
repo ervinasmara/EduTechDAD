@@ -39,17 +39,10 @@ namespace API.DTOs
         }
 
         [Authorize(Policy = "RequireRole1,2,3,4")]
-        [HttpGet("student/{id}")]
-        public async Task<ActionResult> GetStudentById(Guid id, CancellationToken ct)
+        [HttpGet("studentparam")]
+        public async Task<ActionResult> GetStudentParam([FromQuery] string nis, [FromQuery] string name, [FromQuery] string className, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new DetailsStudent.Query { Id = id }, ct));
-        }
-
-        [Authorize(Policy = "RequireRole1,2,3,4")]
-        [HttpGet("byclassroom/{uniqueNumberOfClassRoom}")]
-        public async Task<ActionResult> GetStudentsByClassRoom(string uniqueNumberOfClassRoom, CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new DetailsStudentByClassRoom.Query { UniqueNumberOfClassRoom = uniqueNumberOfClassRoom }, ct));
+            return HandleResult(await Mediator.Send(new DetailsStudent.Query { Nis = nis, Name = name, ClassName = className }, ct));
         }
 
         [Authorize(Policy = "RequireRole1,2,4")]
@@ -65,6 +58,7 @@ namespace API.DTOs
         {
             return HandleResult(await Mediator.Send(new DetailsTeacher.Query { Id = id }, ct));
         }
+
         // =========================== LOGIN =========================== //
         [AllowAnonymous]
         [HttpPost("login")]
@@ -103,120 +97,6 @@ namespace API.DTOs
             }
             return Unauthorized();
         }
-
-        /*
-        [AllowAnonymous]
-        [HttpPost("login/superAdmin")]
-        public async Task<ActionResult<SuperAdminDto>> LoginSuperAdmin(LoginDto loginDto)
-        {
-            var user = await _userManager.FindByNameAsync(loginDto.Username);
-
-            if (user == null) return Unauthorized();
-
-            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-
-            if (result)
-            {
-                try
-                {
-                    // Buat objek SuperAdminDto menggunakan CreateUserObject
-                    var superAdminDto = await CreateUserObjectSuperAdmin(user);
-
-                    return superAdminDto;
-                }
-                catch (Exception ex)
-                {
-                    // Tangani jika data superAdmin tidak ditemukan
-                    return BadRequest(ex.Message);
-                }
-            }
-            return Unauthorized();
-        }
-
-        [AllowAnonymous]
-        [HttpPost("login/admin")]
-        public async Task<ActionResult<AdminDto>> LoginAdmin(LoginDto loginDto)
-        {
-            var user = await _userManager.FindByNameAsync(loginDto.Username);
-
-            if (user == null) return Unauthorized();
-
-            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-
-            if (result)
-            {
-                try
-                {
-                    // Buat objek AdminDto menggunakan CreateUserObject
-                    var adminDto = await CreateUserObjectAdmin(user);
-
-                    return adminDto;
-                }
-                catch (Exception ex)
-                {
-                    // Tangani jika data admin tidak ditemukan
-                    return BadRequest(ex.Message);
-                }
-            }
-            return Unauthorized();
-        }
-
-        [AllowAnonymous]
-        [HttpPost("login/teacher")]
-        public async Task<ActionResult<TeacherDto>> LoginTeacher(LoginDto loginDto)
-        {
-            var user = await _userManager.FindByNameAsync(loginDto.Username);
-
-            if (user == null) return Unauthorized();
-
-            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-
-            if (result)
-            {
-                try
-                {
-                    // Buat objek TeacherDto menggunakan CreateUserObject
-                    var teacherDto = await CreateUserObjectTeacher(user);
-
-                    return teacherDto;
-                }
-                catch (Exception ex)
-                {
-                    // Tangani jika data teacher tidak ditemukan
-                    return BadRequest(ex.Message);
-                }
-            }
-            return Unauthorized();
-        }
-
-        [AllowAnonymous]
-        [HttpPost("login/student")]
-        public async Task<ActionResult<StudentDto>> LoginStudent(LoginDto loginDto)
-        {
-            var user = await _userManager.FindByNameAsync(loginDto.Username);
-
-            if (user == null) return Unauthorized();
-
-            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-
-            if (result)
-            {
-                try
-                {
-                    // Buat objek StudentDto menggunakan CreateUserObject
-                    var studentDto = await CreateUserObjectStudent(user);
-
-                    return studentDto;
-                }
-                catch (Exception ex)
-                {
-                    // Tangani jika data student tidak ditemukan
-                    return BadRequest(ex.Message);
-                }
-            }
-            return Unauthorized();
-        }
-        */
 
         // =========================== REGISTER =========================== //
         [Authorize(Policy = "RequireRole4")]
@@ -295,7 +175,7 @@ namespace API.DTOs
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("register/teacher")]
-        public async Task<ActionResult<TeacherGetDto>> RegisterTeacher(RegisterTeacherDto teacherDto)
+        public async Task<ActionResult<TeacherRegisterDto>> RegisterTeacher(RegisterTeacherDto teacherDto)
         {
             // Pemeriksaan username supaya berbeda dengan yang lain
             if (await _userManager.Users.AnyAsync(x => x.UserName == teacherDto.Username))
@@ -479,7 +359,6 @@ namespace API.DTOs
                 return StatusCode(500, $"An error occurred while uploading Excel file: {ex.Message}");
             }
         }
-
         private async Task<IActionResult> RegisterStudentExcel(RegisterStudentExcelDto studentDto)
         {
             // Pemeriksaan username supaya berbeda dengan yang lain
@@ -617,6 +496,60 @@ namespace API.DTOs
             return Ok(updatedStudentDto);
         }
 
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPut("edit/teacher/{id}")]
+        public async Task<IActionResult> UpdateTeacher(Guid id, EditTeacherDto teacherEditDto)
+        {
+            // Mencari guru berdasarkan ID
+            var teacher = await _context.Teachers
+                .Include(t => t.Lessons) // Memuat data lesson yang terkait dengan guru
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            // Jika guru tidak ditemukan, kembalikan response 404 Not Found
+            if (teacher == null)
+                return NotFound();
+
+            // Update properti Address dan PhoneNumber
+            teacher.Address = teacherEditDto.Address;
+            teacher.PhoneNumber = teacherEditDto.PhoneNumber;
+
+            // Jika LessonIds berubah, cari Lesson baru berdasarkan ID
+            if (teacherEditDto.LessonIds != null)
+            {
+                // Bersihkan daftar lesson yang dimiliki guru
+                teacher.Lessons.Clear();
+
+                // Tambahkan lesson baru ke dalam daftar guru
+                foreach (var lessonId in teacherEditDto.LessonIds)
+                {
+                    var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.Id == lessonId);
+                    if (lesson != null)
+                    {
+                        teacher.Lessons.Add(lesson);
+                    }
+                    else
+                    {
+                        return BadRequest($"Lesson with ID {lessonId} not found.");
+                    }
+                }
+            }
+
+            // Simpan perubahan ke database
+            _context.Teachers.Update(teacher);
+            await _context.SaveChangesAsync();
+
+            // Kembalikan response 200 OK bersama dengan data guru yang telah diperbarui
+            var updatedTeacherDto = new EditTeacherDto
+            {
+                Address = teacher.Address,
+                PhoneNumber = teacher.PhoneNumber,
+                LessonIds = teacher.Lessons.Select(l => l.Id).ToList()
+            };
+
+            return Ok(updatedTeacherDto);
+        }
+
+
         // =========================== GET USER LOGIN =========================== //
         [Authorize]
         [HttpGet("userinfo")]
@@ -652,72 +585,6 @@ namespace API.DTOs
 
             return userDto;
         }
-
-        /*
-        [Authorize(Policy = "RequireRole4")]
-        [HttpGet("superadmin")]
-        public async Task<ActionResult<SuperAdminGetDto>> GetUserSuperAdmin()
-        {
-            var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
-            var user = await _userManager.FindByNameAsync(username);
-
-            if (user == null)
-            {
-                return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
-            }
-
-            var superAdminDto = await CreateUserObjectSuperAdminGet(user);
-            return superAdminDto;
-        }
-
-        [Authorize(Policy = "RequireRole1")]
-        [HttpGet("admin")]
-        public async Task<ActionResult<AdminGetDto>> GetUserAdmin()
-        {
-            var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
-            var user = await _userManager.FindByNameAsync(username);
-
-            if (user == null)
-            {
-                return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
-            }
-
-            var adminDto = await CreateUserObjectAdminGet(user);
-            return adminDto;
-        }
-
-        [Authorize(Policy = "RequireRole2")]
-        [HttpGet("teacher")]
-        public async Task<ActionResult<TeacherGetDto>> GetUserTeacher()
-        {
-            var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
-            var user = await _userManager.FindByNameAsync(username);
-
-            if (user == null)
-            {
-                return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
-            }
-
-            var teacherDto = await CreateUserObjectTeacherGet(user);
-            return teacherDto;
-        }
-
-        [Authorize(Policy = "RequireRole3")]
-        [HttpGet("student")]
-        public async Task<ActionResult<StudentGetDto>> GetUserStudent()
-        {
-            var username = User.Identity.Name; // Mendapatkan nama pengguna dari token
-            var user = await _userManager.FindByNameAsync(username);
-
-            if (user == null)
-            {
-                return NotFound(); // Jika pengguna tidak ditemukan, kembalikan 404 Not Found
-            }
-
-            var studentDto = await CreateUserObjectStudentGet(user);
-            return studentDto;
-        }
-        */
 
         // =========================== SHORT CODE =========================== //
         private async Task<SuperAdminDto> CreateUserObjectSuperAdmin(AppUser user)
@@ -823,7 +690,7 @@ namespace API.DTOs
             };
         }
 
-        private async Task<TeacherGetDto> CreateUserObjectTeacherGet(AppUser user)
+        private async Task<TeacherRegisterDto> CreateUserObjectTeacherGet(AppUser user)
         {
             // Ambil data teacher terkait dari database
             var teacher = await _context.Teachers.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
@@ -834,7 +701,7 @@ namespace API.DTOs
                 throw new Exception("Teacher data not found");
             }
 
-            return new TeacherGetDto
+            return new TeacherRegisterDto
             {
                 Role = user.Role,
                 Username = user.UserName,

@@ -1,4 +1,5 @@
 ﻿using Application.Core;
+using Application.Learn.Subject;
 using Application.User.DTOs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,12 +9,12 @@ namespace Application.User.Teacher
 {
     public class DetailsTeacher
     {
-        public class Query : IRequest<Result<TeacherGetByIdDto>>
+        public class Query : IRequest<Result<TeacherGetAllDto>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<TeacherGetByIdDto>>
+        public class Handler : IRequestHandler<Query, Result<TeacherGetAllDto>>
         {
             private readonly DataContext _context;
 
@@ -22,29 +23,35 @@ namespace Application.User.Teacher
                 _context = context;
             }
 
-            public async Task<Result<TeacherGetByIdDto>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<TeacherGetAllDto>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var student = await _context.Teachers
-                    .Include(s => s.User)
-                    .FirstOrDefaultAsync(s => s.Id == request.Id);
+                var teacher = await _context.Teachers
+                    .Include(t => t.Lessons) // Memuat data lesson yang terkait dengan guru
+                    .FirstOrDefaultAsync(t => t.Id == request.Id);
 
-                if (student == null)
+                if (teacher == null)
                 {
-                    return Result<TeacherGetByIdDto>.Failure("Teacher not found.");
+                    return Result<TeacherGetAllDto>.Failure("Teacher not found.");
                 }
 
-                var studentDto = new TeacherGetByIdDto
+                var teacherDto = new TeacherGetAllDto
                 {
-                    NameTeacher = student.NameTeacher,
-                    Nip = student.Nip,
-                    BirthDate = student.BirthDate,
-                    BirthPlace = student.BirthPlace,
-                    Address = student.Address,
-                    PhoneNumber = student.PhoneNumber,
-                    Username = student.User?.UserName ?? "No Username",
+                    Id = teacher.Id,
+                    NameTeacher = teacher.NameTeacher,
+                    BirthDate = teacher.BirthDate,
+                    BirthPlace = teacher.BirthPlace,
+                    Address = teacher.Address,
+                    PhoneNumber = teacher.PhoneNumber,
+                    Nip = teacher.Nip,
+                    LessonTeacher = teacher.Lessons.Select(l => new LessonGetTeacherDto
+                    {
+                        Id = l.Id,
+                        LessonName = l.LessonName,
+                        UniqueNumberOfLesson = l.UniqueNumberOfLesson
+                    }).ToList()
                 };
 
-                return Result<TeacherGetByIdDto>.Success(studentDto);
+                return Result<TeacherGetAllDto>.Success(teacherDto);
             }
         }
     }

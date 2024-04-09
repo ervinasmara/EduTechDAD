@@ -8,7 +8,7 @@ namespace Application.Learn.Agenda
         {
             RuleFor(x => x.Day)
                .NotEmpty()
-               .InclusiveBetween(1, 7).WithMessage("Day must be between 1 (Monday) and 7 (Sunday).");
+               .InclusiveBetween(1, 5).WithMessage("Day must be between 1 (Monday) and 5 (Friday).");
 
             RuleFor(x => x.StartTime).NotEmpty();
 

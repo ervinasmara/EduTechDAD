@@ -8,12 +8,14 @@ namespace Application.User.Student
 {
     public class DetailsStudent
     {
-        public class Query : IRequest<Result<StudentGetByIdDto>>
+        public class Query : IRequest<Result<List<StudentGetByIdDto>>>
         {
-            public Guid Id { get; set; }
+            public string Nis { get; set; }
+            public string Name { get; set; }
+            public string ClassName { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<StudentGetByIdDto>>
+        public class Handler : IRequestHandler<Query, Result<List<StudentGetByIdDto>>>
         {
             private readonly DataContext _context;
 
@@ -22,19 +24,40 @@ namespace Application.User.Student
                 _context = context;
             }
 
-            public async Task<Result<StudentGetByIdDto>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<List<StudentGetByIdDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var student = await _context.Students
+                IQueryable<Domain.User.Student> query = _context.Students
                     .Include(s => s.User)
-                    .Include(s => s.ClassRoom)
-                    .FirstOrDefaultAsync(s => s.Id == request.Id);
+                    .Include(s => s.ClassRoom);
 
-                if (student == null)
+                if (!string.IsNullOrEmpty(request.Nis))
                 {
-                    return Result<StudentGetByIdDto>.Failure("Student not found.");
+                    query = query.Where(s => EF.Functions.Like(s.Nis, $"%{request.Nis}%"));
                 }
 
-                var studentDto = new StudentGetByIdDto
+                if (!string.IsNullOrEmpty(request.Name))
+                {
+                    query = query.Where(s => s.NameStudent.ToLower().Contains(request.Name.ToLower()));
+                }
+
+                if (!string.IsNullOrEmpty(request.ClassName))
+                {
+                    query = query.Where(s => s.ClassRoom.ClassName.ToLower().Contains(request.ClassName.ToLower()));
+                }
+
+                if (string.IsNullOrEmpty(request.Nis) && string.IsNullOrEmpty(request.Name) && string.IsNullOrEmpty(request.ClassName))
+                {
+                    return Result<List<StudentGetByIdDto>>.Failure("Please provide search criteria.");
+                }
+
+                var students = await query.ToListAsync();
+
+                if (students.Count == 0)
+                {
+                    return Result<List<StudentGetByIdDto>>.Failure("No students found.");
+                }
+
+                var studentDtos = students.Select(student => new StudentGetByIdDto
                 {
                     NameStudent = student.NameStudent,
                     Nis = student.Nis,
@@ -47,9 +70,9 @@ namespace Application.User.Student
                     ClassRoomId = student.ClassRoom.Id,
                     ClassName = student.ClassRoom?.ClassName ?? "No Class",
                     Gender = student.Gender
-                };
+                }).ToList();
 
-                return Result<StudentGetByIdDto>.Success(studentDto);
+                return Result<List<StudentGetByIdDto>>.Success(studentDtos);
             }
         }
     }

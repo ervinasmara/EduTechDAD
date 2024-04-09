@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Domain.Learn.Subject;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.User
 {
@@ -16,5 +17,8 @@ namespace Domain.User
         public string AppUserId { get; set; }
         [ForeignKey("AppUserId")]
         public AppUser User { get; set; }
+
+        // Properti navigasi ke Lesson
+        public ICollection<Lesson> Lessons { get; set; }
     }
 }

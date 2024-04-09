@@ -18,6 +18,13 @@ namespace Persistence
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Lesson>()
+                .HasOne(l => l.Teacher)  // Satu pelajaran memiliki satu guru
+                .WithMany(t => t.Lessons)  // Satu guru dapat mengajar banyak pelajaran
+                .HasForeignKey(l => l.TeacherId) // Foreign key di Lesson untuk TeacherId
+                .OnDelete(DeleteBehavior.Restrict); // Aturan penghapusan (opsional)
+
+
             // One To Many, 1 ClassRoom have many Student
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.ClassRoom)

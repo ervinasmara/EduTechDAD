@@ -1,4 +1,5 @@
 ﻿using Application.Core;
+using Application.Learn.Subject;
 using Application.User.DTOs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ namespace Application.User.Teacher
     {
         public class Query : IRequest<Result<List<TeacherGetAllDto>>>
         {
-            /* Kita tidak memerlukan parameter tambahan untuk meneruskan ke query*/
+            // Tidak memerlukan parameter tambahan untuk meneruskan ke query
         }
 
         public class Handler : IRequestHandler<Query, Result<List<TeacherGetAllDto>>>
@@ -24,20 +25,27 @@ namespace Application.User.Teacher
 
             public async Task<Result<List<TeacherGetAllDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var students = await _context.Teachers
-                    .Select(s => new TeacherGetAllDto
+                var teachers = await _context.Teachers
+                    .Include(t => t.Lessons) // Memuat data lesson yang terkait dengan setiap guru
+                    .Select(t => new TeacherGetAllDto
                     {
-                        Id = s.Id,
-                        NameTeacher = s.NameTeacher,
-                        BirthDate = s.BirthDate,
-                        BirthPlace = s.BirthPlace,
-                        Address = s.Address,
-                        PhoneNumber = s.PhoneNumber,
-                        Nip = s.Nip,
+                        Id = t.Id,
+                        NameTeacher = t.NameTeacher,
+                        BirthDate = t.BirthDate,
+                        BirthPlace = t.BirthPlace,
+                        Address = t.Address,
+                        PhoneNumber = t.PhoneNumber,
+                        Nip = t.Nip,
+                        LessonTeacher = t.Lessons.Select(l => new LessonGetTeacherDto
+                        {
+                            Id = l.Id,
+                            LessonName = l.LessonName,
+                            UniqueNumberOfLesson = l.UniqueNumberOfLesson
+                        }).ToList()
                     })
                     .ToListAsync(cancellationToken);
 
-                return Result<List<TeacherGetAllDto>>.Success(students);
+                return Result<List<TeacherGetAllDto>>.Success(teachers);
             }
         }
     }
