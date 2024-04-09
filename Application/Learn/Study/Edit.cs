@@ -3,7 +3,6 @@ using Persistence;
 using AutoMapper;
 using FluentValidation;
 using Application.Core;
-using Domain.Learn.Study;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Learn.Study

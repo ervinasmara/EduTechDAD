@@ -1,4 +1,4 @@
-﻿namespace Domain.Learn.Subject
+﻿namespace Application.Learn.Subject
 {
     public class LessonDto
     {

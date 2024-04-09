@@ -1,4 +1,4 @@
-﻿namespace Domain.User.DTOs
+﻿namespace Application.User.DTOs
 {
     public class SuperAdminDto
     {

@@ -1,5 +1,4 @@
-﻿using Domain.Submission;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Application.Submission
 {

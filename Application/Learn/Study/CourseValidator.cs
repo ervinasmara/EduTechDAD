@@ -1,5 +1,4 @@
-﻿using Domain.Learn.Study;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Application.Learn.Study
 {

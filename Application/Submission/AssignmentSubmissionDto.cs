@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Domain.Submission
+namespace Application.Submission
 {
     public class AssignmentSubmissionGetDto
     {
@@ -29,8 +29,8 @@ namespace Domain.Submission
 
     public class AssignmentSubmissionStudentDto
     {
-        public IFormFile? FileData { get; set; }
-        public string? Link { get; set; }
+        public IFormFile FileData { get; set; }
+        public string Link { get; set; }
     }
 
     public class AssignmentSubmissionTeacherDto

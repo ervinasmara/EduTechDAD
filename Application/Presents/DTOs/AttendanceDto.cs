@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Domain.Present
+namespace Application.Presents.DTOs
 {
     public class AttendanceDto
     {

@@ -1,4 +1,12 @@
-﻿using AutoMapper;
+﻿using Application.Announcements;
+using Application.ClassRooms;
+using Application.Learn.Agenda;
+using Application.Learn.Study;
+using Application.Learn.Subject;
+using Application.Presents.DTOs;
+using Application.Submission;
+using Application.Tasks;
+using AutoMapper;
 using Domain.Announcement;
 using Domain.Class;
 using Domain.Learn.Agenda;

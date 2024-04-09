@@ -2,7 +2,6 @@
 using API.DTOs.Registration;
 using API.Services;
 using Domain.User;
-using Domain.User.DTOs;
 using API.DTOs.Edit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +11,7 @@ using Persistence;
 using Application.User.Student;
 using Application.User.Teacher;
 using System.Text.RegularExpressions;
+using Application.User.DTOs;
 
 namespace API.DTOs
 {
@@ -422,130 +422,6 @@ namespace API.DTOs
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("seedexcel")]
-        public async Task<IActionResult> UploadExcel3(IFormFile file)
-        {
-            if (file == null || file.Length <= 0)
-            {
-                return BadRequest("Invalid file");
-            }
-
-            try
-            {
-                using (var stream = new MemoryStream())
-                {
-                    await file.CopyToAsync(stream);
-                    stream.Position = 0;
-
-                    // Baca data dari file Excel dan simpan ke database
-                    using (var package = new OfficeOpenXml.ExcelPackage(stream))
-                    {
-                        var worksheet = package.Workbook.Worksheets[0]; // Misalnya, data berada di worksheet pertama
-                        var rowCount = worksheet.Dimension.Rows;
-
-                        for (int row = 2; row <= rowCount; row++) // Mulai dari baris kedua, karena baris pertama mungkin berisi header
-                        {
-                            var studentDto = new RegisterStudentExcelDto
-                            {
-                                NameStudent = worksheet.Cells[row, 1].Value.ToString(),
-                                BirthDate = DateOnly.Parse(worksheet.Cells[row, 2].Value.ToString()),
-                                BirthPlace = worksheet.Cells[row, 3].Value.ToString(),
-                                Address = worksheet.Cells[row, 4].Value.ToString(),
-                                PhoneNumber = worksheet.Cells[row, 5].Value.ToString(),
-                                ParentName = worksheet.Cells[row, 7].Value.ToString(),
-                                Gender = Convert.ToInt32(worksheet.Cells[row, 8].Value.ToString()),
-                                UniqueNumberOfClassRoom = worksheet.Cells[row, 9].Value.ToString()
-                            };
-
-                            // Membuat NIS baru
-                            var lastNis = await _context.Students.MaxAsync(s => s.Nis);
-                            int newNisNumber = 1;
-                            if (!string.IsNullOrEmpty(lastNis))
-                            {
-                                newNisNumber = int.Parse(lastNis) + 1;
-                            }
-                            var newNis = newNisNumber.ToString("00000");
-                            studentDto.Nis = newNis;
-
-                            // Membuat username sama dengan NIS
-                            var username = newNis;
-
-                            // Membuat password berdasarkan NIS yang baru di-generate
-                            var password = $"{newNis}Edu#";
-
-                            // Simpan data student dari file Excel
-                            var result = await RegisterStudentExcel(studentDto, username, password);
-
-                            if (result is BadRequestObjectResult badRequest)
-                            {
-                                return badRequest;
-                            }
-                        }
-                    }
-                }
-
-                return Ok("Data from Excel uploaded and saved successfully");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"An error occurred while uploading Excel file: {ex.Message}");
-            }
-        }
-
-        private async Task<IActionResult> RegisterStudentExcel(RegisterStudentExcelDto studentDto, string username, string password)
-        {
-            if (studentDto.BirthDate == DateOnly.MinValue)
-            {
-                return BadRequest("Date of birth required");
-            }
-
-            // Memeriksa keunikan Nis
-            if (await _context.Students.AnyAsync(s => s.Nis == studentDto.Nis))
-            {
-                return BadRequest($"Nis {studentDto.Nis} already in use");
-            }
-
-            var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == studentDto.UniqueNumberOfClassRoom);
-            if (selectedClass == null)
-            {
-                return BadRequest("Selected UniqueNumberOfClass not found");
-            }
-
-            var user = new AppUser
-            {
-                UserName = username,
-                Role = 3 // Tentukan peran default atau sesuaikan dengan kebutuhan Anda
-            };
-
-            var student = new Student
-            {
-                NameStudent = studentDto.NameStudent,
-                BirthDate = studentDto.BirthDate,
-                BirthPlace = studentDto.BirthPlace,
-                Address = studentDto.Address,
-                PhoneNumber = studentDto.PhoneNumber,
-                Nis = studentDto.Nis,
-                ParentName = studentDto.ParentName,
-                Gender = studentDto.Gender,
-                AppUserId = user.Id,
-                ClassRoomId = selectedClass.Id
-            };
-
-            var result = await _userManager.CreateAsync(user, password);
-
-            if (result.Succeeded)
-            {
-                // Simpan student ke dalam konteks database Anda
-                _context.Students.Add(student);
-                await _context.SaveChangesAsync();
-
-                return Ok("Student registered successfully");
-            }
-
-            return BadRequest(result.Errors);
-        }
-
-        [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpPost("seedexcel4")]
         public async Task<IActionResult> UploadExcel4(IFormFile file)
         {
             if (file == null || file.Length <= 0)
@@ -586,7 +462,7 @@ namespace API.DTOs
 
 
                             // Simpan data student dari file Excel
-                            var result = await RegisterStudentExcel4(studentDto);
+                            var result = await RegisterStudentExcel(studentDto);
 
                             if (result is BadRequestObjectResult badRequest)
                             {
@@ -604,7 +480,7 @@ namespace API.DTOs
             }
         }
 
-        private async Task<IActionResult> RegisterStudentExcel4(RegisterStudentExcelDto studentDto)
+        private async Task<IActionResult> RegisterStudentExcel(RegisterStudentExcelDto studentDto)
         {
             // Pemeriksaan username supaya berbeda dengan yang lain
             if (await _userManager.Users.AnyAsync(x => x.UserName == studentDto.Username))

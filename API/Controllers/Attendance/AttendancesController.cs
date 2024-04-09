@@ -1,5 +1,5 @@
 ﻿using Application.Presents;
-using Domain.Present;
+using Application.Presents.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

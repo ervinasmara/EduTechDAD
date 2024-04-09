@@ -1,5 +1,4 @@
 ﻿using Application.Learn.Agenda;
-using Domain.Learn.Agenda;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +7,7 @@ namespace API.Controllers.Schedules
 
     public class SchedulesController : BaseApiController
     {
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1,3,4")]
         [HttpGet]
         public async Task<IActionResult> GetSchedules(CancellationToken ct)
         {
@@ -37,7 +36,7 @@ namespace API.Controllers.Schedules
             return HandleResult(await Mediator.Send(new Create.Command { ScheduleDto = scheduleDto }, ct));
         }
 
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1,3,4")]
         [HttpPut("{id}")]
         public async Task<IActionResult> EditScheduleDto(Guid id, ScheduleDto scheduleDto, CancellationToken ct)
         {

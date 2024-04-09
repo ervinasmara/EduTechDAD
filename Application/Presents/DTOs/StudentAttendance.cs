@@ -1,6 +1,7 @@
-﻿using Domain.User;
+﻿using Domain.Present;
+using Domain.User;
 
-namespace Domain.Present
+namespace Application.Presents.DTOs
 {
     public class StudentAttendance
     {

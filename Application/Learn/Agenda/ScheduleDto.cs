@@ -1,4 +1,4 @@
-﻿namespace Domain.Learn.Agenda
+﻿namespace Application.Learn.Agenda
 {
     public class ScheduleDto
     {

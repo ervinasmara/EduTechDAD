@@ -1,6 +1,5 @@
 ﻿using Application.Core;
 using AutoMapper;
-using Domain.Task;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;

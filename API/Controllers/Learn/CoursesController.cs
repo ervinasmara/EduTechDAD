@@ -1,5 +1,4 @@
 ﻿using Application.Learn.Study;
-using Domain.Learn.Study;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -3,7 +3,6 @@ using Persistence;
 using AutoMapper;
 using FluentValidation;
 using Application.Core;
-using Domain.Learn.Subject;
 using Domain.Class;
 
 namespace Application.Learn.Subject

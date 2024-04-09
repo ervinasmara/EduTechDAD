@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Domain.Task
+namespace Application.Tasks
 {
     public class AssignmentDto
     {
@@ -8,8 +8,8 @@ namespace Domain.Task
         public DateOnly AssignmentDate { get; set; }
         public DateOnly AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }
-        public IFormFile? AssignmentFileData { get; set; }
-        public string? AssignmentLink { get; set; }
+        public IFormFile AssignmentFileData { get; set; }
+        public string AssignmentLink { get; set; }
         public Guid CourseId { get; set; }
     }
 

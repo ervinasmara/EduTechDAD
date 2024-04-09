@@ -1,5 +1,4 @@
-﻿using Domain.Announcement;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Application.Announcements
 {

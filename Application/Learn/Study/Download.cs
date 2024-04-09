@@ -1,5 +1,5 @@
 ﻿using Application.Core;
-using Domain.Task;
+using Application.Tasks;
 using MediatR;
 using Persistence;
 

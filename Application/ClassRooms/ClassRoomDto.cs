@@ -1,4 +1,4 @@
-﻿namespace Domain.Class
+﻿namespace Application.ClassRooms
 {
     public class ClassRoomDto
     {

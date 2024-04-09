@@ -1,6 +1,5 @@
 ﻿using Application.Core;
 using AutoMapper;
-using Domain.Learn.Agenda;
 using FluentValidation;
 using MediatR;
 using Persistence;

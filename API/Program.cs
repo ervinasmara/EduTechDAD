@@ -55,6 +55,13 @@ builder.Services.AddAuthorization(options =>
         context.User.HasClaim(ClaimTypes.Role, "2") ||
         context.User.HasClaim(ClaimTypes.Role, "4")));
 
+    // Penggabungan role 1, 3, & 4
+    options.AddPolicy("RequireRole1,3,4", policy =>
+    policy.RequireAssertion(context =>
+        context.User.HasClaim(ClaimTypes.Role, "1") ||
+        context.User.HasClaim(ClaimTypes.Role, "3") ||
+        context.User.HasClaim(ClaimTypes.Role, "4")));
+
     // Penggabungan role 2, 3, & 4
     options.AddPolicy("RequireRole2,3,4", policy =>
     policy.RequireAssertion(context =>

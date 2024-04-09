@@ -1,4 +1,4 @@
-﻿using Domain.Present;
+﻿using Application.Presents.DTOs;
 using FluentValidation;
 
 namespace Application.Presents

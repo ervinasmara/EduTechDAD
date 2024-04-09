@@ -3,7 +3,7 @@ using Persistence;
 using AutoMapper;
 using FluentValidation;
 using Application.Core;
-using Domain.Present;
+using Application.Presents.DTOs;
 
 namespace Application.Presents
 {

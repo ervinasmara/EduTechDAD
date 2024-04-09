@@ -1,5 +1,4 @@
-﻿using Domain.Task;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Application.Tasks
 {

@@ -1,5 +1,4 @@
 ﻿using Application.Submission;
-using Domain.Submission;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

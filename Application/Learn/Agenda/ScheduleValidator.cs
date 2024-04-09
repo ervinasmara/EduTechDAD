@@ -1,5 +1,4 @@
-﻿using Domain.Learn.Agenda;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Application.Learn.Agenda
 {

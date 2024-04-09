@@ -1,4 +1,4 @@
-﻿namespace Domain.Announcement
+﻿namespace Application.Announcements
 {
     public class AnnouncementDto
     {

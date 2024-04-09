@@ -1,6 +1,5 @@
 ﻿using Application.Core;
 using AutoMapper;
-using Domain.Submission;
 using FluentValidation;
 using MediatR;
 using Persistence;

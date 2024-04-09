@@ -3,7 +3,6 @@ using Persistence;
 using FluentValidation;
 using Application.Core;
 using Microsoft.EntityFrameworkCore;
-using Domain.Task;
 using AutoMapper;
 
 namespace Application.Tasks
