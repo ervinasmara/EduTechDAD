@@ -47,7 +47,7 @@ namespace Application.Announcements
 
                 if (!result) return Result<AnnouncementDto>.Failure("Failed to create Announcement");
 
-                // Buat DTO dari announcement yang telah dibuat
+                // Membuat DTO dari announcement yang telah dibuat
                 var announcementDto = _mapper.Map<AnnouncementDto>(announcement);
 
                 return Result<AnnouncementDto>.Success(announcementDto);

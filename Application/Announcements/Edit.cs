@@ -52,7 +52,7 @@ namespace Application.Announcements
                     return Result<AnnouncementDto>.Failure("Failed to edit Announcement");
                 }
 
-                // Buat instance AnnouncementDto yang mewakili hasil edit
+                // Membuat instance AnnouncementDto yang mewakili hasil edit
                 var editedAnnouncementDto = _mapper.Map<AnnouncementDto>(announcement);
 
                 return Result<AnnouncementDto>.Success(editedAnnouncementDto);
