@@ -14,7 +14,6 @@ namespace API.Controllers.Attendances
             return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
 
-        [Authorize(Policy = "RequireRole1,2,3,4")]
         [HttpGet("attendanceparam")]
         public async Task<ActionResult> GetAttendanceParam([FromQuery] int? year, [FromQuery] int? month, [FromQuery] int? day, [FromQuery] string nameStudent, [FromQuery] string className, CancellationToken ct)
         {
