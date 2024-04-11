@@ -5,6 +5,7 @@ using Persistence;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.OpenApi.Models;
+using Application.InfoRecaps.StatusUpdateAfter1Day;
 
 namespace API.Extensions
 {
@@ -65,6 +66,7 @@ namespace API.Extensions
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddFluentValidationAutoValidation();
             services.AddValidatorsFromAssemblyContaining<Create>();
+            services.AddHostedService<StatusUpdateService>();
 
             return services;
         }

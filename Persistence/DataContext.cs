@@ -9,6 +9,7 @@ using Domain.Learn.Study;
 using Domain.Task;
 using Domain.Learn.Agenda;
 using Domain.Submission;
+using Domain.InfoRecaps;
 
 namespace Persistence
 {
@@ -99,5 +100,6 @@ namespace Persistence
         public DbSet<Assignment> Assignments { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
+        public DbSet<InfoRecap> InfoRecaps { get; set; }
     }
 }

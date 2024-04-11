@@ -111,6 +111,7 @@ try
 
     await SeedAnnouncement.SeedData(context);
     await SeedClassRoom.SeedData(context);
+    await SeedInfoRecap.SeedData(context);
     //await SeedLesson.SeedData(context);
     //await SeedUser.SeedData(context, userManager);
 }

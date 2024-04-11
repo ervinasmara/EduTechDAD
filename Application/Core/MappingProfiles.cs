@@ -1,5 +1,6 @@
 ﻿using Application.Announcements;
 using Application.ClassRooms;
+using Application.InfoRecaps;
 using Application.Learn.Agenda;
 using Application.Learn.Study;
 using Application.Learn.Subject;
@@ -9,6 +10,7 @@ using Application.Tasks;
 using AutoMapper;
 using Domain.Announcement;
 using Domain.Class;
+using Domain.InfoRecaps;
 using Domain.Learn.Agenda;
 using Domain.Learn.Study;
 using Domain.Learn.Subject;
@@ -38,6 +40,9 @@ namespace Application.Core
             CreateMap<Schedule, ScheduleDto>();
             CreateMap<ScheduleDto, Schedule>();
             CreateMap<Schedule, ScheduleGetDto>();
+            CreateMap<InfoRecap, InfoRecapDto>();
+
+
             CreateMap<AssignmentSubmission, AssignmentSubmissionStatusDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionStudentDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionTeacherDto>();
