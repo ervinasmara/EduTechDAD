@@ -46,6 +46,7 @@ namespace Application.User.Student
                     Username = student.User?.UserName ?? "No Username",
                     ClassRoomId = student.ClassRoom.Id,
                     ClassName = student.ClassRoom?.ClassName ?? "No Class",
+                    UniqueNumberOfClassRoom = student.ClassRoom?.UniqueNumberOfClassRoom,
                     Gender = student.Gender
                 };
 

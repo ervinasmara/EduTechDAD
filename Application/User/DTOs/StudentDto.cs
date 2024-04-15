@@ -61,6 +61,7 @@
         public string Username { get; set; }
         public Guid ClassRoomId { get; set; }
         public string ClassName { get; set; }
+        public string UniqueNumberOfClassRoom { get; set; }
         public int Gender { get; set; }
     }
 }
