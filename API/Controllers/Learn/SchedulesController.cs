@@ -1,4 +1,4 @@
-﻿using Application.Learn.Agenda;
+﻿using Application.Learn.Schedules;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

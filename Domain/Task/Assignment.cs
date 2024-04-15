@@ -1,4 +1,4 @@
-﻿using Domain.Learn.Study;
+﻿using Domain.Learn.Courses;
 using Domain.Submission;
 using System.ComponentModel.DataAnnotations.Schema;
 

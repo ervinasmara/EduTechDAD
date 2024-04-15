@@ -1,4 +1,4 @@
-﻿using Application.Learn.Subject;
+﻿using Application.Learn.Lessons;
 using AutoMapper;
 
 namespace Application.User.DTOs
@@ -49,5 +49,11 @@ namespace Application.User.DTOs
         public string PhoneNumber { get; set; }
         public string Nip { get; set; }
         public string Username { get; set; }
+    }
+
+    public class TeacherGetLessonDto
+    {
+        public Guid TeacherId { get; set; }
+        public string NameTeacher { get; set; }
     }
 }

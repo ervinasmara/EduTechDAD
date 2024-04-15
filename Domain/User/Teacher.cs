@@ -1,4 +1,4 @@
-﻿using Domain.Learn.Subject;
+﻿using Domain.Learn.Lessons;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.User

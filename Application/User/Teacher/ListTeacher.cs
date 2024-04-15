@@ -1,5 +1,5 @@
 ﻿using Application.Core;
-using Application.Learn.Subject;
+using Application.Learn.Lessons;
 using Application.User.DTOs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

@@ -59,7 +59,7 @@ namespace Persistence.Migrations
                     b.ToTable("ClassRooms");
                 });
 
-            modelBuilder.Entity("Domain.Learn.Agenda.Schedule", b =>
+            modelBuilder.Entity("Domain.Learn.Schedules.Schedule", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -89,7 +89,7 @@ namespace Persistence.Migrations
                     b.ToTable("Schedules");
                 });
 
-            modelBuilder.Entity("Domain.Learn.Study.Course", b =>
+            modelBuilder.Entity("Domain.Learn.Courses.Course", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -117,7 +117,7 @@ namespace Persistence.Migrations
                     b.ToTable("Courses");
                 });
 
-            modelBuilder.Entity("Domain.Learn.Subject.Lesson", b =>
+            modelBuilder.Entity("Domain.Learn.Lessons.Lesson", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -139,7 +139,7 @@ namespace Persistence.Migrations
                     b.ToTable("Lessons");
                 });
 
-            modelBuilder.Entity("Domain.Present.Attendance", b =>
+            modelBuilder.Entity("Domain.Attendances.Attendance", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -557,7 +557,7 @@ namespace Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Learn.Agenda.Schedule", b =>
+            modelBuilder.Entity("Domain.Learn.Schedules.Schedule", b =>
                 {
                     b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
                         .WithMany("Schedules")
@@ -565,7 +565,7 @@ namespace Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Learn.Subject.Lesson", "Lesson")
+                    b.HasOne("Domain.Learn.Lessons.Lesson", "Lesson")
                         .WithMany("Schedules")
                         .HasForeignKey("LessonId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -576,9 +576,9 @@ namespace Persistence.Migrations
                     b.Navigation("Lesson");
                 });
 
-            modelBuilder.Entity("Domain.Learn.Study.Course", b =>
+            modelBuilder.Entity("Domain.Learn.Courses.Course", b =>
                 {
-                    b.HasOne("Domain.Learn.Subject.Lesson", "Lesson")
+                    b.HasOne("Domain.Learn.Lessons.Lesson", "Lesson")
                         .WithMany("Courses")
                         .HasForeignKey("LessonId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -587,7 +587,7 @@ namespace Persistence.Migrations
                     b.Navigation("Lesson");
                 });
 
-            modelBuilder.Entity("Domain.Learn.Subject.Lesson", b =>
+            modelBuilder.Entity("Domain.Learn.Lessons.Lesson", b =>
                 {
                     b.HasOne("Domain.User.Teacher", "Teacher")
                         .WithMany("Lessons")
@@ -598,7 +598,7 @@ namespace Persistence.Migrations
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("Domain.Present.Attendance", b =>
+            modelBuilder.Entity("Domain.Attendances.Attendance", b =>
                 {
                     b.HasOne("Domain.User.Student", "Student")
                         .WithMany("Attendances")
@@ -630,7 +630,7 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Task.Assignment", b =>
                 {
-                    b.HasOne("Domain.Learn.Study.Course", "Course")
+                    b.HasOne("Domain.Learn.Courses.Course", "Course")
                         .WithMany("Assignments")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -741,12 +741,12 @@ namespace Persistence.Migrations
                     b.Navigation("Students");
                 });
 
-            modelBuilder.Entity("Domain.Learn.Study.Course", b =>
+            modelBuilder.Entity("Domain.Learn.Courses.Course", b =>
                 {
                     b.Navigation("Assignments");
                 });
 
-            modelBuilder.Entity("Domain.Learn.Subject.Lesson", b =>
+            modelBuilder.Entity("Domain.Learn.Lessons.Lesson", b =>
                 {
                     b.Navigation("Courses");
 

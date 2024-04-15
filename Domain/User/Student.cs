@@ -1,5 +1,5 @@
 ﻿using Domain.Class;
-using Domain.Present;
+using Domain.Attendances;
 using Domain.Submission;
 using System.ComponentModel.DataAnnotations.Schema;
 

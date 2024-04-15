@@ -3,11 +3,11 @@ using Domain.Announcement;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Domain.Class;
-using Domain.Present;
-using Domain.Learn.Subject;
-using Domain.Learn.Study;
+using Domain.Attendances;
+using Domain.Learn.Lessons;
+using Domain.Learn.Courses;
 using Domain.Task;
-using Domain.Learn.Agenda;
+using Domain.Learn.Schedules;
 using Domain.Submission;
 using Domain.InfoRecaps;
 

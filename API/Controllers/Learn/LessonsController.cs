@@ -1,4 +1,4 @@
-﻿using Application.Learn.Subject;
+﻿using Application.Learn.Lessons;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

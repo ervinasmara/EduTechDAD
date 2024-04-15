@@ -474,30 +474,12 @@ namespace API.DTOs
             // Dapatkan AppUser terkait dengan siswa
             var user = await _userManager.FindByIdAsync(student.AppUserId.ToString());
 
-            // Update password jika diperlukan
-            if (!string.IsNullOrWhiteSpace(studentEditDto.Password))
-            {
-                // Langsung set password baru tanpa token
-                var setPasswordResult = await _userManager.RemovePasswordAsync(user);
-                if (!setPasswordResult.Succeeded)
-                {
-                    return BadRequest(setPasswordResult.Errors);
-                }
-
-                setPasswordResult = await _userManager.AddPasswordAsync(user, studentEditDto.Password);
-                if (!setPasswordResult.Succeeded)
-                {
-                    return BadRequest(setPasswordResult.Errors);
-                }
-            }
-
             // Kembalikan response 200 OK bersama dengan data siswa yang telah diperbarui
             var updatedStudentDto = new EditStudentDto
             {
                 Address = student.Address,
                 PhoneNumber = student.PhoneNumber,
                 UniqueNumberOfClassRoom = student.ClassRoom?.UniqueNumberOfClassRoom ?? string.Empty,
-                Password = string.Empty // Tidak ada akses langsung ke Password dari AppUser
             };
 
             return Ok(updatedStudentDto);

@@ -5,6 +5,5 @@
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
         public string UniqueNumberOfClassRoom { get; set; }
-        public string Password { get; set; }
     }
 }

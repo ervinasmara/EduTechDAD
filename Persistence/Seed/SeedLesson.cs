@@ -1,4 +1,4 @@
-﻿using Domain.Learn.Subject;
+﻿using Domain.Learn.Lessons;
 
 namespace Persistence.Seed
 {

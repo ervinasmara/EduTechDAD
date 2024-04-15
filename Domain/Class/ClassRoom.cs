@@ -1,4 +1,4 @@
-﻿using Domain.Learn.Agenda;
+﻿using Domain.Learn.Schedules;
 using Domain.User;
 
 namespace Domain.Class
