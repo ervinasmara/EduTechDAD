@@ -27,13 +27,15 @@ namespace Application.Learn.Courses
             public async Task<Result<CourseGetDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var course = await _context.Courses
-                                            .Include(c => c.Lesson)
-                                            .FirstOrDefaultAsync(c => c.Id == request.Id);
+                    .Include(c => c.Lesson)
+                    .Include(c => c.CourseClassRooms)
+                    .ThenInclude(ccr => ccr.ClassRoom)
+                    .FirstOrDefaultAsync(c => c.Id == request.Id);
 
                 if (course == null)
                     return Result<CourseGetDto>.Failure("Course not found.");
 
-                var courseDto = _mapper.Map<CourseGetDto>(course); // Memetakan Course ke CourseGetDto
+                var courseDto = _mapper.Map<CourseGetDto>(course);
 
                 // Set FileName based on CourseName and FileData extension
                 if (!string.IsNullOrEmpty(course.CourseName) && course.FileData != null)
@@ -42,8 +44,7 @@ namespace Application.Learn.Courses
                 }
                 else
                 {
-                    // Handle null values appropriately
-                    courseDto.FileName = "UnknownFileName";
+                    courseDto.FileName = "No File";
                 }
 
                 // Set UniqueNumberOfLesson from Lesson entity
@@ -53,13 +54,14 @@ namespace Application.Learn.Courses
                 }
                 else
                 {
-                    // Handle null values appropriately
                     courseDto.UniqueNumberOfLesson = "UnknownUniqueNumberOfLesson";
                 }
 
+                // Get UniqueNumberOfClassRooms from CourseClassRooms
+                courseDto.UniqueNumberOfClassRooms = course.CourseClassRooms.Select(ccr => ccr.ClassRoom.UniqueNumberOfClassRoom).ToList();
+
                 return Result<CourseGetDto>.Success(courseDto);
             }
-
 
             private string GetFileExtension(byte[] fileData)
             {

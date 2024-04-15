@@ -4,6 +4,7 @@ using AutoMapper;
 using FluentValidation;
 using Application.Core;
 using Microsoft.EntityFrameworkCore;
+using Domain.Course_and_Task;
 
 namespace Application.Learn.Courses
 {
@@ -36,7 +37,9 @@ namespace Application.Learn.Courses
 
             public async Task<Result<CourseDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var course = await _context.Courses.FindAsync(request.Id);
+                var course = await _context.Courses
+                    .Include(c => c.CourseClassRooms)
+                    .FirstOrDefaultAsync(c => c.Id == request.Id);
 
                 // Periksa apakah course ditemukan
                 if (course == null)
@@ -71,6 +74,26 @@ namespace Application.Learn.Courses
                 // Memperbarui UniqueNumberOfLesson dengan nilai dari Lesson yang sesuai
                 course.Lesson = lesson;
 
+                // Memperbarui entri di CourseClassRoom
+                course.CourseClassRooms.Clear(); // Hapus semua entri yang ada terlebih dahulu
+
+                foreach (var uniqueNumberOfClassRoom in request.CourseDto.UniqueNumberOfClassRooms)
+                {
+                    // Temukan ClassRoom yang sesuai berdasarkan UniqueNumberOfClassRoom
+                    var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(x => x.UniqueNumberOfClassRoom == uniqueNumberOfClassRoom);
+                    if (classRoom == null)
+                    {
+                        return Result<CourseDto>.Failure($"ClassRoom with UniqueNumberOfClassRoom {uniqueNumberOfClassRoom} not found");
+                    }
+
+                    // Buat entri baru di CourseClassRoom
+                    course.CourseClassRooms.Add(new CourseClassRoom
+                    {
+                        CourseId = course.Id,
+                        ClassRoomId = classRoom.Id
+                    });
+                }
+
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
                 if (!result)
@@ -81,6 +104,7 @@ namespace Application.Learn.Courses
                 // Buat instance CourseDto yang mewakili hasil edit
                 var editedCourseDto = _mapper.Map<CourseDto>(course);
                 editedCourseDto.UniqueNumberOfLesson = request.CourseDto.UniqueNumberOfLesson;
+                editedCourseDto.UniqueNumberOfClassRooms = request.CourseDto.UniqueNumberOfClassRooms;
 
                 return Result<CourseDto>.Success(editedCourseDto);
             }

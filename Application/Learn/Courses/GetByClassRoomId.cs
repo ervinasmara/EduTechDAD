@@ -6,11 +6,11 @@ using Persistence;
 
 namespace Application.Learn.Courses
 {
-    public class List
+    public class GetByClassRoomId
     {
         public class Query : IRequest<Result<List<CourseGetDto>>>
         {
-            // Tidak memerlukan parameter tambahan untuk meneruskan ke query
+            public Guid ClassRoomId { get; set; }
         }
 
         public class Handler : IRequestHandler<Query, Result<List<CourseGetDto>>>
@@ -28,8 +28,9 @@ namespace Application.Learn.Courses
             {
                 var courses = await _context.Courses
                     .Include(c => c.Lesson)
-                    .Include(c => c.CourseClassRooms) // Include CourseClassRooms
-                    .ThenInclude(ccr => ccr.ClassRoom) // Include ClassRoom for each CourseClassRoom
+                    .Include(c => c.CourseClassRooms)
+                    .ThenInclude(ccr => ccr.ClassRoom)
+                    .Where(c => c.CourseClassRooms.Any(ccr => ccr.ClassRoomId == request.ClassRoomId))
                     .ToListAsync(cancellationToken);
 
                 var courseDtos = new List<CourseGetDto>();
@@ -37,7 +38,8 @@ namespace Application.Learn.Courses
                 foreach (var course in courses)
                 {
                     var courseDto = _mapper.Map<CourseGetDto>(course);
-                    courseDto.UniqueNumberOfLesson = course.Lesson.UniqueNumberOfLesson; // Set UniqueNumberOfLesson from Lesson
+                    courseDto.UniqueNumberOfLesson = course.Lesson.UniqueNumberOfLesson;
+
                     if (course.FileData != null)
                     {
                         courseDto.FileName = $"{course.CourseName}.{GetFileExtension(course.FileData)}";
@@ -47,9 +49,7 @@ namespace Application.Learn.Courses
                         courseDto.FileName = "No File";
                     }
 
-                    // Get UniqueNumberOfClassRooms from CourseClassRooms
                     courseDto.UniqueNumberOfClassRooms = course.CourseClassRooms.Select(ccr => ccr.ClassRoom.UniqueNumberOfClassRoom).ToList();
-
                     courseDtos.Add(courseDto);
                 }
 

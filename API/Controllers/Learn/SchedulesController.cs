@@ -28,14 +28,14 @@ namespace API.Controllers.Schedules
             return HandleResult(await Mediator.Send(new Create.Command { ScheduleDto = scheduleDto }, ct));
         }
 
-        [Authorize(Policy = "RequireRole1,3,4")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> EditScheduleDto(Guid id, ScheduleDto scheduleDto, CancellationToken ct)
-        {
-            var result = await Mediator.Send(new Edit.Command { Id = id, ScheduleDto = scheduleDto }, ct);
+        //[Authorize(Policy = "RequireRole1,3,4")]
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> EditScheduleDto(Guid id, ScheduleDto scheduleDto, CancellationToken ct)
+        //{
+        //    var result = await Mediator.Send(new Edit.Command { Id = id, ScheduleDto = scheduleDto }, ct);
 
-            return HandleResult(result);
-        }
+        //    return HandleResult(result);
+        //}
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpDelete("{id}")]

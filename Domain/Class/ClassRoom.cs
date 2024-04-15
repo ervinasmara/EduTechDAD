@@ -1,4 +1,5 @@
-﻿using Domain.Learn.Schedules;
+﻿using Domain.Course_and_Task;
+using Domain.Learn.Schedules;
 using Domain.User;
 
 namespace Domain.Class
@@ -14,5 +15,8 @@ namespace Domain.Class
 
         // Relasi dengan jadwal
         public ICollection<Schedule> Schedules { get; set; }
+
+        // Relasi many-to-many dengan ClassRoom melalui tabel pivot CourseClassRoom
+        public ICollection<CourseClassRoom> CourseClassRooms { get; set; }
     }
 }

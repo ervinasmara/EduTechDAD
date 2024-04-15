@@ -9,6 +9,7 @@ namespace Application.Learn.Courses
         public IFormFile FileData { get; set; }
         public string LinkCourse { get; set; }
         public string UniqueNumberOfLesson { get; set; }
+        public ICollection<string> UniqueNumberOfClassRooms { get; set; }
     }
 
     public class CourseEditDto
@@ -29,6 +30,7 @@ namespace Application.Learn.Courses
         public string FileName { get; set; }
         public string LinkCourse { get; set; }
         public string UniqueNumberOfLesson { get; set; }
+        public ICollection<string> UniqueNumberOfClassRooms { get; set; }
         public byte[] FileData { get; set; }
     }
 }

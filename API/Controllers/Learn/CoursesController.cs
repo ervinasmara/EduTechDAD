@@ -1,4 +1,5 @@
-﻿using Application.Learn.Courses;
+﻿using Application.Core;
+using Application.Learn.Courses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,14 @@ namespace API.Controllers.Learn
         {
             return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
+
+        [Authorize(Policy = "RequireRole2,3,4")]
+        [HttpGet("courses/{classRoomId}")]
+        public async Task<ActionResult<Result<List<CourseGetDto>>>> GetCoursesByClassRoom(Guid classRoomId)
+        {
+            return HandleResult(await Mediator.Send(new GetByClassRoomId.Query { ClassRoomId = classRoomId }));
+        }
+
 
         [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet("{id}")]

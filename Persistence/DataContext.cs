@@ -10,6 +10,7 @@ using Domain.Task;
 using Domain.Learn.Schedules;
 using Domain.Submission;
 using Domain.InfoRecaps;
+using Domain.Course_and_Task;
 
 namespace Persistence
 {
@@ -81,6 +82,22 @@ namespace Persistence
                 .WithMany(s => s.AssignmentSubmissions)
                 .HasForeignKey(z => z.StudentId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Konfigurasi many-to-many relasi antara Course dan ClassRoom
+            modelBuilder.Entity<CourseClassRoom>()
+                .HasKey(ccr => new { ccr.CourseId, ccr.ClassRoomId });
+
+            // CourseClassRoom memiliki relasi one-to-many ke Course
+            modelBuilder.Entity<CourseClassRoom>()
+                .HasOne(ccr => ccr.Course) // Setiap CourseClassRoom memiliki satu Course
+                .WithMany(course => course.CourseClassRooms) // Setiap Course memiliki banyak CourseClassRoom
+                .HasForeignKey(ccr => ccr.CourseId); // ForeignKey CourseId di CourseClassRoom
+
+            // CourseClassRoom memiliki relasi one-to-many ke ClassRoom
+            modelBuilder.Entity<CourseClassRoom>()
+                .HasOne(ccr => ccr.ClassRoom) // Setiap CourseClassRoom memiliki satu ClassRoom
+                .WithMany(classRoom => classRoom.CourseClassRooms) // Setiap ClassRoom memiliki banyak CourseClassRoom
+                .HasForeignKey(ccr => ccr.ClassRoomId); // ForeignKey ClassRoomId di CourseClassRoom
         }
 
         public DataContext(DbContextOptions options) : base(options)
@@ -101,5 +118,6 @@ namespace Persistence
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
         public DbSet<InfoRecap> InfoRecaps { get; set; }
+        public DbSet<CourseClassRoom> CourseClassRooms { get; set; }
     }
 }

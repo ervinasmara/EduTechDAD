@@ -16,8 +16,8 @@ namespace Application.Learn.Schedules
                 .GreaterThan(x => x.StartTime)
                 .WithMessage("EndTime must be greater than StartTime");
 
-            RuleFor(x => x.LessonId).NotEmpty();
-            RuleFor(x => x.ClassRoomId).NotEmpty();
+            RuleFor(x => x.UniqueNumberOfLesson).NotEmpty();
+            RuleFor(x => x.UniqueNumberOfClassRoom).NotEmpty();
         }
     }
 }

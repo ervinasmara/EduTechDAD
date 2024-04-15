@@ -12,6 +12,7 @@ using Application.User.Student;
 using Application.User.Teacher;
 using System.Text.RegularExpressions;
 using Application.User.DTOs;
+using Application.Learn.Courses;
 
 namespace API.DTOs
 {
@@ -575,7 +576,97 @@ namespace API.DTOs
             return userDto;
         }
 
+        [Authorize(Policy = "RequireRole2,3,4")]
+        [Authorize]
+        [HttpGet("courseclassroom")]
+        public async Task<ActionResult<object>> GetClassroomInfo()
+        {
+            // Mendapatkan kelas dari token
+            var classroomId = User.Claims.FirstOrDefault(c => c.Type == "ClassRoomId")?.Value;
+
+            if (classroomId == null)
+            {
+                return BadRequest("Classroom ID not found in token");
+            }
+
+            // Temukan kelas berdasarkan ClassroomId
+            var classroom = await _context.ClassRooms
+            .Include(c => c.CourseClassRooms)
+                .ThenInclude(ccr => ccr.Course)
+                    .ThenInclude(course => course.Lesson)
+            .FirstOrDefaultAsync(c => c.Id == Guid.Parse(classroomId));
+
+
+            if (classroom == null)
+            {
+                return NotFound("Classroom not found");
+            }
+
+            // Mendapatkan kursus yang terkait dengan kelas ini
+            var coursesInClassroom = await _context.Courses
+                .Include(c => c.Lesson) // Sertakan pelajaran yang terkait dengan kursus
+                .Where(c => c.CourseClassRooms.Any(ccr => ccr.ClassRoomId == classroom.Id))
+                .ToListAsync();
+
+            // Membuat daftar DTO untuk kursus
+            var courseDtos = coursesInClassroom.Select(course =>
+                new CourseGetDto
+                {
+                    Id = course.Id,
+                    CourseName = course.CourseName,
+                    Description = course.Description,
+                    FileName = course.FileData != null ? $"{course.CourseName}.{GetFileExtension(course.FileData)}" : "No File",
+                    FileData = course.FileData,
+                    LinkCourse = course.LinkCourse,
+                    UniqueNumberOfLesson = course.Lesson != null ? course.Lesson.UniqueNumberOfLesson : "UnknownUniqueNumberOfLesson",
+                    UniqueNumberOfClassRooms = course.CourseClassRooms?.Select(ccr => ccr.ClassRoom.UniqueNumberOfClassRoom).ToList() ?? new List<string>(),
+                }).ToList();
+
+            // Mengembalikan respons yang sesuai
+            return new
+            {
+                classroomId = classroom.Id,
+                className = classroom.ClassName,
+                courses = courseDtos
+            };
+        }
+
+
+
+
         // =========================== SHORT CODE =========================== //
+        private string GetFileExtension(byte[] fileData)
+        {
+            if (fileData == null || fileData.Length < 4)
+                return null;
+
+            // Analisis byte pertama untuk menentukan jenis file
+            if (fileData[0] == 0xFF && fileData[1] == 0xD8 && fileData[2] == 0xFF)
+            {
+                return "jpg";
+            }
+            else if (fileData[0] == 0x89 && fileData[1] == 0x50 && fileData[2] == 0x4E && fileData[3] == 0x47)
+            {
+                return "png";
+            }
+            else if (fileData[0] == 0x25 && fileData[1] == 0x50 && fileData[2] == 0x44 && fileData[3] == 0x46)
+            {
+                return "pdf";
+            }
+            else if (fileData[0] == 0x50 && fileData[1] == 0x4B && fileData[2] == 0x03 && fileData[3] == 0x04)
+            {
+                return "zip";
+            }
+            else if (fileData[0] == 0x52 && fileData[1] == 0x61 && fileData[2] == 0x72 && fileData[3] == 0x21)
+            {
+                return "rar";
+            }
+            else
+            {
+                return null; // Ekstensi file tidak dikenali
+            }
+        }
+
         private async Task<SuperAdminDto> CreateUserObjectSuperAdmin(AppUser user)
         {
             // Ambil data admin terkait dari database

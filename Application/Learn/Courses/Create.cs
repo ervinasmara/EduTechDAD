@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using AutoMapper;
+using Domain.Course_and_Task;
 using Domain.Learn.Courses;
 using FluentValidation;
 using MediatR;
@@ -67,9 +68,31 @@ namespace Application.Learn.Courses
                     _context.Courses.Add(course);
                     await _context.SaveChangesAsync(cancellationToken);
 
-                    // Mengembalikan CourseDto yang baru dibuat
+                    // Loop melalui koleksi UniqueNumberOfClassRooms
+                    var addedClassRooms = new List<string>();
+                    foreach (var uniqueNumberOfClassRoom in request.CourseDto.UniqueNumberOfClassRooms)
+                    {
+                        // Temukan ClassRoom yang sesuai berdasarkan UniqueNumberOfClassRoom
+                        var classRoom = _context.ClassRooms.FirstOrDefault(x => x.UniqueNumberOfClassRoom == uniqueNumberOfClassRoom);
+                        if (classRoom == null)
+                            return Result<CourseDto>.Failure($"ClassRoom with UniqueNumberOfClassRoom {uniqueNumberOfClassRoom} not found.");
+
+                        // Buat entri baru di CourseClassRoom
+                        _context.CourseClassRooms.Add(new CourseClassRoom
+                        {
+                            CourseId = course.Id,
+                            ClassRoomId = classRoom.Id
+                        });
+
+                        addedClassRooms.Add(classRoom.UniqueNumberOfClassRoom);
+                    }
+
+                    await _context.SaveChangesAsync(cancellationToken);
+
+                    // Mengembalikan CourseDto yang baru dibuat bersama dengan UniqueNumberOfClassRooms yang berhasil ditambahkan
                     var courseDto = _mapper.Map<CourseDto>(course);
                     courseDto.UniqueNumberOfLesson = lesson.UniqueNumberOfLesson;
+                    courseDto.UniqueNumberOfClassRooms = addedClassRooms;
                     return Result<CourseDto>.Success(courseDto);
                 }
                 catch (Exception ex)
