@@ -14,19 +14,11 @@ namespace API.Controllers.Schedules
             return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
 
-        [Authorize(Policy = "RequireRole3OrRole4")]
-        [HttpGet("{classRoomId}")]
-        public async Task<ActionResult> GetByClassRoomId(Guid classRoomId)
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpGet("scheduleparam")]
+        public async Task<ActionResult> GetScheduleParam([FromQuery] int? day, [FromQuery] string lessonName, [FromQuery] string nameTeacher, CancellationToken ct)
         {
-            var query = new Details.Query(classRoomId);
-            var result = await Mediator.Send(query);
-
-            if (result.IsSuccess)
-            {
-                return Ok(result.Value); // Return the list of schedules
-            }
-
-            return BadRequest(result.Error); // Return error message if something went wrong
+            return HandleResult(await Mediator.Send(new Search.Query { Day = day, LessonName = lessonName, TeacherName = nameTeacher }, ct));
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]

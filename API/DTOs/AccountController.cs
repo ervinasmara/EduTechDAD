@@ -39,6 +39,13 @@ namespace API.DTOs
         }
 
         [Authorize(Policy = "RequireRole1,2,3,4")]
+        [HttpGet("student/{id}")]
+        public async Task<ActionResult> GetStudentById(Guid id, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new DetailsStudentById.Query { Id = id }, ct));
+        }
+
+        [Authorize(Policy = "RequireRole1,2,4")]
         [HttpGet("studentparam")]
         public async Task<ActionResult> GetStudentParam([FromQuery] string nis, [FromQuery] string name, [FromQuery] string className, CancellationToken ct)
         {

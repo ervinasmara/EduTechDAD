@@ -26,12 +26,12 @@ namespace Application.InfoRecaps.StatusUpdateAfter1Day
 
                     foreach (var infoRecap in infoRecaps)
                     {
-                        // Periksa apakah LastStatusChangeDate adalah hari sebelumnya
-                        if (infoRecap.LastStatusChangeDate.Date < DateTime.Today)
+                        // Periksa apakah LastStatusChangeDate adalah hari sebelumnya dalam waktu UTC
+                        if (infoRecap.LastStatusChangeDate.ToUniversalTime().Date < DateTime.UtcNow.Date)
                         {
                             // Ubah status menjadi 1
                             infoRecap.Status = 1;
-                            infoRecap.LastStatusChangeDate = DateTime.Today;
+                            infoRecap.LastStatusChangeDate = DateTime.UtcNow.AddHours(7); // Tambahkan 7 jam untuk sesuaikan dengan waktu Indonesia
                         }
                     }
 

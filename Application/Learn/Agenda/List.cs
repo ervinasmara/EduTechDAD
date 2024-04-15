@@ -28,6 +28,7 @@ namespace Application.Learn.Agenda
             {
                 var schedules = await _context.Schedules
                     .Include(s => s.Lesson)
+                        .ThenInclude(l => l.Teacher) // Include guru dari pelajaran
                     .Include(s => s.ClassRoom)
                     .ToListAsync(cancellationToken);
 
@@ -37,6 +38,13 @@ namespace Application.Learn.Agenda
                 for (int i = 0; i < schedules.Count; i++)
                 {
                     scheduleDtos[i].Id = schedules[i].Id;
+
+                    // Map informasi tentang guru ke ScheduleGetDto
+                    scheduleDtos[i].TeacherSchedule = new TeacherScheduleDto
+                    {
+                        TeacherId = schedules[i].Lesson.TeacherId,
+                        NameTeacher = schedules[i].Lesson.Teacher.NameTeacher // Anggap properti nama guru ada di entitas Teacher
+                    };
                 }
 
                 return Result<List<ScheduleGetDto>>.Success(scheduleDtos);
