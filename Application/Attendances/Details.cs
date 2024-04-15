@@ -1,9 +1,6 @@
 ﻿using Application.Core;
 using Application.Attendances.DTOs;
-using AutoMapper;
-using Domain.Attendances;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.Attendances

@@ -1,4 +1,6 @@
-﻿using Application.Core;
+﻿using Application.Attendances.DTOs;
+using Application.Core;
+using AutoMapper;
 using Domain.Class;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,21 +10,30 @@ namespace Application.ClassRooms
 {
     public class List
     {
-        public class Query : IRequest<Result<List<ClassRoom>>>
+        public class Query : IRequest<Result<List<ClassRoomGetDto>>>
         {
             /* Kita tidak memerlukan parameter tambahan untuk meneruskan ke query*/
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<ClassRoom>>>
+        public class Handler : IRequestHandler<Query, Result<List<ClassRoomGetDto>>>
         {
             private readonly DataContext _context;
-            public Handler(DataContext context)
+            private readonly IMapper _mapper;
+
+            public Handler(DataContext context, IMapper mapper)
             {
                 _context = context;
+                _mapper = mapper;
             }
-            public async Task<Result<List<ClassRoom>>> Handle(Query request, CancellationToken cancellationToken)
+
+            public async Task<Result<List<ClassRoomGetDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                return Result<List<ClassRoom>>.Success(await _context.ClassRooms.ToListAsync(cancellationToken));
+                var classRoom = await _context.ClassRooms
+                    .ToListAsync(cancellationToken);
+
+                var attendanceDtos = _mapper.Map<List<ClassRoomGetDto>>(classRoom);
+
+                return Result<List<ClassRoomGetDto>>.Success(attendanceDtos);
             }
         }
     }

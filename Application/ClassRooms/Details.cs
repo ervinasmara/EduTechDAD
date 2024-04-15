@@ -1,5 +1,4 @@
 ﻿using Application.Core;
-using Domain.Class;
 using MediatR;
 using Persistence;
 
@@ -7,12 +6,12 @@ namespace Application.ClassRooms
 {
     public class Details
     {
-        public class Query : IRequest<Result<ClassRoom>>
+        public class Query : IRequest<Result<ClassRoomDto>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<ClassRoom>>
+        public class Handler : IRequestHandler<Query, Result<ClassRoomDto>>
         {
             private readonly DataContext _context;
 
@@ -21,11 +20,20 @@ namespace Application.ClassRooms
                 _context = context;
             }
 
-            public async Task<Result<ClassRoom>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<ClassRoomDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var classRoom = await _context.ClassRooms.FindAsync(request.Id);
 
-                return Result<ClassRoom>.Success(classRoom);
+                if (classRoom == null)
+                    return Result<ClassRoomDto>.Failure("Attendance not found.");
+
+                var classRoomDto = new ClassRoomDto
+                {
+                    ClassName = classRoom.ClassName,
+                    UniqueNumberOfClassRoom = classRoom.UniqueNumberOfClassRoom,
+                };
+
+                return Result<ClassRoomDto>.Success(classRoomDto);
             }
         }
     }

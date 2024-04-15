@@ -27,6 +27,7 @@ namespace Application.Core
             CreateMap<Announcement, AnnouncementDto>();
             CreateMap<AnnouncementDto, Announcement>();
             CreateMap<ClassRoom, ClassRoomDto>();
+            CreateMap<ClassRoom, ClassRoomGetDto>();
             CreateMap<ClassRoomDto, ClassRoom>();
             CreateMap<Attendance, AttendanceDto>();
             CreateMap<AttendanceDto, Attendance>();
