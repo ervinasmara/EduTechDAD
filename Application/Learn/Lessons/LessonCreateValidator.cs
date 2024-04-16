@@ -7,6 +7,7 @@ namespace Application.Learn.Lessons
         public LessonCreateValidator()
         {
             RuleFor(x => x.LessonName).NotEmpty();
+            RuleFor(x => x.NameTeacher).NotEmpty();
         }
     }
 }

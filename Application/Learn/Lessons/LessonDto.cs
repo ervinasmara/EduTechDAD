@@ -1,6 +1,4 @@
-﻿using Application.User.DTOs;
-
-namespace Application.Learn.Lessons
+﻿namespace Application.Learn.Lessons
 {
     public class LessonDto
     {
@@ -27,6 +25,6 @@ namespace Application.Learn.Lessons
     public class LessonCreateDto
     {
         public string LessonName { get; set; }
-        public Guid TeacherId { get; set; }
+        public string NameTeacher { get; set; }
     }
 }
