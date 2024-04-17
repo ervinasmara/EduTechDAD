@@ -11,7 +11,13 @@
         public Guid Id { get; set; }
         public string LessonName { get; set; }
         public string UniqueNumberOfLesson { get; set; }
-        public ICollection<string> NameTeachers { get; set; }
+        public ICollection<TeacherLessonGetAllDto> TeacherLesson { get; set; }
+    }
+
+    public class TeacherLessonGetAllDto
+    {
+        public string NameTeacher { get; set; }
+        public string UniqueNumberOfClassRoom { get; set; }
     }
 
     public class LessonGetTeacherDto

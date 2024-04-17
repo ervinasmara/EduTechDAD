@@ -33,9 +33,16 @@ namespace Application.Learn.Lessons
                         Id = lesson.Id,
                         LessonName = lesson.LessonName,
                         UniqueNumberOfLesson = lesson.UniqueNumberOfLesson,
-                        NameTeachers = _context.TeacherLessons
+                        TeacherLesson = _context.TeacherLessons
                             .Where(tl => tl.LessonId == lesson.Id)
-                            .Select(tl => tl.Teacher.NameTeacher)
+                            .Select(tl => new TeacherLessonGetAllDto
+                            {
+                                NameTeacher = tl.Teacher.NameTeacher,
+                                UniqueNumberOfClassRoom = _context.TeacherClassRooms
+                                    .Where(tc => tc.TeacherId == tl.TeacherId)
+                                    .Select(tc => tc.ClassRoom.UniqueNumberOfClassRoom)
+                                    .FirstOrDefault()
+                            })
                             .ToList()
                     })
                     .ToListAsync(cancellationToken);
