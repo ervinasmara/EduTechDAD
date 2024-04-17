@@ -1,5 +1,4 @@
 ﻿using Domain.Learn.Courses;
-using Domain.Learn.Lessons;
 using Domain.Many_to_Many;
 using System.ComponentModel.DataAnnotations.Schema;
 
