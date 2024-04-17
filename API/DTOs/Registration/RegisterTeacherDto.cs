@@ -33,5 +33,7 @@ namespace API.DTOs.Registration
         [Required(ErrorMessage = "Role is required")]
         [Range(2, 2, ErrorMessage = "Role must be 2")]
         public int Role { get; set; }
+        public ICollection<string> LessonName { get; set; }
+        public ICollection<string> UniqueNumberOfClassRoom { get; set; }
     }
 }

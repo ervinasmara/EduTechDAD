@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Application.User.Student;
-using Application.User.Teacher;
 using System.Text.RegularExpressions;
 using Application.User.DTOs;
 using Application.Learn.Courses;
+using Domain.Many_to_Many;
 
 namespace API.DTOs
 {
@@ -53,19 +53,19 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new DetailsStudent.Query { Nis = nis, Name = name, ClassName = className }, ct));
         }
 
-        [Authorize(Policy = "RequireRole1,2,4")]
-        [HttpGet("teachers")]
-        public async Task<IActionResult> GetTeachers(CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new ListTeacher.Query(), ct));
-        }
+        //[Authorize(Policy = "RequireRole1,2,4")]
+        //[HttpGet("teachers")]
+        //public async Task<IActionResult> GetTeachers(CancellationToken ct)
+        //{
+        //    return HandleResult(await Mediator.Send(new ListTeacher.Query(), ct));
+        //}
 
-        [Authorize(Policy = "RequireRole1,2,4")]
-        [HttpGet("teacher/{id}")]
-        public async Task<ActionResult> GetTeacherById(Guid id, CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new DetailsTeacher.Query { Id = id }, ct));
-        }
+        //[Authorize(Policy = "RequireRole1,2,4")]
+        //[HttpGet("teacher/{id}")]
+        //public async Task<ActionResult> GetTeacherById(Guid id, CancellationToken ct)
+        //{
+        //    return HandleResult(await Mediator.Send(new DetailsTeacher.Query { Id = id }, ct));
+        //}
 
         // =========================== LOGIN =========================== //
         [AllowAnonymous]
@@ -196,6 +196,24 @@ namespace API.DTOs
                 return BadRequest("Date of birth required");
             }
 
+            // Pemeriksaan apakah lessonname ada di database
+            foreach (var lessonName in teacherDto.LessonName)
+            {
+                if (!await _context.Lessons.AnyAsync(l => l.LessonName == lessonName))
+                {
+                    return BadRequest($"Lesson '{lessonName}' does not exist");
+                }
+            }
+
+            // Pemeriksaan apakah uniquenumberofclassroom ada di database
+            foreach (var uniqueNumber in teacherDto.UniqueNumberOfClassRoom)
+            {
+                if (!await _context.ClassRooms.AnyAsync(c => c.UniqueNumberOfClassRoom == uniqueNumber))
+                {
+                    return BadRequest($"Classroom with unique number '{uniqueNumber}' does not exist");
+                }
+            }
+
             var user = new AppUser
             {
                 UserName = teacherDto.Username,
@@ -219,6 +237,37 @@ namespace API.DTOs
             {
                 // Simpan teacher ke dalam konteks database Anda
                 _context.Teachers.Add(teacher);
+
+                // Tambahkan relasi antara guru dan pelajaran (Lesson)
+                foreach (var lessonName in teacherDto.LessonName)
+                {
+                    var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.LessonName == lessonName);
+                    if (lesson != null)
+                    {
+                        var teacherLesson = new TeacherLesson
+                        {
+                            Teacher = teacher,
+                            Lesson = lesson
+                        };
+                        _context.TeacherLessons.Add(teacherLesson);
+                    }
+                }
+
+                // Tambahkan relasi antara guru dan nomor unik ruang kelas (UniqueNumberOfClassRoom)
+                foreach (var uniqueNumber in teacherDto.UniqueNumberOfClassRoom)
+                {
+                    var classroom = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == uniqueNumber);
+                    if (classroom != null)
+                    {
+                        var teacherClassroom = new TeacherClassRoom
+                        {
+                            Teacher = teacher,
+                            ClassRoom = classroom
+                        };
+                        _context.TeacherClassRooms.Add(teacherClassroom);
+                    }
+                }
+
                 await _context.SaveChangesAsync();
 
                 // Gunakan metode CreateUserObjectTeacher untuk membuat objek TeacherDto
@@ -486,58 +535,58 @@ namespace API.DTOs
             return Ok(updatedStudentDto);
         }
 
-        [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpPut("edit/teacher/{id}")]
-        public async Task<IActionResult> UpdateTeacher(Guid id, EditTeacherDto teacherEditDto)
-        {
-            // Mencari guru berdasarkan ID
-            var teacher = await _context.Teachers
-                .Include(t => t.Lessons) // Memuat data lesson yang terkait dengan guru
-                .FirstOrDefaultAsync(t => t.Id == id);
+        //[Authorize(Policy = "RequireRole1OrRole4")]
+        //[HttpPut("edit/teacher/{id}")]
+        //public async Task<IActionResult> UpdateTeacher(Guid id, EditTeacherDto teacherEditDto)
+        //{
+        //    // Mencari guru berdasarkan ID
+        //    var teacher = await _context.Teachers
+        //        .Include(t => t.Lessons) // Memuat data lesson yang terkait dengan guru
+        //        .FirstOrDefaultAsync(t => t.Id == id);
 
-            // Jika guru tidak ditemukan, kembalikan response 404 Not Found
-            if (teacher == null)
-                return NotFound();
+        //    // Jika guru tidak ditemukan, kembalikan response 404 Not Found
+        //    if (teacher == null)
+        //        return NotFound();
 
-            // Update properti Address dan PhoneNumber
-            teacher.Address = teacherEditDto.Address;
-            teacher.PhoneNumber = teacherEditDto.PhoneNumber;
+        //    // Update properti Address dan PhoneNumber
+        //    teacher.Address = teacherEditDto.Address;
+        //    teacher.PhoneNumber = teacherEditDto.PhoneNumber;
 
-            // Jika LessonIds berubah, cari Lesson baru berdasarkan ID
-            if (teacherEditDto.LessonIds != null)
-            {
-                // Bersihkan daftar lesson yang dimiliki guru
-                teacher.Lessons.Clear();
+        //    // Jika LessonIds berubah, cari Lesson baru berdasarkan ID
+        //    if (teacherEditDto.LessonIds != null)
+        //    {
+        //        // Bersihkan daftar lesson yang dimiliki guru
+        //        teacher.Lessons.Clear();
 
-                // Tambahkan lesson baru ke dalam daftar guru
-                foreach (var lessonId in teacherEditDto.LessonIds)
-                {
-                    var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.Id == lessonId);
-                    if (lesson != null)
-                    {
-                        teacher.Lessons.Add(lesson);
-                    }
-                    else
-                    {
-                        return BadRequest($"Lesson with ID {lessonId} not found.");
-                    }
-                }
-            }
+        //        // Tambahkan lesson baru ke dalam daftar guru
+        //        foreach (var lessonId in teacherEditDto.LessonIds)
+        //        {
+        //            var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.Id == lessonId);
+        //            if (lesson != null)
+        //            {
+        //                teacher.Lessons.Add(lesson);
+        //            }
+        //            else
+        //            {
+        //                return BadRequest($"Lesson with ID {lessonId} not found.");
+        //            }
+        //        }
+        //    }
 
-            // Simpan perubahan ke database
-            _context.Teachers.Update(teacher);
-            await _context.SaveChangesAsync();
+        //    // Simpan perubahan ke database
+        //    _context.Teachers.Update(teacher);
+        //    await _context.SaveChangesAsync();
 
-            // Kembalikan response 200 OK bersama dengan data guru yang telah diperbarui
-            var updatedTeacherDto = new EditTeacherDto
-            {
-                Address = teacher.Address,
-                PhoneNumber = teacher.PhoneNumber,
-                LessonIds = teacher.Lessons.Select(l => l.Id).ToList()
-            };
+        //    // Kembalikan response 200 OK bersama dengan data guru yang telah diperbarui
+        //    var updatedTeacherDto = new EditTeacherDto
+        //    {
+        //        Address = teacher.Address,
+        //        PhoneNumber = teacher.PhoneNumber,
+        //        LessonIds = teacher.Lessons.Select(l => l.Id).ToList()
+        //    };
 
-            return Ok(updatedTeacherDto);
-        }
+        //    return Ok(updatedTeacherDto);
+        //}
 
 
         // =========================== GET USER LOGIN =========================== //

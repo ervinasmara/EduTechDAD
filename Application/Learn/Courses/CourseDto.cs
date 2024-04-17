@@ -8,7 +8,8 @@ namespace Application.Learn.Courses
         public string Description { get; set; }
         public IFormFile FileData { get; set; }
         public string LinkCourse { get; set; }
-        public string UniqueNumberOfLesson { get; set; }
+        public string LessonName { get; set; }
+        public Guid TeacherId { get; set; }
         public ICollection<string> UniqueNumberOfClassRooms { get; set; }
     }
 

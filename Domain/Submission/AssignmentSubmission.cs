@@ -1,4 +1,4 @@
-﻿using Domain.Task;
+﻿using Domain.Assignments;
 using Domain.User;
 using System.ComponentModel.DataAnnotations.Schema;
 

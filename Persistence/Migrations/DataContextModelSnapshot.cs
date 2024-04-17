@@ -39,6 +39,43 @@ namespace Persistence.Migrations
                     b.ToTable("Announcements");
                 });
 
+            modelBuilder.Entity("Domain.Assignments.Assignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("AssignmentDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("AssignmentDeadline")
+                        .HasColumnType("date");
+
+                    b.Property<string>("AssignmentDescription")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AssignmentLink")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AssignmentName")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("FileData")
+                        .HasColumnType("bytea");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("Assignments");
+                });
+
             modelBuilder.Entity("Domain.Attendances.Attendance", b =>
                 {
                     b.Property<Guid>("Id")
@@ -76,21 +113,6 @@ namespace Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ClassRooms");
-                });
-
-            modelBuilder.Entity("Domain.Course_and_Task.CourseClassRoom", b =>
-                {
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ClassRoomId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("CourseId", "ClassRoomId");
-
-                    b.HasIndex("ClassRoomId");
-
-                    b.ToTable("CourseClassRooms");
                 });
 
             modelBuilder.Entity("Domain.InfoRecaps.InfoRecap", b =>
@@ -141,6 +163,21 @@ namespace Persistence.Migrations
                     b.ToTable("Courses");
                 });
 
+            modelBuilder.Entity("Domain.Learn.Courses.TeacherCourse", b =>
+                {
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("TeacherId", "CourseId");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("TeacherCourses");
+                });
+
             modelBuilder.Entity("Domain.Learn.Lessons.Lesson", b =>
                 {
                     b.Property<Guid>("Id")
@@ -150,15 +187,10 @@ namespace Persistence.Migrations
                     b.Property<string>("LessonName")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("TeacherId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("UniqueNumberOfLesson")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TeacherId");
 
                     b.ToTable("Lessons");
                 });
@@ -191,6 +223,66 @@ namespace Persistence.Migrations
                     b.HasIndex("LessonId");
 
                     b.ToTable("Schedules");
+                });
+
+            modelBuilder.Entity("Domain.Many_to_Many.AssignmentClassRoom", b =>
+                {
+                    b.Property<Guid>("AssignmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClassRoomId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AssignmentId", "ClassRoomId");
+
+                    b.HasIndex("ClassRoomId");
+
+                    b.ToTable("AssignmentClassRooms");
+                });
+
+            modelBuilder.Entity("Domain.Many_to_Many.CourseClassRoom", b =>
+                {
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClassRoomId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("CourseId", "ClassRoomId");
+
+                    b.HasIndex("ClassRoomId");
+
+                    b.ToTable("CourseClassRooms");
+                });
+
+            modelBuilder.Entity("Domain.Many_to_Many.TeacherClassRoom", b =>
+                {
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClassRoomId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("TeacherId", "ClassRoomId");
+
+                    b.HasIndex("ClassRoomId");
+
+                    b.ToTable("TeacherClassRooms");
+                });
+
+            modelBuilder.Entity("Domain.Many_to_Many.TeacherLesson", b =>
+                {
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("TeacherId", "LessonId");
+
+                    b.HasIndex("LessonId");
+
+                    b.ToTable("TeacherLessons");
                 });
 
             modelBuilder.Entity("Domain.Submission.AssignmentSubmission", b =>
@@ -230,43 +322,6 @@ namespace Persistence.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("AssignmentSubmissions");
-                });
-
-            modelBuilder.Entity("Domain.Task.Assignment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateOnly>("AssignmentDate")
-                        .HasColumnType("date");
-
-                    b.Property<DateOnly>("AssignmentDeadline")
-                        .HasColumnType("date");
-
-                    b.Property<string>("AssignmentDescription")
-                        .HasColumnType("text");
-
-                    b.Property<string>("AssignmentLink")
-                        .HasColumnType("text");
-
-                    b.Property<string>("AssignmentName")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uuid");
-
-                    b.Property<byte[]>("FileData")
-                        .HasColumnType("bytea");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("Assignments");
                 });
 
             modelBuilder.Entity("Domain.User.Admin", b =>
@@ -589,6 +644,17 @@ namespace Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Assignments.Assignment", b =>
+                {
+                    b.HasOne("Domain.Learn.Courses.Course", "Course")
+                        .WithMany("Assignments")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("Domain.Attendances.Attendance", b =>
                 {
                     b.HasOne("Domain.User.Student", "Student")
@@ -598,25 +664,6 @@ namespace Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("Domain.Course_and_Task.CourseClassRoom", b =>
-                {
-                    b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
-                        .WithMany("CourseClassRooms")
-                        .HasForeignKey("ClassRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Learn.Courses.Course", "Course")
-                        .WithMany("CourseClassRooms")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClassRoom");
-
-                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Domain.Learn.Courses.Course", b =>
@@ -630,13 +677,21 @@ namespace Persistence.Migrations
                     b.Navigation("Lesson");
                 });
 
-            modelBuilder.Entity("Domain.Learn.Lessons.Lesson", b =>
+            modelBuilder.Entity("Domain.Learn.Courses.TeacherCourse", b =>
                 {
-                    b.HasOne("Domain.User.Teacher", "Teacher")
-                        .WithMany("Lessons")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("Domain.Learn.Courses.Course", "Course")
+                        .WithMany("TeacherCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Domain.User.Teacher", "Teacher")
+                        .WithMany("TeacherCourses")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
 
                     b.Navigation("Teacher");
                 });
@@ -660,9 +715,85 @@ namespace Persistence.Migrations
                     b.Navigation("Lesson");
                 });
 
+            modelBuilder.Entity("Domain.Many_to_Many.AssignmentClassRoom", b =>
+                {
+                    b.HasOne("Domain.Assignments.Assignment", "Assignment")
+                        .WithMany("AssignmentClassRooms")
+                        .HasForeignKey("AssignmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
+                        .WithMany("AssignmentClassRooms")
+                        .HasForeignKey("ClassRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Assignment");
+
+                    b.Navigation("ClassRoom");
+                });
+
+            modelBuilder.Entity("Domain.Many_to_Many.CourseClassRoom", b =>
+                {
+                    b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
+                        .WithMany("CourseClassRooms")
+                        .HasForeignKey("ClassRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Learn.Courses.Course", "Course")
+                        .WithMany("CourseClassRooms")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClassRoom");
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("Domain.Many_to_Many.TeacherClassRoom", b =>
+                {
+                    b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
+                        .WithMany("TeacherClassRooms")
+                        .HasForeignKey("ClassRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.User.Teacher", "Teacher")
+                        .WithMany("TeacherClassRooms")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClassRoom");
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("Domain.Many_to_Many.TeacherLesson", b =>
+                {
+                    b.HasOne("Domain.Learn.Lessons.Lesson", "Lesson")
+                        .WithMany("TeacherLessons")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.User.Teacher", "Teacher")
+                        .WithMany("TeacherLessons")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
+
+                    b.Navigation("Teacher");
+                });
+
             modelBuilder.Entity("Domain.Submission.AssignmentSubmission", b =>
                 {
-                    b.HasOne("Domain.Task.Assignment", "Assignment")
+                    b.HasOne("Domain.Assignments.Assignment", "Assignment")
                         .WithMany("AssignmentSubmissions")
                         .HasForeignKey("AssignmentId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -677,17 +808,6 @@ namespace Persistence.Migrations
                     b.Navigation("Assignment");
 
                     b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("Domain.Task.Assignment", b =>
-                {
-                    b.HasOne("Domain.Learn.Courses.Course", "Course")
-                        .WithMany("Assignments")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Domain.User.Admin", b =>
@@ -785,13 +905,24 @@ namespace Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Assignments.Assignment", b =>
+                {
+                    b.Navigation("AssignmentClassRooms");
+
+                    b.Navigation("AssignmentSubmissions");
+                });
+
             modelBuilder.Entity("Domain.Class.ClassRoom", b =>
                 {
+                    b.Navigation("AssignmentClassRooms");
+
                     b.Navigation("CourseClassRooms");
 
                     b.Navigation("Schedules");
 
                     b.Navigation("Students");
+
+                    b.Navigation("TeacherClassRooms");
                 });
 
             modelBuilder.Entity("Domain.Learn.Courses.Course", b =>
@@ -799,6 +930,8 @@ namespace Persistence.Migrations
                     b.Navigation("Assignments");
 
                     b.Navigation("CourseClassRooms");
+
+                    b.Navigation("TeacherCourses");
                 });
 
             modelBuilder.Entity("Domain.Learn.Lessons.Lesson", b =>
@@ -806,11 +939,8 @@ namespace Persistence.Migrations
                     b.Navigation("Courses");
 
                     b.Navigation("Schedules");
-                });
 
-            modelBuilder.Entity("Domain.Task.Assignment", b =>
-                {
-                    b.Navigation("AssignmentSubmissions");
+                    b.Navigation("TeacherLessons");
                 });
 
             modelBuilder.Entity("Domain.User.AppUser", b =>
@@ -833,7 +963,11 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.User.Teacher", b =>
                 {
-                    b.Navigation("Lessons");
+                    b.Navigation("TeacherClassRooms");
+
+                    b.Navigation("TeacherCourses");
+
+                    b.Navigation("TeacherLessons");
                 });
 #pragma warning restore 612, 618
         }

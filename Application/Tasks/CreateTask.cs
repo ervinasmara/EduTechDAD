@@ -1,6 +1,6 @@
 ﻿using Application.Core;
 using AutoMapper;
-using Domain.Task;
+using Domain.Assignments;
 using FluentValidation;
 using MediatR;
 using Persistence;

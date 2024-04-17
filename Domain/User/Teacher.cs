@@ -1,4 +1,6 @@
-﻿using Domain.Learn.Lessons;
+﻿using Domain.Learn.Courses;
+using Domain.Learn.Lessons;
+using Domain.Many_to_Many;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.User
@@ -18,7 +20,13 @@ namespace Domain.User
         [ForeignKey("AppUserId")]
         public AppUser User { get; set; }
 
-        // Properti navigasi ke Lesson
-        public ICollection<Lesson> Lessons { get; set; }
+        // Relasi many-to-many dengan Lesson melalui tabel pivot TeacherLesson
+        public ICollection<TeacherLesson> TeacherLessons { get; set; }
+
+        // Relasi many-to-many dengan ClassRoom melalui tabel pivot TeacherClassRoom
+        public ICollection<TeacherClassRoom> TeacherClassRooms { get; set; }
+
+        // Properti navigasi ke TeacherCourse
+        public ICollection<TeacherCourse> TeacherCourses { get; set; }
     }
 }

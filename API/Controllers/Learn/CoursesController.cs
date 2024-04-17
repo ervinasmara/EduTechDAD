@@ -57,14 +57,14 @@ namespace API.Controllers.Learn
             }
         }
 
-        [Authorize(Policy = "RequireRole2OrRole4")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> EditCourse(Guid id,[FromForm] CourseDto courseDto, CancellationToken ct)
-        {
-            var result = await Mediator.Send(new Edit.Command { Id = id, CourseDto = courseDto }, ct);
+        //[Authorize(Policy = "RequireRole2OrRole4")]
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> EditCourse(Guid id,[FromForm] CourseDto courseDto, CancellationToken ct)
+        //{
+        //    var result = await Mediator.Send(new Edit.Command { Id = id, CourseDto = courseDto }, ct);
 
-            return HandleResult(result);
-        }
+        //    return HandleResult(result);
+        //}
 
         [Authorize(Policy = "RequireRole2OrRole4")]
         [HttpDelete("{id}")]

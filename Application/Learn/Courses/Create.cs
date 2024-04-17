@@ -1,10 +1,11 @@
 ﻿using Application.Core;
 using AutoMapper;
-using Domain.Course_and_Task;
+using Domain.Many_to_Many;
 using Domain.Learn.Courses;
 using FluentValidation;
 using MediatR;
 using Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Learn.Courses
 {
@@ -38,6 +39,10 @@ namespace Application.Learn.Courses
             {
                 try
                 {
+                    // Memeriksa apakah teacherId tidak kosong
+                    if (request.CourseDto.TeacherId == Guid.Empty)
+                        return Result<CourseDto>.Failure($"TeacherId cannot be empty.");
+
                     // Membaca data file jika CourseDto.FileData tidak null
                     byte[]? fileData = null;
                     if (request.CourseDto.FileData != null)
@@ -49,10 +54,31 @@ namespace Application.Learn.Courses
                         }
                     }
 
-                    // Menemukan Lesson yang sesuai berdasarkan UniqueNumberOfLesson
-                    var lesson = _context.Lessons.FirstOrDefault(x => x.UniqueNumberOfLesson == request.CourseDto.UniqueNumberOfLesson);
+                    // Menemukan Lesson yang sesuai berdasarkan LessonName
+                    var lesson = await _context.Lessons
+                        .Include(l => l.TeacherLessons)
+                        .ThenInclude(tl => tl.Teacher)
+                        .FirstOrDefaultAsync(x => x.LessonName == request.CourseDto.LessonName);
+
                     if (lesson == null)
-                        return Result<CourseDto>.Failure($"Lesson with UniqueNumberOfLesson {request.CourseDto.UniqueNumberOfLesson} not found.");
+                        return Result<CourseDto>.Failure($"Lesson with LessonName {request.CourseDto.LessonName} not found.");
+
+                    // Memeriksa apakah teacher memiliki keterkaitan dengan lesson yang dimasukkan
+                    var teacherId = request.CourseDto.TeacherId;
+                    if (lesson.TeacherLessons.All(tl => tl.TeacherId != teacherId))
+                        return Result<CourseDto>.Failure($"Teacher does not have this lesson.");
+
+                    // Memeriksa apakah teacherId memiliki keterkaitan dengan setiap uniqueNumberOfClassRoom yang dimasukkan
+                    foreach (var uniqueNumberOfClassRoom in request.CourseDto.UniqueNumberOfClassRooms)
+                    {
+                        var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(x => x.UniqueNumberOfClassRoom == uniqueNumberOfClassRoom);
+                        if (classRoom == null)
+                            return Result<CourseDto>.Failure($"ClassRoom with UniqueNumberOfClassRoom {uniqueNumberOfClassRoom} not found.");
+
+                        // Memeriksa keterkaitan teacherId dengan classroom
+                        if (!_context.TeacherClassRooms.Any(tc => tc.TeacherId == teacherId && tc.ClassRoomId == classRoom.Id))
+                            return Result<CourseDto>.Failure($"Teacher is not assigned to Classroom {uniqueNumberOfClassRoom}.");
+                    }
 
                     // Membuat objek Course dari data yang diterima
                     var course = new Course
@@ -68,12 +94,21 @@ namespace Application.Learn.Courses
                     _context.Courses.Add(course);
                     await _context.SaveChangesAsync(cancellationToken);
 
+                    // Simpan TeacherId dan CourseId dalam entitas TeacherCourse
+                    var teacherCourse = new TeacherCourse
+                    {
+                        TeacherId = teacherId,
+                        CourseId = course.Id
+                    };
+                    _context.TeacherCourses.Add(teacherCourse);
+                    await _context.SaveChangesAsync(cancellationToken);
+
                     // Loop melalui koleksi UniqueNumberOfClassRooms
                     var addedClassRooms = new List<string>();
                     foreach (var uniqueNumberOfClassRoom in request.CourseDto.UniqueNumberOfClassRooms)
                     {
                         // Temukan ClassRoom yang sesuai berdasarkan UniqueNumberOfClassRoom
-                        var classRoom = _context.ClassRooms.FirstOrDefault(x => x.UniqueNumberOfClassRoom == uniqueNumberOfClassRoom);
+                        var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(x => x.UniqueNumberOfClassRoom == uniqueNumberOfClassRoom);
                         if (classRoom == null)
                             return Result<CourseDto>.Failure($"ClassRoom with UniqueNumberOfClassRoom {uniqueNumberOfClassRoom} not found.");
 
@@ -89,11 +124,13 @@ namespace Application.Learn.Courses
 
                     await _context.SaveChangesAsync(cancellationToken);
 
-                    // Mengembalikan CourseDto yang baru dibuat bersama dengan UniqueNumberOfClassRooms yang berhasil ditambahkan
+                    // Mengembalikan CourseDto yang baru dibuat bersama dengan TeacherId dan UniqueNumberOfClassRooms yang berhasil ditambahkan
                     var courseDto = _mapper.Map<CourseDto>(course);
-                    courseDto.UniqueNumberOfLesson = lesson.UniqueNumberOfLesson;
+                    courseDto.LessonName = lesson.LessonName;
                     courseDto.UniqueNumberOfClassRooms = addedClassRooms;
+                    courseDto.TeacherId = teacherId; // Menambahkan TeacherId ke dalam CourseDto
                     return Result<CourseDto>.Success(courseDto);
+
                 }
                 catch (Exception ex)
                 {

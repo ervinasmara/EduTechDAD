@@ -5,6 +5,7 @@ using Application.Core;
 using AutoMapper;
 using Domain.Learn.Lessons;
 using Microsoft.EntityFrameworkCore;
+using Domain.Many_to_Many;
 
 namespace Application.Learn.Lessons
 {
@@ -38,52 +39,53 @@ namespace Application.Learn.Lessons
             {
                 try
                 {
-                    // Temukan Teacher berdasarkan NameTeacher yang diberikan
-                    var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.NameTeacher == request.LessonCreateDto.NameTeacher);
-                    if (teacher == null)
-                        return Result<LessonCreateDto>.Failure($"Teacher with name {request.LessonCreateDto.NameTeacher} not found.");
+                    // Temukan semua guru berdasarkan nama yang diberikan
+                    var teachers = await _context.Teachers
+                        .Where(t => request.LessonCreateDto.NameTeachers.Contains(t.NameTeacher))
+                        .ToListAsync();
+
+                    if (teachers.Count != request.LessonCreateDto.NameTeachers.Count)
+                    {
+                        var missingTeachers = request.LessonCreateDto.NameTeachers.Except(teachers.Select(t => t.NameTeacher));
+                        return Result<LessonCreateDto>.Failure($"Teachers with names {string.Join(", ", missingTeachers)} not found.");
+                    }
 
                     var lastLesson = await _context.Lessons
                         .OrderByDescending(x => x.UniqueNumberOfLesson)
                         .FirstOrDefaultAsync(cancellationToken);
 
-                    int newUniqueNumber = 1; // Nilai awal jika tidak ada lesson sebelumnya
-
-                    if (lastLesson != null)
-                    {
-                        // Ambil nomor terakhir dan tambahkan 1
-                        var lastUniqueNumber = int.Parse(lastLesson.UniqueNumberOfLesson);
-                        newUniqueNumber = lastUniqueNumber + 1;
-                    }
-
-                    // Buat UniqueNumberOfLesson dengan format 2 digit
+                    int newUniqueNumber = (lastLesson != null) ? int.Parse(lastLesson.UniqueNumberOfLesson) + 1 : 1;
                     var uniqueNumber = newUniqueNumber.ToString("00");
 
                     var lesson = new Lesson
                     {
                         LessonName = request.LessonCreateDto.LessonName,
-                        UniqueNumberOfLesson = uniqueNumber,
-                        TeacherId = teacher.Id // Set TeacherId berdasarkan entitas Teacher yang ditemukan
+                        UniqueNumberOfLesson = uniqueNumber
                     };
 
                     _context.Lessons.Add(lesson);
 
+                    foreach (var teacher in teachers)
+                    {
+                        _context.TeacherLessons.Add(new TeacherLesson
+                        {
+                            TeacherId = teacher.Id,
+                            LessonId = lesson.Id
+                        });
+                    }
+
                     var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
                     if (!result)
-                        return Result<LessonCreateDto>.Failure("Failed to Create Lesson");
-
-                    // Memuat kembali teacher untuk mendapatkan nama
-                    teacher = await _context.Teachers.FindAsync(teacher.Id);
+                        return Result<LessonCreateDto>.Failure("Failed to create Lesson");
 
                     var lessonDto = _mapper.Map<LessonCreateDto>(lesson);
-                    lessonDto.NameTeacher = teacher.NameTeacher; // Mengisi NameTeacher dalam DTO
+                    lessonDto.NameTeachers = teachers.Select(t => t.NameTeacher).ToList(); // Mengisi NameTeachers dalam DTO dengan koleksi nama guru
 
                     return Result<LessonCreateDto>.Success(lessonDto);
                 }
                 catch (Exception ex)
                 {
-                    // Tangani pengecualian dan kembalikan pesan kesalahan yang sesuai
                     return Result<LessonCreateDto>.Failure($"Failed to create lesson: {ex.Message}");
                 }
             }

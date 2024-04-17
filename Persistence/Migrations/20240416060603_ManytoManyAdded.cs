@@ -6,19 +6,17 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class FromLessonToSchedule : Migration
+    public partial class ManytoManyAdded : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_SuperAdmins_AppUserId",
-                table: "SuperAdmins");
-
-            migrationBuilder.RenameColumn(
-                name: "UniqueNumber",
-                table: "ClassRooms",
-                newName: "UniqueNumberOfClassRoom");
+            migrationBuilder.AddColumn<Guid>(
+                name: "ClassRoomId",
+                table: "Students",
+                type: "uuid",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
 
             migrationBuilder.CreateTable(
                 name: "Attendances",
@@ -41,6 +39,33 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ClassRooms",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ClassName = table.Column<string>(type: "text", nullable: true),
+                    UniqueNumberOfClassRoom = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClassRooms", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "InfoRecaps",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    LastStatusChangeDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InfoRecaps", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Lessons",
                 columns: table => new
                 {
@@ -51,6 +76,48 @@ namespace Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Lessons", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SuperAdmins",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    NameSuperAdmin = table.Column<string>(type: "text", nullable: true),
+                    AppUserId = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SuperAdmins", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SuperAdmins_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TeacherClassRooms",
+                columns: table => new
+                {
+                    TeacherId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ClassRoomId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TeacherClassRooms", x => new { x.TeacherId, x.ClassRoomId });
+                    table.ForeignKey(
+                        name: "FK_TeacherClassRooms_ClassRooms_ClassRoomId",
+                        column: x => x.ClassRoomId,
+                        principalTable: "ClassRooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TeacherClassRooms_Teachers_TeacherId",
+                        column: x => x.TeacherId,
+                        principalTable: "Teachers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -104,6 +171,30 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TeacherLessons",
+                columns: table => new
+                {
+                    TeacherId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LessonId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TeacherLessons", x => new { x.TeacherId, x.LessonId });
+                    table.ForeignKey(
+                        name: "FK_TeacherLessons_Lessons_LessonId",
+                        column: x => x.LessonId,
+                        principalTable: "Lessons",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TeacherLessons_Teachers_TeacherId",
+                        column: x => x.TeacherId,
+                        principalTable: "Teachers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Assignments",
                 columns: table => new
                 {
@@ -126,6 +217,54 @@ namespace Persistence.Migrations
                         principalTable: "Courses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CourseClassRooms",
+                columns: table => new
+                {
+                    CourseId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ClassRoomId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseClassRooms", x => new { x.CourseId, x.ClassRoomId });
+                    table.ForeignKey(
+                        name: "FK_CourseClassRooms_ClassRooms_ClassRoomId",
+                        column: x => x.ClassRoomId,
+                        principalTable: "ClassRooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CourseClassRooms_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AssignmentClassRooms",
+                columns: table => new
+                {
+                    AssignmentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ClassRoomId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AssignmentClassRooms", x => new { x.AssignmentId, x.ClassRoomId });
+                    table.ForeignKey(
+                        name: "FK_AssignmentClassRooms_Assignments_AssignmentId",
+                        column: x => x.AssignmentId,
+                        principalTable: "Assignments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AssignmentClassRooms_ClassRooms_ClassRoomId",
+                        column: x => x.ClassRoomId,
+                        principalTable: "ClassRooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -160,10 +299,14 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_SuperAdmins_AppUserId",
-                table: "SuperAdmins",
-                column: "AppUserId",
-                unique: true);
+                name: "IX_Students_ClassRoomId",
+                table: "Students",
+                column: "ClassRoomId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssignmentClassRooms_ClassRoomId",
+                table: "AssignmentClassRooms",
+                column: "ClassRoomId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Assignments_CourseId",
@@ -186,6 +329,11 @@ namespace Persistence.Migrations
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CourseClassRooms_ClassRoomId",
+                table: "CourseClassRooms",
+                column: "ClassRoomId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Courses_LessonId",
                 table: "Courses",
                 column: "LessonId");
@@ -199,11 +347,42 @@ namespace Persistence.Migrations
                 name: "IX_Schedules_LessonId",
                 table: "Schedules",
                 column: "LessonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SuperAdmins_AppUserId",
+                table: "SuperAdmins",
+                column: "AppUserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TeacherClassRooms_ClassRoomId",
+                table: "TeacherClassRooms",
+                column: "ClassRoomId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TeacherLessons_LessonId",
+                table: "TeacherLessons",
+                column: "LessonId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Students_ClassRooms_ClassRoomId",
+                table: "Students",
+                column: "ClassRoomId",
+                principalTable: "ClassRooms",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Students_ClassRooms_ClassRoomId",
+                table: "Students");
+
+            migrationBuilder.DropTable(
+                name: "AssignmentClassRooms");
+
             migrationBuilder.DropTable(
                 name: "AssignmentSubmissions");
 
@@ -211,10 +390,28 @@ namespace Persistence.Migrations
                 name: "Attendances");
 
             migrationBuilder.DropTable(
+                name: "CourseClassRooms");
+
+            migrationBuilder.DropTable(
+                name: "InfoRecaps");
+
+            migrationBuilder.DropTable(
                 name: "Schedules");
 
             migrationBuilder.DropTable(
+                name: "SuperAdmins");
+
+            migrationBuilder.DropTable(
+                name: "TeacherClassRooms");
+
+            migrationBuilder.DropTable(
+                name: "TeacherLessons");
+
+            migrationBuilder.DropTable(
                 name: "Assignments");
+
+            migrationBuilder.DropTable(
+                name: "ClassRooms");
 
             migrationBuilder.DropTable(
                 name: "Courses");
@@ -223,18 +420,12 @@ namespace Persistence.Migrations
                 name: "Lessons");
 
             migrationBuilder.DropIndex(
-                name: "IX_SuperAdmins_AppUserId",
-                table: "SuperAdmins");
+                name: "IX_Students_ClassRoomId",
+                table: "Students");
 
-            migrationBuilder.RenameColumn(
-                name: "UniqueNumberOfClassRoom",
-                table: "ClassRooms",
-                newName: "UniqueNumber");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SuperAdmins_AppUserId",
-                table: "SuperAdmins",
-                column: "AppUserId");
+            migrationBuilder.DropColumn(
+                name: "ClassRoomId",
+                table: "Students");
         }
     }
 }

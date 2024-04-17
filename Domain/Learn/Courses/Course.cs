@@ -1,6 +1,6 @@
-﻿using Domain.Course_and_Task;
+﻿using Domain.Assignments;
+using Domain.Many_to_Many;
 using Domain.Learn.Lessons;
-using Domain.Task;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Learn.Courses
@@ -20,6 +20,9 @@ namespace Domain.Learn.Courses
 
         // Properti navigasi ke Assignment
         public ICollection<Assignment> Assignments { get; set; }
+
+        // Properti navigasi ke TeacherCourse
+        public ICollection<TeacherCourse> TeacherCourses { get; set; }
 
         // Relasi many-to-many dengan Course melalui tabel pivot CourseClassRoom
         public ICollection<CourseClassRoom> CourseClassRooms { get; set; }

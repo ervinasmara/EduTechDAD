@@ -16,7 +16,7 @@ using Domain.Learn.Courses;
 using Domain.Learn.Lessons;
 using Domain.Attendances;
 using Domain.Submission;
-using Domain.Task;
+using Domain.Assignments;
 
 namespace Application.Core
 {

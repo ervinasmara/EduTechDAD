@@ -1,8 +1,9 @@
-﻿using Domain.Learn.Courses;
+﻿using Domain.Many_to_Many;
+using Domain.Learn.Courses;
 using Domain.Submission;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Domain.Task
+namespace Domain.Assignments
 {
     public class Assignment
     {
@@ -11,8 +12,8 @@ namespace Domain.Task
         public DateOnly AssignmentDate { get; set; }
         public DateOnly AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }
-        public byte[]? FileData { get; set; }
-        public string? AssignmentLink { get; set; }
+        public byte[] FileData { get; set; }
+        public string AssignmentLink { get; set; }
         public int Status { get; set; } = 1;
 
         // Kunci asing ke Course
@@ -22,5 +23,8 @@ namespace Domain.Task
 
         // Relasi dengan AssignmentSubmission
         public ICollection<AssignmentSubmission> AssignmentSubmissions { get; set; }
+
+        // Relasi many-to-many dengan ClassRoom melalui tabel pivot CourseClassRoom
+        public ICollection<AssignmentClassRoom> AssignmentClassRooms { get; set; }
     }
 }

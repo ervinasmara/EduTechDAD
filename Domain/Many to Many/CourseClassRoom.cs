@@ -1,7 +1,7 @@
 ﻿using Domain.Learn.Courses;
 using Domain.Class;
 
-namespace Domain.Course_and_Task
+namespace Domain.Many_to_Many
 {
     public class CourseClassRoom
     {

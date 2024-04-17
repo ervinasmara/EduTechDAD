@@ -7,19 +7,19 @@ namespace API.Controllers.Schedules
 
     public class SchedulesController : BaseApiController
     {
-        [Authorize(Policy = "RequireRole1,3,4")]
-        [HttpGet]
-        public async Task<IActionResult> GetSchedules(CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new List.Query(), ct));
-        }
+        //[Authorize(Policy = "RequireRole1,3,4")]
+        //[HttpGet]
+        //public async Task<IActionResult> GetSchedules(CancellationToken ct)
+        //{
+        //    return HandleResult(await Mediator.Send(new List.Query(), ct));
+        //}
 
-        [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpGet("scheduleparam")]
-        public async Task<ActionResult> GetScheduleParam([FromQuery] int? day, [FromQuery] string lessonName, [FromQuery] string nameTeacher, CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new Search.Query { Day = day, LessonName = lessonName, TeacherName = nameTeacher }, ct));
-        }
+        //[Authorize(Policy = "RequireRole1OrRole4")]
+        //[HttpGet("scheduleparam")]
+        //public async Task<ActionResult> GetScheduleParam([FromQuery] int? day, [FromQuery] string lessonName, [FromQuery] string nameTeacher, CancellationToken ct)
+        //{
+        //    return HandleResult(await Mediator.Send(new Search.Query { Day = day, LessonName = lessonName, TeacherName = nameTeacher }, ct));
+        //}
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost]

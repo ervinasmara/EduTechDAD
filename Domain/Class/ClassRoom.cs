@@ -1,4 +1,4 @@
-﻿using Domain.Course_and_Task;
+﻿using Domain.Many_to_Many;
 using Domain.Learn.Schedules;
 using Domain.User;
 
@@ -18,5 +18,11 @@ namespace Domain.Class
 
         // Relasi many-to-many dengan ClassRoom melalui tabel pivot CourseClassRoom
         public ICollection<CourseClassRoom> CourseClassRooms { get; set; }
+
+        // Relasi many-to-many dengan ClassRoom melalui tabel pivot CourseClassRoom
+        public ICollection<AssignmentClassRoom> AssignmentClassRooms { get; set; }
+
+        // Relasi many-to-many dengan ClassRoom melalui tabel pivot TeacherClassRoom
+        public ICollection<TeacherClassRoom> TeacherClassRooms { get; set; }
     }
 }

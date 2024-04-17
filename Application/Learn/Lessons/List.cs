@@ -27,18 +27,20 @@ namespace Application.Learn.Lessons
 
             public async Task<Result<List<LessonGetAllDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var lessonsWithTeacherName = await _context.Lessons
+                var lessonsWithTeacherNames = await _context.Lessons
                     .Select(lesson => new LessonGetAllDto
                     {
                         Id = lesson.Id,
                         LessonName = lesson.LessonName,
                         UniqueNumberOfLesson = lesson.UniqueNumberOfLesson,
-                        TeacherId = lesson.TeacherId,
-                        NameTeacher = _context.Teachers.FirstOrDefault(t => t.Id == lesson.TeacherId).NameTeacher ?? "Unknown"
+                        NameTeachers = _context.TeacherLessons
+                            .Where(tl => tl.LessonId == lesson.Id)
+                            .Select(tl => tl.Teacher.NameTeacher)
+                            .ToList()
                     })
                     .ToListAsync(cancellationToken);
 
-                return Result<List<LessonGetAllDto>>.Success(lessonsWithTeacherName);
+                return Result<List<LessonGetAllDto>>.Success(lessonsWithTeacherNames);
             }
         }
     }
