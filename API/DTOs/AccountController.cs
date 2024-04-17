@@ -659,8 +659,26 @@ namespace API.DTOs
                 .ToListAsync();
 
             // Membuat daftar DTO untuk kursus
-            var courseDtos = coursesInClassroom.Select(course =>
-                new CourseGetDto
+            var courseDtos = new List<CourseGetDto>();
+            foreach (var course in coursesInClassroom)
+            {
+                // Dapatkan entitas TeacherCourse yang terkait dengan kursus ini
+                var teacherCourse = await _context.TeacherCourses
+                    .Include(tc => tc.Teacher) // Sertakan entitas Teacher
+                    .FirstOrDefaultAsync(tc => tc.CourseId == course.Id);
+
+                // Jika data TeacherCourse tidak ditemukan, lanjutkan ke kursus berikutnya
+                if (teacherCourse == null)
+                    continue;
+
+                // Dapatkan nama guru dari entitas Teacher
+                var teacherName = teacherCourse.Teacher?.NameTeacher;
+
+                // Dapatkan LessonName dari kursus ini
+                var lessonName = course.Lesson?.LessonName;
+
+                // Membuat DTO untuk kursus
+                var courseDto = new CourseGetDto
                 {
                     Id = course.Id,
                     CourseName = course.CourseName,
@@ -670,7 +688,12 @@ namespace API.DTOs
                     LinkCourse = course.LinkCourse,
                     UniqueNumberOfLesson = course.Lesson != null ? course.Lesson.UniqueNumberOfLesson : "UnknownUniqueNumberOfLesson",
                     UniqueNumberOfClassRooms = course.CourseClassRooms?.Select(ccr => ccr.ClassRoom.UniqueNumberOfClassRoom).ToList() ?? new List<string>(),
-                }).ToList();
+                    NameTeacher = teacherName, // Tambahkan properti NameTeacher
+                    LessonName = lessonName // Tambahkan properti LessonName
+                };
+
+                courseDtos.Add(courseDto);
+            }
 
             // Mengembalikan respons yang sesuai
             return new
