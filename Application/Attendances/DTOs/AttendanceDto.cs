@@ -5,11 +5,13 @@ namespace Application.Attendances.DTOs
     public class AttendanceDto
     {
         public DateOnly Date { get; set; }
+        public ICollection<AttendanceStudentCreateDto> AttendanceStudentCreate { get; set; }
+    }
 
-        [Required(ErrorMessage = "Status is required")]
-        [Range(1, 3, ErrorMessage = "Status must be between 1 and 3")]
+    public class AttendanceEditDto
+    {
+        public DateOnly Date { get; set; }
         public int Status { get; set; }
-        public Guid StudentId { get; set; }
     }
 
     public class AttendanceGetAllDto
@@ -21,8 +23,29 @@ namespace Application.Attendances.DTOs
 
     public class AttendanceGetDto
     {
+        public Guid StudentId { get; set; }
+        public string NameStudent { get; set; }
+        public string UniqueNumberOfClassRoom { get; set; }
+        public ICollection<AttendanceStudentDto> AttendanceStudent { get; set; }
+    }
+
+    public class AttendanceGetByIdDto
+    {
         public Guid Id { get; set; }
         public DateOnly Date { get; set; }
+        public int Status { get; set; }
+        public Guid StudentId { get; set; }
+    }
+
+    public class AttendanceStudentDto
+    {
+        public Guid AttendanceId { get; set; }
+        public DateOnly Date { get; set; }
+        public int Status { get; set; }
+    }
+
+    public class AttendanceStudentCreateDto
+    {
         public int Status { get; set; }
         public Guid StudentId { get; set; }
     }

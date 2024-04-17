@@ -4,26 +4,27 @@ using AutoMapper;
 using FluentValidation;
 using Application.Core;
 using Application.Attendances.DTOs;
+using Application.Attendances.Validator;
 
 namespace Application.Attendances
 {
     public class Edit
     {
-        public class Command : IRequest<Result<AttendanceDto>>
+        public class Command : IRequest<Result<AttendanceEditDto>>
         {
             public Guid Id { get; set; }
-            public AttendanceDto AttendanceDto { get; set; }
+            public AttendanceEditDto AttendanceEditDto { get; set; }
         }
 
         public class CommandValidatorDto : AbstractValidator<Command>
         {
             public CommandValidatorDto()
             {
-                RuleFor(x => x.AttendanceDto).SetValidator(new AttendanceValidator());
+                RuleFor(x => x.AttendanceEditDto).SetValidator(new AttendanceEditValidator());
             }
         }
 
-        public class Handler : IRequestHandler<Command, Result<AttendanceDto>>
+        public class Handler : IRequestHandler<Command, Result<AttendanceEditDto>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -34,29 +35,29 @@ namespace Application.Attendances
                 _context = context;
             }
 
-            public async Task<Result<AttendanceDto>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<AttendanceEditDto>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var attendance = await _context.Attendances.FindAsync(request.Id);
 
                 // Periksa apakah attendance ditemukan
                 if (attendance == null)
                 {
-                    return Result<AttendanceDto>.Failure("Attendance has not found");
+                    return Result<AttendanceEditDto>.Failure("Attendance has not found");
                 }
 
-                _mapper.Map(request.AttendanceDto, attendance);
+                _mapper.Map(request.AttendanceEditDto, attendance);
 
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
                 if (!result)
                 {
-                    return Result<AttendanceDto>.Failure("Failed to edit Attendance");
+                    return Result<AttendanceEditDto>.Failure("Failed to edit Attendance");
                 }
 
-                // Buat instance AttendanceDto yang mewakili hasil edit
-                var editedAttendanceDto = _mapper.Map<AttendanceDto>(attendance);
+                // Buat instance AttendanceEditDto yang mewakili hasil edit
+                var editedAttendanceEditDto = _mapper.Map<AttendanceEditDto>(attendance);
 
-                return Result<AttendanceDto>.Success(editedAttendanceDto);
+                return Result<AttendanceEditDto>.Success(editedAttendanceEditDto);
             }
         }
     }

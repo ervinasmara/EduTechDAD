@@ -7,12 +7,12 @@ namespace Application.Attendances
 {
     public class Details
     {
-        public class Query : IRequest<Result<AttendanceGetDto>>
+        public class Query : IRequest<Result<AttendanceGetByIdDto>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<AttendanceGetDto>>
+        public class Handler : IRequestHandler<Query, Result<AttendanceGetByIdDto>>
         {
             private readonly DataContext _context;
 
@@ -21,14 +21,14 @@ namespace Application.Attendances
                 _context = context;
             }
 
-            public async Task<Result<AttendanceGetDto>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<AttendanceGetByIdDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var attendance = await _context.Attendances.FindAsync(request.Id);
 
                 if (attendance == null)
-                    return Result<AttendanceGetDto>.Failure("Attendance not found.");
+                    return Result<AttendanceGetByIdDto>.Failure("Attendance not found.");
 
-                var attendanceDto = new AttendanceGetDto
+                var attendanceDto = new AttendanceGetByIdDto
                 {
                     Id = attendance.Id,
                     Date = attendance.Date,
@@ -36,7 +36,7 @@ namespace Application.Attendances
                     StudentId = attendance.StudentId
                 };
 
-                return Result<AttendanceGetDto>.Success(attendanceDto);
+                return Result<AttendanceGetByIdDto>.Success(attendanceDto);
             }
         }
     }

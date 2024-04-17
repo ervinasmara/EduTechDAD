@@ -33,6 +33,8 @@ namespace Application.Core
             CreateMap<AttendanceDto, Attendance>();
             CreateMap<Attendance, AttendanceGetDto>();
             CreateMap<Attendance, AttendanceGetAllDto>();
+            CreateMap<Attendance, AttendanceEditDto>();
+            CreateMap<AttendanceEditDto, Attendance>();
             CreateMap<Assignment, AssignmentDto>();
             CreateMap<AssignmentDto, Assignment>();
             CreateMap<Assignment, AssignmentGetDto>();
