@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using Application.User.DTOs;
 using Application.Learn.Courses;
 using Domain.Many_to_Many;
+using Application.Learn.Lessons;
 
 namespace API.DTOs
 {
@@ -680,8 +681,81 @@ namespace API.DTOs
             };
         }
 
+        [Authorize]
+        [HttpGet("courseteacher")]
+        public async Task<ActionResult<object>> GetTeacherInfo()
+        {
+            // Mendapatkan ID guru dari token
+            var teacherId = User.Claims.FirstOrDefault(c => c.Type == "TeacherId")?.Value;
 
+            if (teacherId == null)
+            {
+                return BadRequest("Teacher ID not found in token");
+            }
 
+            // Temukan semua pelajaran yang terkait dengan guru ini dari TeacherLesson
+            var teacherLessons = await _context.TeacherLessons
+                .Where(tl => tl.TeacherId == Guid.Parse(teacherId))
+                .Select(tl => tl.Lesson)
+                .ToListAsync();
+
+            // Temukan semua kursus yang terkait dengan guru ini dari TeacherCourse
+            var teacherCourses = await _context.TeacherCourses
+                .Include(tc => tc.Course)
+                .Where(tc => tc.TeacherId == Guid.Parse(teacherId))
+                .Select(tc => tc.Course)
+                .ToListAsync();
+
+            // Temukan semua classroom yang terkait dengan guru ini dari TeacherClassRoom
+            var teacherClassRooms = await _context.TeacherClassRooms
+                .Include(tcr => tcr.ClassRoom)
+                .Where(tcr => tcr.TeacherId == Guid.Parse(teacherId))
+                .Select(tcr => tcr.ClassRoom)
+                .ToListAsync();
+
+            // Membuat daftar DTO untuk pelajaran (lesson)
+            var lessonDtos = teacherLessons.Select(lesson =>
+                new LessonGetTeacherDto
+                {
+                    Id = lesson.Id,
+                    LessonName = lesson.LessonName,
+                    UniqueNumberOfLesson = lesson.UniqueNumberOfLesson,
+                }).ToList();
+
+            // Membuat daftar DTO untuk kursus (course)
+            var courseDtos = teacherCourses.Select(course =>
+            {
+                // Dapatkan daftar kelas yang terkait dengan guru melalui TeacherClassRoom
+                var teacherClassRoomUniqueNumbers = teacherClassRooms.Select(tcr => tcr.UniqueNumberOfClassRoom);
+
+                // Dapatkan daftar kelas yang terkait dengan kursus melalui CourseClassRoom
+                var courseClassRoomUniqueNumbers = course.CourseClassRooms?.Select(ccr => ccr.ClassRoom.UniqueNumberOfClassRoom);
+
+                // Gabungkan daftar kelas dari kedua sumber
+                var allClassRoomUniqueNumbers = teacherClassRoomUniqueNumbers.Concat(courseClassRoomUniqueNumbers ?? Enumerable.Empty<string>());
+
+                // Membuat daftar DTO untuk kursus
+                return new CourseGetDto
+                {
+                    Id = course.Id,
+                    CourseName = course.CourseName,
+                    Description = course.Description,
+                    FileName = course.FileData != null ? $"{course.CourseName}.{GetFileExtension(course.FileData)}" : "No File",
+                    FileData = course.FileData,
+                    LinkCourse = course.LinkCourse,
+                    UniqueNumberOfLesson = course.Lesson != null ? course.Lesson.UniqueNumberOfLesson : "UnknownUniqueNumberOfLesson",
+                    UniqueNumberOfClassRooms = allClassRoomUniqueNumbers.ToList(),
+                };
+            }).ToList();
+
+            // Mengembalikan respons yang sesuai
+            return new
+            {
+                teacherId = teacherId,
+                lessons = lessonDtos,
+                courses = courseDtos,
+            };
+        }
 
         // =========================== SHORT CODE =========================== //
         private string GetFileExtension(byte[] fileData)
