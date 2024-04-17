@@ -1,4 +1,4 @@
-﻿using Application.Core;
+using Application.Core;
 using Application.Attendances.DTOs;
 using AutoMapper;
 using MediatR;
@@ -28,25 +28,9 @@ namespace Application.Attendances
             public async Task<Result<List<AttendanceGetDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var attendances = await _context.Attendances
-                    .Include(a => a.Student) // Memuat data siswa terkait
-                        .ThenInclude(s => s.ClassRoom) // Memuat data ruang kelas terkait dengan siswa
                     .ToListAsync(cancellationToken);
 
-                var groupedAttendances = attendances
-                    .GroupBy(a => a.StudentId)
-                    .Select(group => new AttendanceGetDto
-                    {
-                        StudentId = group.Key,
-                        NameStudent = group.First().Student.NameStudent, // Mendapatkan nama siswa
-                        UniqueNumberOfClassRoom = group.First().Student.ClassRoom.UniqueNumberOfClassRoom, // Mendapatkan nomor unik ruang kelas
-                        AttendanceStudent = group.Select(attendance => new AttendanceStudentDto
-                        {
-                            AttendanceId = attendance.Id,
-                            Date = attendance.Date,
-                            Status = attendance.Status
-                        }).ToList()
-                    })
-                    .ToList();
+                var attendanceDtos = _mapper.Map<List<AttendanceGetDto>>(attendances);
 
                 return Result<List<AttendanceGetDto>>.Success(groupedAttendances);
             }
