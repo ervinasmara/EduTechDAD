@@ -31,8 +31,18 @@ namespace API.Controllers.Learn
 
         [Authorize(Policy = "RequireRole2OrRole4")]
         [HttpPost]
-        public async Task<IActionResult> Course([FromForm] Create.Command command, CancellationToken ct)
+        public async Task<IActionResult> Course([FromForm] CourseDto courseDto, CancellationToken ct)
         {
+            // Ambil TeacherId dari token autentikasi
+            var teacherId = Guid.Parse(HttpContext.User.FindFirst("TeacherId").Value);
+
+            // Tetapkan TeacherId dari token autentikasi ke dalam CourseDto
+            courseDto.TeacherId = teacherId;
+
+            // Buat command menggunakan CourseDto yang diterima
+            var command = new Create.Command { CourseDto = courseDto };
+
+            // Kirim command ke handler untuk diproses
             return HandleResult(await Mediator.Send(command, ct));
         }
 
