@@ -16,20 +16,13 @@ namespace API.Controllers.Attendances
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpGet("attendanceparam")]
-        public async Task<ActionResult> GetAttendanceParam([FromQuery] int? year, [FromQuery] int? month, [FromQuery] int? day, [FromQuery] string nameStudent, [FromQuery] string className, CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new GetAttendanceByFilter.Query { Year = year, Month = month, Day = day, NameStudent = nameStudent, ClassName = className }, ct));
-        }
-
-        [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAttendance(Guid id, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new Details.Query { Id = id }, ct));
         }
 
-        [Authorize(Policy = "RequireRole3OrRole4")]
+        [Authorize(Policy = "RequireRole1,3,4")]
         [HttpGet("student/{studentId}")]
         public async Task<ActionResult> GetAttendanceByStudentId(Guid studentId, CancellationToken ct)
         {
@@ -45,9 +38,9 @@ namespace API.Controllers.Attendances
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> EditAttendanceDto(Guid id, AttendanceDto announcementDto, CancellationToken ct)
+        public async Task<IActionResult> EditAttendanceDto(Guid id, AttendanceEditDto announcementEditDto, CancellationToken ct)
         {
-            var result = await Mediator.Send(new Edit.Command { Id = id, AttendanceDto = announcementDto }, ct);
+            var result = await Mediator.Send(new Edit.Command { Id = id, AttendanceEditDto = announcementEditDto }, ct);
 
             return HandleResult(result);
         }

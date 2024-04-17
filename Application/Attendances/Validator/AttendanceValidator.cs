@@ -1,4 +1,5 @@
 ﻿using Application.Attendances.DTOs;
+using Application.Attendances.Validator;
 using FluentValidation;
 
 namespace Application.Attendances
@@ -8,8 +9,8 @@ namespace Application.Attendances
         public AttendanceValidator()
         {
             RuleFor(x => x.Date).NotEmpty();
-            RuleFor(x => x.Status).NotEmpty();
-            RuleFor(x => x.StudentId).NotEmpty();
+            RuleForEach(x => x.AttendanceStudentCreate)
+                .SetValidator(new AttendanceStudentValidator());
         }
     }
 }

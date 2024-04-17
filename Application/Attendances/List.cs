@@ -1,4 +1,4 @@
-﻿using Application.Core;
+using Application.Core;
 using Application.Attendances.DTOs;
 using AutoMapper;
 using MediatR;
@@ -32,7 +32,7 @@ namespace Application.Attendances
 
                 var attendanceDtos = _mapper.Map<List<AttendanceGetDto>>(attendances);
 
-                return Result<List<AttendanceGetDto>>.Success(attendanceDtos);
+                return Result<List<AttendanceGetDto>>.Success(groupedAttendances);
             }
         }
     }
