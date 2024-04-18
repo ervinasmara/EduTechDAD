@@ -90,7 +90,9 @@ namespace Application.Learn.Courses
                         Description = request.CourseDto.Description,
                         FileData = fileData,
                         LinkCourse = request.CourseDto.LinkCourse,
-                        LessonId = lesson.Id // Mengisi LessonId dengan Id Lesson yang sesuai
+                        LessonId = lesson.Id, // Mengisi LessonId dengan Id Lesson yang sesuai
+                        CreatedAt = DateTime.UtcNow.AddHours(7) // Menambahkan 7 jam sesuai dengan zona waktu Indonesia
+
                     };
 
                     // Menambahkan Course ke database

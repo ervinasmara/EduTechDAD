@@ -47,6 +47,7 @@ namespace Application.Learn.Courses
                 var coursesInClassroom = await _context.Courses
                     .Include(c => c.Lesson)
                     .Where(c => c.CourseClassRooms.Any(ccr => ccr.ClassRoomId == classroom.Id))
+                    .OrderByDescending(c => c.CreatedAt)
                     .ToListAsync(cancellationToken);
 
                 var courseDtos = coursesInClassroom.Select(course => new CourseGetDto

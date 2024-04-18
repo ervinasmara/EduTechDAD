@@ -42,14 +42,10 @@ namespace Application.Learn.Courses
 
                 var teacherCourses = await _context.TeacherCourses
                     .Include(tc => tc.Course)
+                    .ThenInclude(c => c.CourseClassRooms)
+                    .ThenInclude(ccr => ccr.ClassRoom)
                     .Where(tc => tc.TeacherId == Guid.Parse(teacherId))
                     .Select(tc => tc.Course)
-                    .ToListAsync();
-
-                var teacherClassRooms = await _context.TeacherClassRooms
-                    .Include(tcr => tcr.ClassRoom)
-                    .Where(tcr => tcr.TeacherId == Guid.Parse(teacherId))
-                    .Select(tcr => tcr.ClassRoom)
                     .ToListAsync();
 
                 var lessonDtos = teacherLessons.Select(lesson =>
@@ -62,9 +58,7 @@ namespace Application.Learn.Courses
 
                 var courseDtos = teacherCourses.Select(course =>
                 {
-                    var teacherClassRoomUniqueNumbers = teacherClassRooms.Select(tcr => tcr.UniqueNumberOfClassRoom);
-                    var courseClassRoomUniqueNumbers = course.CourseClassRooms?.Select(ccr => ccr.ClassRoom.UniqueNumberOfClassRoom);
-                    var allClassRoomUniqueNumbers = teacherClassRoomUniqueNumbers.Concat(courseClassRoomUniqueNumbers ?? Enumerable.Empty<string>());
+                    var classRoomNames = course.CourseClassRooms.Select(ccr => ccr.ClassRoom.ClassName);
 
                     return new CourseTeacherGetDto
                     {
@@ -75,9 +69,10 @@ namespace Application.Learn.Courses
                         FileData = course.FileData,
                         LinkCourse = course.LinkCourse,
                         UniqueNumberOfLesson = course.Lesson != null ? course.Lesson.UniqueNumberOfLesson : "UnknownUniqueNumberOfLesson",
-                        UniqueNumberOfClassRooms = allClassRoomUniqueNumbers.ToList(),
+                        ClassNames = classRoomNames.ToList() // Menggunakan ClassName
                     };
                 }).ToList();
+
 
                 return Result<object>.Success(new
                 {
