@@ -13,6 +13,7 @@ namespace Domain.User
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
         public string Nip { get; set; }
+        public int Status { get; set; } = 1;
 
         // Menunjukkan kunci asing ke AppUser
         public string AppUserId { get; set; }

@@ -16,6 +16,7 @@ namespace Domain.User
         public string Nis { get; set; }
         public string ParentName { get; set; }
         public int Gender { get; set; }
+        public int Status { get; set; } = 1;
 
         // Menunjukkan kunci asing ke AppUser
         public string AppUserId { get; set; }

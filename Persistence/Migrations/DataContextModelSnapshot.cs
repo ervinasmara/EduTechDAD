@@ -63,6 +63,9 @@ namespace Persistence.Migrations
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<byte[]>("FileData")
                         .HasColumnType("bytea");
 
@@ -143,6 +146,9 @@ namespace Persistence.Migrations
 
                     b.Property<string>("CourseName")
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -336,6 +342,9 @@ namespace Persistence.Migrations
                     b.Property<string>("NameAdmin")
                         .HasColumnType("text");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId")
@@ -447,6 +456,9 @@ namespace Persistence.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId")
@@ -468,6 +480,9 @@ namespace Persistence.Migrations
 
                     b.Property<string>("NameSuperAdmin")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -503,6 +518,9 @@ namespace Persistence.Migrations
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

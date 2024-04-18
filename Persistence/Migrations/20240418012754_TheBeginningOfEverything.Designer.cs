@@ -12,8 +12,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240416060603_ManytoManyAdded")]
-    partial class ManytoManyAdded
+    [Migration("20240418012754_TheBeginningOfEverything")]
+    partial class TheBeginningOfEverything
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,6 +65,9 @@ namespace Persistence.Migrations
 
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<byte[]>("FileData")
                         .HasColumnType("bytea");
@@ -147,6 +150,9 @@ namespace Persistence.Migrations
                     b.Property<string>("CourseName")
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
@@ -164,6 +170,21 @@ namespace Persistence.Migrations
                     b.HasIndex("LessonId");
 
                     b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("Domain.Learn.Courses.TeacherCourse", b =>
+                {
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("TeacherId", "CourseId");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("TeacherCourses");
                 });
 
             modelBuilder.Entity("Domain.Learn.Lessons.Lesson", b =>
@@ -324,6 +345,9 @@ namespace Persistence.Migrations
                     b.Property<string>("NameAdmin")
                         .HasColumnType("text");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId")
@@ -435,6 +459,9 @@ namespace Persistence.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId")
@@ -456,6 +483,9 @@ namespace Persistence.Migrations
 
                     b.Property<string>("NameSuperAdmin")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -491,6 +521,9 @@ namespace Persistence.Migrations
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -663,6 +696,25 @@ namespace Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Lesson");
+                });
+
+            modelBuilder.Entity("Domain.Learn.Courses.TeacherCourse", b =>
+                {
+                    b.HasOne("Domain.Learn.Courses.Course", "Course")
+                        .WithMany("TeacherCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.User.Teacher", "Teacher")
+                        .WithMany("TeacherCourses")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Domain.Learn.Schedules.Schedule", b =>
@@ -899,6 +951,8 @@ namespace Persistence.Migrations
                     b.Navigation("Assignments");
 
                     b.Navigation("CourseClassRooms");
+
+                    b.Navigation("TeacherCourses");
                 });
 
             modelBuilder.Entity("Domain.Learn.Lessons.Lesson", b =>
@@ -931,6 +985,8 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.User.Teacher", b =>
                 {
                     b.Navigation("TeacherClassRooms");
+
+                    b.Navigation("TeacherCourses");
 
                     b.Navigation("TeacherLessons");
                 });

@@ -6,6 +6,7 @@ namespace Domain.User
     {
         public Guid Id { get; set; }
         public string NameAdmin { get; set; }
+        public int Status { get; set; } = 1;
 
         // Menunjukkan kunci asing ke AppUser
         public string AppUserId { get; set; }

@@ -15,6 +15,7 @@ namespace Domain.Assignments
         public byte[] FileData { get; set; }
         public string AssignmentLink { get; set; }
         public int Status { get; set; } = 1;
+        public DateTime CreatedAt { get; set; }
 
         // Kunci asing ke Course
         public Guid CourseId { get; set; }

@@ -12,6 +12,7 @@ namespace Domain.Learn.Courses
         public string Description { get; set; }
         public byte[]? FileData { get; set; }
         public string? LinkCourse { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         // Kunci asing ke Lesson
         public Guid LessonId { get; set; }
