@@ -14,6 +14,20 @@ namespace API.Controllers.Learn
             return HandleResult(await Mediator.Send(new List.Query(), ct));
         }
 
+        [Authorize]
+        [HttpGet("studentcourseclassroom")]
+        public async Task<IActionResult> GetStudentCourses(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new CourseStudentClassRoom.Query(), ct));
+        }
+
+        [Authorize]
+        [HttpGet("teachercourses")]
+        public async Task<IActionResult> GetTeacherCourses(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new CourseTeacher.Query(), ct));
+        }
+
         [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet("courses/{classRoomId}")]
         public async Task<ActionResult<Result<List<CourseGetDto>>>> GetCoursesByClassRoom(Guid classRoomId)
@@ -27,6 +41,13 @@ namespace API.Controllers.Learn
         public async Task<ActionResult> GetCourse(Guid id, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new Details.Query { Id = id }, ct));
+        }
+
+        [Authorize(Policy = "RequireRole2OrRole4")]
+        [HttpPost("coba")]
+        public async Task<IActionResult> CreateCours([FromForm] CourseDto courseDto, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new Create.Command { CourseDto = courseDto }, ct));
         }
 
         [Authorize(Policy = "RequireRole2OrRole4")]

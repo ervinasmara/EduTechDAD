@@ -6,6 +6,7 @@ using FluentValidation;
 using MediatR;
 using Persistence;
 using Microsoft.EntityFrameworkCore;
+using Application.Interface;
 
 namespace Application.Learn.Courses
 {
@@ -28,11 +29,13 @@ namespace Application.Learn.Courses
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
+            private readonly IUserAccessor _userAccessor;
 
-            public Handler(DataContext context, IMapper mapper)
+            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
             {
                 _context = context;
                 _mapper = mapper;
+                _userAccessor = userAccessor;
             }
 
             public async Task<Result<CourseDto>> Handle(Command request, CancellationToken cancellationToken)
@@ -64,7 +67,7 @@ namespace Application.Learn.Courses
                         return Result<CourseDto>.Failure($"Lesson with LessonName {request.CourseDto.LessonName} not found.");
 
                     // Memeriksa apakah teacher memiliki keterkaitan dengan lesson yang dimasukkan
-                    var teacherId = request.CourseDto.TeacherId;
+                    var teacherId = Guid.Parse(_userAccessor.GetTeacherIdFromToken());
                     if (lesson.TeacherLessons.All(tl => tl.TeacherId != teacherId))
                         return Result<CourseDto>.Failure($"Teacher does not have this lesson.");
 
