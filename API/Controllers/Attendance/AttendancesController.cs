@@ -36,14 +36,14 @@ namespace API.Controllers.Attendances
             return HandleResult(await Mediator.Send(new Create.Command { AttendanceDto = announcementDto }, ct));
         }
 
-        [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> EditAttendanceDto(Guid id, AttendanceEditDto announcementEditDto, CancellationToken ct)
-        {
-            var result = await Mediator.Send(new Edit.Command { Id = id, AttendanceEditDto = announcementEditDto }, ct);
+        //[Authorize(Policy = "RequireRole1OrRole4")]
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> EditAttendanceDto(Guid id, AttendanceEditDto announcementEditDto, CancellationToken ct)
+        //{
+        //    var result = await Mediator.Send(new Edit.Command { Id = id, AttendanceEditDto = announcementEditDto }, ct);
 
-            return HandleResult(result);
-        }
+        //    return HandleResult(result);
+        //}
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpDelete("{id}")]

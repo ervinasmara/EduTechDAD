@@ -14,6 +14,7 @@ using Application.User.DTOs;
 using Application.Learn.Courses;
 using Domain.Many_to_Many;
 using Application.Learn.Lessons;
+using static Application.User.Student.CreateSuperAdmin;
 
 namespace API.DTOs
 {
@@ -108,6 +109,13 @@ namespace API.DTOs
         }
 
         // =========================== REGISTER =========================== //
+        [Authorize(Policy = "RequireRole4")]
+        [HttpPost("register/superAdminCQRS")]
+        public async Task<IActionResult> RegisterSuperAdminCQRS(RegisterSuperAdminDtoCoba superAdminDto, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new RegisterSuperAdminCommand { SuperAdminDto = superAdminDto }, ct));
+        }
+
         [Authorize(Policy = "RequireRole4")]
         [HttpPost("register/superAdmin")]
         public async Task<ActionResult<SuperAdminGetDto>> RegisterSuperAdmin(RegisterSuperAdminDto superAdminDto)
