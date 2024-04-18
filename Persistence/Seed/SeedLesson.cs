@@ -12,17 +12,17 @@ namespace Persistence.Seed
             {
                 new Lesson
                 {
-                    LessonName = "PAI",
+                    LessonName = "Komputer dan Jaringan Dasar",
                     UniqueNumberOfLesson = "01",
                 },
                 new Lesson
                 {
-                    LessonName = "PPKN",
+                    LessonName = "Pemograman Dasar",
                     UniqueNumberOfLesson = "02",
                 },
                 new Lesson
                 {
-                    LessonName = "Bahasa Indonesia",
+                    LessonName = "Teknologi Dasar Otomotif",
                     UniqueNumberOfLesson = "03",
                 },
             };

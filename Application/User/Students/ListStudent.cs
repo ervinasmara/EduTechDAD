@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.User.Student
+namespace Application.User.Students
 {
     public class ListStudent
     {

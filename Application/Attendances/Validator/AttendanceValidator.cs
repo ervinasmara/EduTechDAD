@@ -1,8 +1,7 @@
 ﻿using Application.Attendances.DTOs;
-using Application.Attendances.Validator;
 using FluentValidation;
 
-namespace Application.Attendances
+namespace Application.Attendances.Validator
 {
     public class AttendanceValidator : AbstractValidator<AttendanceDto>
     {

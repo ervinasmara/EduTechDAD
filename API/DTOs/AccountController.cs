@@ -1,5 +1,4 @@
 ﻿using API.Controllers;
-using API.DTOs.Registration;
 using API.Services;
 using Domain.User;
 using API.DTOs.Edit;
@@ -8,13 +7,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using Application.User.Student;
-using System.Text.RegularExpressions;
+using Application.User.Students;
 using Application.User.DTOs;
 using Application.Learn.Courses;
-using Domain.Many_to_Many;
 using Application.Learn.Lessons;
-using static Application.User.Student.CreateSuperAdmin;
+using Application.User.DTOs.Registration;
+using Application.User.Superadmin;
+using Application.User.Admins;
+using Application.User.Teachers;
 
 namespace API.DTOs
 {
@@ -110,260 +110,31 @@ namespace API.DTOs
 
         // =========================== REGISTER =========================== //
         [Authorize(Policy = "RequireRole4")]
-        [HttpPost("register/superAdminCQRS")]
-        public async Task<IActionResult> RegisterSuperAdminCQRS(RegisterSuperAdminDtoCoba superAdminDto, CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new RegisterSuperAdminCommand { SuperAdminDto = superAdminDto }, ct));
-        }
-
-        [Authorize(Policy = "RequireRole4")]
         [HttpPost("register/superAdmin")]
-        public async Task<ActionResult<SuperAdminGetDto>> RegisterSuperAdmin(RegisterSuperAdminDto superAdminDto)
+        public async Task<IActionResult> RegisterSuperAdminCQRS(RegisterSuperAdminDto superAdminDto, CancellationToken ct)
         {
-            // Pemeriksaan username supaya berbeda dengan yang lain
-            if (await _userManager.Users.AnyAsync(x => x.UserName == superAdminDto.Username))
-            {
-                return BadRequest("Username already in use");
-            }
-
-            var user = new AppUser
-            {
-                UserName = superAdminDto.Username,
-                Role = superAdminDto.Role,
-            };
-
-            var superAdmin = new SuperAdmin
-            {
-                NameSuperAdmin = superAdminDto.NameSuperAdmin,
-                AppUserId = user.Id
-            };
-
-            var result = await _userManager.CreateAsync(user, superAdminDto.Password);
-
-            if (result.Succeeded)
-            {
-                // Simpan superAdmin ke dalam konteks database Anda
-                _context.SuperAdmins.Add(superAdmin);
-                await _context.SaveChangesAsync();
-
-                // Gunakan metode CreateUserObjectSuperAdmin untuk membuat objek SuperAdminDto
-                var superAdminDtoResult = await CreateUserObjectSuperAdminGet(user);
-                return superAdminDtoResult; // Mengembalikan hasil dari Task<ActionResult<SuperAdminDto>>
-            }
-            return BadRequest(result.Errors);
+            return HandleResult(await Mediator.Send(new CreateSuperAdmin.RegisterSuperAdminCommand { SuperAdminDto = superAdminDto }, ct));
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("register/admin")]
-        public async Task<ActionResult<AdminGetDto>> RegisterAdmin(RegisterAdminDto adminDto)
+        public async Task<IActionResult> RegisterAdminCQRS(RegisterAdminDto adminDto, CancellationToken ct)
         {
-            // Pemeriksaan username supaya berbeda dengan yang lain
-            if (await _userManager.Users.AnyAsync(x => x.UserName == adminDto.Username))
-            {
-                return BadRequest("Username already in use");
-            }
-
-            var user = new AppUser
-            {
-                UserName = adminDto.Username,
-                Role = adminDto.Role,
-            };
-
-            var admin = new Admin
-            {
-                NameAdmin = adminDto.NameAdmin,
-                AppUserId = user.Id
-            };
-
-            var result = await _userManager.CreateAsync(user, adminDto.Password);
-
-            if (result.Succeeded)
-            {
-                // Simpan admin ke dalam konteks database Anda
-                _context.Admins.Add(admin);
-                await _context.SaveChangesAsync();
-
-                // Gunakan metode CreateUserObjectAdmin untuk membuat objek AdminDto
-                var adminDtoResult = await CreateUserObjectAdminGet(user);
-                return adminDtoResult; // Mengembalikan hasil dari Task<ActionResult<AdminDto>>
-            }
-            return BadRequest(result.Errors);
+            return HandleResult(await Mediator.Send(new CreateAdmin.RegisterAdminCommand { AdminDto = adminDto }, ct));
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("register/teacher")]
-        public async Task<ActionResult<TeacherRegisterDto>> RegisterTeacher(RegisterTeacherDto teacherDto)
+        public async Task<IActionResult> RegisterTeacherCQRS(RegisterTeacherDto teacherDto, CancellationToken ct)
         {
-            // Pemeriksaan username supaya berbeda dengan yang lain
-            if (await _userManager.Users.AnyAsync(x => x.UserName == teacherDto.Username))
-            {
-                return BadRequest("Username already in use");
-            }
-
-            if (teacherDto.BirthDate == DateOnly.MinValue)
-            {
-                return BadRequest("Date of birth required");
-            }
-
-            // Pemeriksaan apakah lessonname ada di database
-            foreach (var lessonName in teacherDto.LessonName)
-            {
-                if (!await _context.Lessons.AnyAsync(l => l.LessonName == lessonName))
-                {
-                    return BadRequest($"Lesson '{lessonName}' does not exist");
-                }
-            }
-
-            // Pemeriksaan apakah uniquenumberofclassroom ada di database
-            foreach (var uniqueNumber in teacherDto.UniqueNumberOfClassRoom)
-            {
-                if (!await _context.ClassRooms.AnyAsync(c => c.UniqueNumberOfClassRoom == uniqueNumber))
-                {
-                    return BadRequest($"Classroom with unique number '{uniqueNumber}' does not exist");
-                }
-            }
-
-            var user = new AppUser
-            {
-                UserName = teacherDto.Username,
-                Role = teacherDto.Role,
-            };
-
-            var teacher = new Teacher
-            {
-                NameTeacher = teacherDto.NameTeacher,
-                BirthDate = teacherDto.BirthDate,
-                BirthPlace = teacherDto.BirthPlace,
-                Address = teacherDto.Address,
-                PhoneNumber = teacherDto.PhoneNumber,
-                Nip = teacherDto.Nip,
-                AppUserId = user.Id
-            };
-
-            var result = await _userManager.CreateAsync(user, teacherDto.Password);
-
-            if (result.Succeeded)
-            {
-                // Simpan teacher ke dalam konteks database Anda
-                _context.Teachers.Add(teacher);
-
-                // Tambahkan relasi antara guru dan pelajaran (Lesson)
-                foreach (var lessonName in teacherDto.LessonName)
-                {
-                    var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.LessonName == lessonName);
-                    if (lesson != null)
-                    {
-                        var teacherLesson = new TeacherLesson
-                        {
-                            Teacher = teacher,
-                            Lesson = lesson
-                        };
-                        _context.TeacherLessons.Add(teacherLesson);
-                    }
-                }
-
-                // Tambahkan relasi antara guru dan nomor unik ruang kelas (UniqueNumberOfClassRoom)
-                foreach (var uniqueNumber in teacherDto.UniqueNumberOfClassRoom)
-                {
-                    var classroom = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == uniqueNumber);
-                    if (classroom != null)
-                    {
-                        var teacherClassroom = new TeacherClassRoom
-                        {
-                            Teacher = teacher,
-                            ClassRoom = classroom
-                        };
-                        _context.TeacherClassRooms.Add(teacherClassroom);
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-
-                // Gunakan metode CreateUserObjectTeacher untuk membuat objek TeacherDto
-                var teacherDtoResult = await CreateUserObjectTeacherGet(user);
-                return teacherDtoResult; // Mengembalikan hasil dari Task<ActionResult<TeacherDto>>
-            }
-            return BadRequest(result.Errors);
+            return HandleResult(await Mediator.Send(new CreateTeacher.RegisterTeacherCommand { TeacherDto = teacherDto }, ct));
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("register/student")]
-        public async Task<ActionResult<StudentGetDto>> RegisterStudent(RegisterStudentDto studentDto)
+        public async Task<IActionResult> RegisterStudentCQRS(RegisterStudentDto studentDto, CancellationToken ct)
         {
-            if (studentDto.BirthDate == DateOnly.MinValue)
-            {
-                return BadRequest("Date of birth required");
-            }
-
-            // Mengambil NIS terakhir dari database
-            var lastNis = await _context.Students.MaxAsync(s => s.Nis);
-            int newNisNumber = 1;
-            if (!string.IsNullOrEmpty(lastNis))
-            {
-                // Mengambil angka dari NIS terakhir dan menambahkannya satu
-                newNisNumber = int.Parse(lastNis) + 1;
-            }
-
-            // Membuat NIS baru dengan format yang diinginkan
-            var newNis = newNisNumber.ToString("00000");
-
-            var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == studentDto.UniqueNumberOfClassRoom);
-            if (selectedClass == null)
-            {
-                return BadRequest("Selected UniqueNumberOfClass not found");
-            }
-
-            // Membuat username sama dengan NIS
-            var username = newNis;
-
-            // Memeriksa apakah username sudah digunakan
-            if (await _userManager.Users.AnyAsync(x => x.UserName == username))
-            {
-                return BadRequest("Username already in use");
-            }
-
-            var user = new AppUser
-            {
-                UserName = username,
-                Role = studentDto.Role,
-            };
-
-            var student = new Student
-            {
-                NameStudent = studentDto.NameStudent,
-                BirthDate = studentDto.BirthDate,
-                BirthPlace = studentDto.BirthPlace,
-                Address = studentDto.Address,
-                PhoneNumber = studentDto.PhoneNumber,
-                Nis = newNis, // Menggunakan NIS yang baru di-generate
-                ParentName = studentDto.ParentName,
-                Gender = studentDto.Gender,
-                AppUserId = user.Id,
-                ClassRoomId = selectedClass.Id
-            };
-
-            // Membuat password berdasarkan NIS yang baru di-generate
-            var password = $"{newNis}Edu#";
-
-            // Validasi password sesuai dengan ekspresi reguler sebelum menyimpannya
-            if (!Regex.IsMatch(password, "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}"))
-            {
-                return BadRequest("Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one digit.");
-            }
-
-            var result = await _userManager.CreateAsync(user, password);
-
-            if (result.Succeeded)
-            {
-                // Simpan student ke dalam konteks database Anda
-                _context.Students.Add(student);
-                await _context.SaveChangesAsync();
-
-                // Gunakan metode CreateUserObjectStudent untuk membuat objek StudentDto
-                var studentDtoResult = await CreateUserObjectStudentGet(user);
-                return studentDtoResult; // Mengembalikan hasil dari Task<ActionResult<StudentDto>>
-            }
-            return BadRequest(result.Errors);
+            return HandleResult(await Mediator.Send(new CreateStudent.RegisterStudentCommand { StudentDto = studentDto }, ct));
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]

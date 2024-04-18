@@ -6,6 +6,7 @@ using AutoMapper;
 using Domain.Attendances;
 using Application.Attendances.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Application.Attendances.Validator;
 
 namespace Application.Attendances
 {

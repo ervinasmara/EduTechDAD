@@ -1,34 +1,30 @@
 ﻿using Application.Core;
-using AutoMapper;
-using Domain.Many_to_Many;
-using Domain.Learn.Courses;
-using FluentValidation;
 using MediatR;
 using Persistence;
 using Microsoft.EntityFrameworkCore;
 using Application.User.DTOs;
 using Domain.User;
 using Microsoft.AspNetCore.Identity;
-using System.Net;
+using Application.User.DTOs.Registration;
+using FluentValidation;
+using Application.User.Validation;
 
-namespace Application.User.Student
+namespace Application.User.Superadmin
 {
     public class CreateSuperAdmin
     {
         public class RegisterSuperAdminCommand : IRequest<Result<SuperAdminGetDto>>
         {
-            public RegisterSuperAdminDtoCoba SuperAdminDto { get; set; }
+            public RegisterSuperAdminDto SuperAdminDto { get; set; }
         }
 
-
-
-        //public class CommandValidatorDto : AbstractValidator<Command>
-        //{
-        //    public CommandValidatorDto()
-        //    {
-        //        RuleFor(x => x.CourseDto).SetValidator(new CourseValidator());
-        //    }
-        //}
+        public class RegisterSuperAdminCommandValidator : AbstractValidator<RegisterSuperAdminCommand>
+        {
+            public RegisterSuperAdminCommandValidator()
+            {
+                RuleFor(x => x.SuperAdminDto).SetValidator(new RegisterSuperadminValidator());
+            }
+        }
 
         public class RegisterSuperAdminCommandHandler : IRequestHandler<RegisterSuperAdminCommand, Result<SuperAdminGetDto>>
         {
@@ -43,14 +39,14 @@ namespace Application.User.Student
 
             public async Task<Result<SuperAdminGetDto>> Handle(RegisterSuperAdminCommand request, CancellationToken cancellationToken)
             {
-                RegisterSuperAdminDtoCoba superAdminDto = request.SuperAdminDto;
+                RegisterSuperAdminDto superAdminDto = request.SuperAdminDto;
 
                 // Validasi menggunakan FluentValidation
-                //var validationResult = new RegisterSuperAdminCommandValidator().Validate(request);
-                //if (!validationResult.IsValid)
-                //{
-                //    return Result<SuperAdminGetDto>.Failure("Validation failed");
-                //}
+                var validationResult = new RegisterSuperAdminCommandValidator().Validate(request);
+                if (!validationResult.IsValid)
+                {
+                    return Result<SuperAdminGetDto>.Failure("Validation failed");
+                }
 
                 // Pemeriksaan username supaya berbeda dengan yang lain
                 if (await _userManager.Users.AnyAsync(x => x.UserName == superAdminDto.Username))

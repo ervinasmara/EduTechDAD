@@ -81,6 +81,7 @@ namespace API.Services
                 new Claim(ClaimTypes.Role, user.Role.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.UserName),
+                new Claim("TeacherId", teacher.Id.ToString()),
                 new Claim("NameTeacher", teacher.NameTeacher),
                 new Claim("BirthDate", teacher.BirthDate.ToString()),
                 new Claim("BirthPlace", teacher.BirthPlace),
