@@ -2,7 +2,7 @@
 using MediatR;
 using Persistence;
 
-namespace Application.InfoRecaps
+namespace Application.InfoRecaps.Command
 {
     public class DeleteInfoRecap
     {

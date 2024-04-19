@@ -3,9 +3,9 @@ using Domain.Announcement;
 using MediatR;
 using Persistence;
 
-namespace Application.Announcements
+namespace Application.Announcements.Query
 {
-    public class Details
+    public class DetailsAnnouncement
     {
         public class Query : IRequest<Result<Announcement>>
         {
@@ -23,8 +23,10 @@ namespace Application.Announcements
 
             public async Task<Result<Announcement>> Handle(Query request, CancellationToken cancellationToken)
             {
+                // Menggunakan FindAsync untuk mencari Announcement berdasarkan ID yang diberikan dalam permintaan.
                 var announcement = await _context.Announcements.FindAsync(request.Id);
 
+                // Mengembalikan hasil yang berhasil bersama dengan entitas Announcement yang ditemukan.
                 return Result<Announcement>.Success(announcement);
             }
         }

@@ -4,9 +4,9 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Announcements
+namespace Application.Announcements.Query
 {
-    public class List
+    public class ListAnnouncement
     {
         public class Query : IRequest<Result<List<Announcement>>>
         {
@@ -22,6 +22,7 @@ namespace Application.Announcements
             }
             public async Task<Result<List<Announcement>>> Handle(Query request, CancellationToken cancellationToken)
             {
+                // Mengembalikan hasil yang berhasil bersama dengan daftar Announcement dari basis data.
                 return Result<List<Announcement>>.Success(await _context.Announcements.ToListAsync(cancellationToken));
             }
         }

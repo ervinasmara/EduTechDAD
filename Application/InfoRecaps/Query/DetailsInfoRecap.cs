@@ -3,7 +3,7 @@ using Domain.InfoRecaps;
 using MediatR;
 using Persistence;
 
-namespace Application.InfoRecaps
+namespace Application.InfoRecaps.Query
 {
     public class DetailsInfoRecap
     {

@@ -5,7 +5,7 @@ using Application.Core;
 using AutoMapper;
 using Domain.InfoRecaps;
 
-namespace Application.InfoRecaps
+namespace Application.InfoRecaps.Command
 {
     public class CreateInfoRecap
     {

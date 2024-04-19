@@ -5,7 +5,7 @@ using FluentValidation;
 using Application.Core;
 using Domain.InfoRecaps;
 
-namespace Application.InfoRecaps
+namespace Application.InfoRecaps.Command
 {
     public class EditInfoRecap
     {
