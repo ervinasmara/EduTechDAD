@@ -48,7 +48,7 @@ namespace Application.Core
             CreateMap<Schedule, ScheduleDto>();
             CreateMap<ScheduleDto, Schedule>();
             CreateMap<Schedule, ScheduleGetDto>();
-            CreateMap<InfoRecap, InfoRecapDto>();
+            CreateMap<InfoRecap, InfoRecapCreateDto>();
             CreateMap<Teacher, TeacherGetAllDto>();
 
 

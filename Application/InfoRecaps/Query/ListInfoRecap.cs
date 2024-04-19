@@ -6,7 +6,7 @@ using Persistence;
 
 namespace Application.InfoRecaps
 {
-    public class List
+    public class ListInfoRecap
     {
         public class Query : IRequest<Result<List<InfoRecap>>>
         {
@@ -22,6 +22,7 @@ namespace Application.InfoRecaps
             }
             public async Task<Result<List<InfoRecap>>> Handle(Query request, CancellationToken cancellationToken)
             {
+                // Mengembalikan hasil yang berhasil bersama dengan daftar InfoRecap dari basis data.
                 return Result<List<InfoRecap>>.Success(await _context.InfoRecaps.ToListAsync(cancellationToken));
             }
         }

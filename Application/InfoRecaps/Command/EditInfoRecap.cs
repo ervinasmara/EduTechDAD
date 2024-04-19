@@ -7,7 +7,7 @@ using Domain.InfoRecaps;
 
 namespace Application.InfoRecaps
 {
-    public class Edit
+    public class EditInfoRecap
     {
         public class Command : IRequest<Result<InfoRecap>>
         {
@@ -28,6 +28,7 @@ namespace Application.InfoRecaps
 
             public async Task<Result<InfoRecap>> Handle(Command request, CancellationToken cancellationToken)
             {
+                // Menggunakan FindAsync untuk mencari InfoRecap berdasarkan ID yang diberikan dalam permintaan.
                 var infoRecap = await _context.InfoRecaps.FindAsync(request.Id);
 
                 // Periksa apakah infoRecap ditemukan

@@ -2,7 +2,7 @@
 
 namespace Application.InfoRecaps
 {
-    public class InfoRecapValidator : AbstractValidator<InfoRecapDto>
+    public class InfoRecapValidator : AbstractValidator<InfoRecapCreateDto>
     {
         public InfoRecapValidator()
         {
