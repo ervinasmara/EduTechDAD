@@ -20,6 +20,13 @@ namespace API.Controllers.Lessons
             return HandleResult(await Mediator.Send(new Details.Query { Id = id }, ct));
         }
 
+        [Authorize(Policy = "RequireRole1,3,4")]
+        [HttpGet("lessonClassRoomId")]
+        public async Task<IActionResult> GetLessonsByClassRoomId(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new LessonByClassRoomId.Query(), ct));
+        }
+
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost]
         public async Task<IActionResult> CreateLessonDto(LessonCreateDto lessonDto, CancellationToken ct)
@@ -32,11 +39,9 @@ namespace API.Controllers.Lessons
         public async Task<IActionResult> EditLessonDto(Guid id, LessonDto lessonDto, CancellationToken ct)
         {
             var result = await Mediator.Send(new Edit.Command { Id = id, LessonDto = lessonDto }, ct);
-
             return HandleResult(result);
         }
-
-        [Authorize(Policy = "RequireRole1OrRole4")]
+               [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLesson(Guid id, CancellationToken ct)
         {

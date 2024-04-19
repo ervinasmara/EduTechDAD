@@ -6,7 +6,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.User.Teacher
+namespace Application.User.Teachers
 {
     public class ListTeacher
     {

@@ -2,9 +2,9 @@
 using MediatR;
 using Persistence;
 
-namespace Application.Learn.Schedules
+namespace Application.Learn.Schedules.Command
 {
-    public class Delete
+    public class DeleteSchedule
     {
         public class Command : IRequest<Result<Unit>>
         {

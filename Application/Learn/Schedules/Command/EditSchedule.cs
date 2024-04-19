@@ -1,24 +1,25 @@
 ﻿using Application.Core;
 using AutoMapper;
-using Domain.Learn.Schedules;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Learn.Schedules
+namespace Application.Learn.Schedules.Command
 {
-    public class Create
+    public class EditSchedule
     {
         public class Command : IRequest<Result<ScheduleDto>>
         {
-            public ScheduleDto ScheduleDto { get; set; }
+            public Guid Id { get; set; } // ID dari jadwal yang ingin diubah
+            public ScheduleDto ScheduleDto { get; set; } // Data jadwal yang baru
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
             public CommandValidator()
             {
+                RuleFor(x => x.Id).NotEmpty();
                 RuleFor(x => x.ScheduleDto).SetValidator(new ScheduleValidator());
             }
         }
@@ -36,6 +37,12 @@ namespace Application.Learn.Schedules
 
             public async Task<Result<ScheduleDto>> Handle(Command request, CancellationToken cancellationToken)
             {
+                // Cari jadwal yang akan diubah berdasarkan ID
+                var schedule = await _context.Schedules.FindAsync(request.Id);
+
+                if (schedule == null)
+                    return Result<ScheduleDto>.Failure("Schedule not found");
+
                 // Cari Lesson berdasarkan LessonName
                 var lesson = await _context.Lessons.SingleOrDefaultAsync(l => l.LessonName == request.ScheduleDto.LessonName);
                 if (lesson == null)
@@ -53,22 +60,20 @@ namespace Application.Learn.Schedules
                 if (!isClassRoomValidForLesson)
                     return Result<ScheduleDto>.Failure("The selected ClassRoom is not associated with the selected Lesson.");
 
-                var schedule = new Schedule
-                {
-                    Day = request.ScheduleDto.Day,
-                    StartTime = request.ScheduleDto.StartTime,
-                    EndTime = request.ScheduleDto.EndTime,
-                    LessonId = lesson.Id,
-                    ClassRoomId = classRoom.Id
-                };
+                // Update informasi jadwal
+                schedule.Day = request.ScheduleDto.Day;
+                schedule.StartTime = request.ScheduleDto.StartTime;
+                schedule.EndTime = request.ScheduleDto.EndTime;
+                schedule.LessonId = lesson.Id;
+                schedule.ClassRoomId = classRoom.Id;
 
-                _context.Schedules.Add(schedule);
-
+                // Simpan perubahan ke dalam database
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                if (!result) return Result<ScheduleDto>.Failure("Failed to create Schedule");
+                if (!result)
+                    return Result<ScheduleDto>.Failure("Failed to update Schedule");
 
-                // Buat DTO dari jadwal yang telah dibuat
+                // Buat DTO dari jadwal yang telah diubah
                 var scheduleDto = _mapper.Map<ScheduleDto>(schedule);
 
                 // Tambahkan LessonName dan ClassName ke dalam response body

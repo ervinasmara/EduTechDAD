@@ -19,10 +19,4 @@
         public string ClassName { get; set; }
         public string NameTeacher { get; set; }
     }
-
-    public class TeacherScheduleDto
-    {
-        public Guid TeacherId { get; set; }
-        public string NameTeacher { get; set; }
-    }
 }

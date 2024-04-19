@@ -16,7 +16,6 @@ using Application.User.Admins;
 using Application.User.Teachers;
 using Application.User.DTOs.Edit;
 using Application.Announcements;
-using Application.User.Teacher;
 
 namespace API.DTOs
 {
