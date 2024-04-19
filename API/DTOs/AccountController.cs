@@ -1,7 +1,6 @@
 ﻿using API.Controllers;
 using API.Services;
 using Domain.User;
-using API.DTOs.Edit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +14,9 @@ using Application.User.DTOs.Registration;
 using Application.User.Superadmin;
 using Application.User.Admins;
 using Application.User.Teachers;
+using Application.User.DTOs.Edit;
+using Application.Announcements;
+using Application.User.Teacher;
 
 namespace API.DTOs
 {
@@ -62,12 +64,21 @@ namespace API.DTOs
         //    return HandleResult(await Mediator.Send(new ListTeacher.Query(), ct));
         //}
 
-        //[Authorize(Policy = "RequireRole1,2,4")]
-        //[HttpGet("teacher/{id}")]
-        //public async Task<ActionResult> GetTeacherById(Guid id, CancellationToken ct)
-        //{
-        //    return HandleResult(await Mediator.Send(new DetailsTeacher.Query { Id = id }, ct));
-        //}
+        [Authorize(Policy = "RequireRole1,2,3,4")]
+        [HttpGet("teacher/{id}")]
+        public async Task<ActionResult> GetTeacherByTeacherId(Guid id, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new DetailsTeacher.Query { Id = id }, ct));
+        }
+
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPut("teacher/{teacherId}")]
+        public async Task<IActionResult> EditTeacherByTeacherId(Guid teacherId, EditTeacherDto editTeacherDto, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new EditTeacher.EditTeacherCommand { TeacherId = teacherId, TeacherDto = editTeacherDto }, ct);
+
+            return HandleResult(result);
+        }
 
         // =========================== LOGIN =========================== //
         [AllowAnonymous]

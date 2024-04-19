@@ -39,15 +39,15 @@ namespace Application.Learn.Lessons
             {
                 try
                 {
-                    // Temukan semua guru berdasarkan nama yang diberikan
-                    var teachers = await _context.Teachers
-                        .Where(t => request.LessonCreateDto.NameTeachers.Contains(t.NameTeacher))
+                    // Temukan semua kelas berdasarkan nama yang diberikan
+                    var classrooms = await _context.ClassRooms
+                        .Where(c => request.LessonCreateDto.ClassNames.Contains(c.ClassName))
                         .ToListAsync();
 
-                    if (teachers.Count != request.LessonCreateDto.NameTeachers.Count)
+                    if (classrooms.Count != request.LessonCreateDto.ClassNames.Count)
                     {
-                        var missingTeachers = request.LessonCreateDto.NameTeachers.Except(teachers.Select(t => t.NameTeacher));
-                        return Result<LessonCreateDto>.Failure($"Teachers with names {string.Join(", ", missingTeachers)} not found.");
+                        var missingClassrooms = request.LessonCreateDto.ClassNames.Except(classrooms.Select(c => c.ClassName));
+                        return Result<LessonCreateDto>.Failure($"Classrooms with names {string.Join(", ", missingClassrooms)} not found.");
                     }
 
                     var lastLesson = await _context.Lessons
@@ -65,12 +65,12 @@ namespace Application.Learn.Lessons
 
                     _context.Lessons.Add(lesson);
 
-                    foreach (var teacher in teachers)
+                    foreach (var classroom in classrooms)
                     {
-                        _context.TeacherLessons.Add(new TeacherLesson
+                        _context.LessonClassRooms.Add(new LessonClassRoom
                         {
-                            TeacherId = teacher.Id,
-                            LessonId = lesson.Id
+                            LessonId = lesson.Id,
+                            ClassRoomId = classroom.Id
                         });
                     }
 
@@ -80,7 +80,7 @@ namespace Application.Learn.Lessons
                         return Result<LessonCreateDto>.Failure("Failed to create Lesson");
 
                     var lessonDto = _mapper.Map<LessonCreateDto>(lesson);
-                    lessonDto.NameTeachers = teachers.Select(t => t.NameTeacher).ToList(); // Mengisi NameTeachers dalam DTO dengan koleksi nama guru
+                    lessonDto.ClassNames = classrooms.Select(c => c.ClassName).ToList(); // Mengisi ClassNames dalam DTO dengan koleksi nama kelas
 
                     return Result<LessonCreateDto>.Success(lessonDto);
                 }

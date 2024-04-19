@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace API.DTOs.Edit
+namespace Application.User.DTOs.Edit
 {
-    public class EditTeacherDto
+    public class EditStudentDto
     {
         [Required]
         public string Address { get; set; }
@@ -11,6 +11,6 @@ namespace API.DTOs.Edit
         public string PhoneNumber { get; set; }
 
         [Required]
-        public ICollection<Guid> LessonIds { get; set; }
+        public string UniqueNumberOfClassRoom { get; set; }
     }
 }

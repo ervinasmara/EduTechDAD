@@ -14,6 +14,6 @@ namespace Application.User.DTOs.Registration
         public string Password { get; set; }
         public int Role { get; set; }
         public ICollection<string> LessonName { get; set; }
-        public ICollection<string> UniqueNumberOfClassRoom { get; set; }
+        public ICollection<string> ClassNames { get; set; }
     }
 }

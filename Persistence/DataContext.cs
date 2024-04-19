@@ -99,6 +99,23 @@ namespace Persistence
                 .HasForeignKey(tc => tc.CourseId); // Kunci asing TeacherCourse adalah CourseId
 
             // ======================== Many to Many ============================
+            // Konfigurasi many-to-many relasi antara Lesson dan ClassRoom
+            modelBuilder.Entity<LessonClassRoom>()
+                .HasKey(ccr => new { ccr.LessonId, ccr.ClassRoomId });
+
+            // LessonClassRoom memiliki relasi one-to-many ke Lesson
+            modelBuilder.Entity<LessonClassRoom>()
+                .HasOne(ccr => ccr.Lesson) // Setiap LessonClassRoom memiliki satu Lesson
+                .WithMany(course => course.LessonClassRooms) // Setiap Lesson memiliki banyak LessonClassRoom
+                .HasForeignKey(ccr => ccr.LessonId); // ForeignKey LessonId di LessonClassRoom
+
+            // LessonClassRoom memiliki relasi one-to-many ke ClassRoom
+            modelBuilder.Entity<LessonClassRoom>()
+                .HasOne(ccr => ccr.ClassRoom) // Setiap LessonClassRoom memiliki satu ClassRoom
+                .WithMany(classRoom => classRoom.LessonClassRooms) // Setiap ClassRoom memiliki banyak LessonClassRoom
+                .HasForeignKey(ccr => ccr.ClassRoomId); // ForeignKey ClassRoomId di LessonClassRoom
+
+
             // Konfigurasi many-to-many relasi antara Course dan ClassRoom
             modelBuilder.Entity<CourseClassRoom>()
                 .HasKey(ccr => new { ccr.CourseId, ccr.ClassRoomId });
@@ -190,5 +207,6 @@ namespace Persistence
         public DbSet<TeacherLesson> TeacherLessons { get; set; }
         public DbSet<TeacherClassRoom> TeacherClassRooms { get; set; }
         public DbSet<TeacherCourse> TeacherCourses { get; set; }
+        public DbSet<LessonClassRoom> LessonClassRooms { get; set; }
     }
 }

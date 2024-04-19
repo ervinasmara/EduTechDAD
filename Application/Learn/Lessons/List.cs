@@ -33,15 +33,19 @@ namespace Application.Learn.Lessons
                         Id = lesson.Id,
                         LessonName = lesson.LessonName,
                         UniqueNumberOfLesson = lesson.UniqueNumberOfLesson,
+                        ClassNames = _context.LessonClassRooms
+                            .Where(lcr => lcr.LessonId == lesson.Id)
+                            .Select(lcr => lcr.ClassRoom.ClassName)
+                            .ToList(),
                         TeacherLesson = _context.TeacherLessons
                             .Where(tl => tl.LessonId == lesson.Id)
                             .Select(tl => new TeacherLessonGetAllDto
                             {
                                 NameTeacher = tl.Teacher.NameTeacher,
-                                UniqueNumberOfClassRoom = _context.TeacherClassRooms
+                                ClassNames = _context.TeacherClassRooms
                                     .Where(tc => tc.TeacherId == tl.TeacherId)
-                                    .Select(tc => tc.ClassRoom.UniqueNumberOfClassRoom)
-                                    .FirstOrDefault()
+                                    .Select(tc => tc.ClassRoom.ClassName)
+                                    .ToList()
                             })
                             .ToList()
                     })

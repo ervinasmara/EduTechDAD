@@ -44,28 +44,28 @@ namespace API.Controllers.Learn
         }
 
         [Authorize(Policy = "RequireRole2OrRole4")]
-        [HttpPost("coba")]
+        [HttpPost]
         public async Task<IActionResult> CreateCours([FromForm] CourseDto courseDto, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new Create.Command { CourseDto = courseDto }, ct));
         }
 
-        [Authorize(Policy = "RequireRole2OrRole4")]
-        [HttpPost]
-        public async Task<IActionResult> Course([FromForm] CourseDto courseDto, CancellationToken ct)
-        {
-            // Ambil TeacherId dari token autentikasi
-            var teacherId = Guid.Parse(HttpContext.User.FindFirst("TeacherId").Value);
+        //[Authorize(Policy = "RequireRole2OrRole4")]
+        //[HttpPost]
+        //public async Task<IActionResult> Course([FromForm] CourseDto courseDto, CancellationToken ct)
+        //{
+        //    // Ambil TeacherId dari token autentikasi
+        //    var teacherId = Guid.Parse(HttpContext.User.FindFirst("TeacherId").Value);
 
-            // Tetapkan TeacherId dari token autentikasi ke dalam CourseDto
-            courseDto.TeacherId = teacherId;
+        //    // Tetapkan TeacherId dari token autentikasi ke dalam CourseDto
+        //    courseDto.TeacherId = teacherId;
 
-            // Buat command menggunakan CourseDto yang diterima
-            var command = new Create.Command { CourseDto = courseDto };
+        //    // Buat command menggunakan CourseDto yang diterima
+        //    var command = new Create.Command { CourseDto = courseDto };
 
-            // Kirim command ke handler untuk diproses
-            return HandleResult(await Mediator.Send(command, ct));
-        }
+        //    // Kirim command ke handler untuk diproses
+        //    return HandleResult(await Mediator.Send(command, ct));
+        //}
 
         [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet("download/{id}")]

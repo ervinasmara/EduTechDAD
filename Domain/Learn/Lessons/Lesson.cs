@@ -20,5 +20,8 @@ namespace Domain.Learn.Lessons
 
         // Relasi many-to-many dengan Lesson melalui tabel pivot TeacherLesson
         public ICollection<TeacherLesson> TeacherLessons { get; set; }
+
+        // Relasi many-to-many dengan ClassRoom melalui tabel pivot LessonClassRoom
+        public ICollection<LessonClassRoom> LessonClassRooms { get; set; }
     }
 }

@@ -24,5 +24,8 @@ namespace Domain.Class
 
         // Relasi many-to-many dengan ClassRoom melalui tabel pivot TeacherClassRoom
         public ICollection<TeacherClassRoom> TeacherClassRooms { get; set; }
+
+        // Relasi many-to-many dengan ClassRoom melalui tabel pivot LessonClassRoom
+        public ICollection<LessonClassRoom> LessonClassRooms { get; set; }
     }
 }

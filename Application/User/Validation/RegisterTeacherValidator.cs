@@ -24,7 +24,7 @@ namespace Application.User.Validation
 
             RuleFor(x => x.LessonName).NotEmpty().WithMessage("LessonName is required.");
 
-            RuleFor(x => x.UniqueNumberOfClassRoom).NotEmpty().WithMessage("UniqueNumberOfClassRoom is required.");
+            RuleFor(x => x.ClassNames).NotEmpty().WithMessage("ClassNames is required.");
         }
     }
 }
