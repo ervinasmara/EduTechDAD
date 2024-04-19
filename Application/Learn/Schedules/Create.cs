@@ -36,23 +36,30 @@ namespace Application.Learn.Schedules
 
             public async Task<Result<ScheduleDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                // Cari Lesson berdasarkan UniqueNumberOfLesson
-                var lesson = await _context.Lessons.SingleOrDefaultAsync(l => l.UniqueNumberOfLesson == request.ScheduleDto.UniqueNumberOfLesson);
+                // Cari Lesson berdasarkan LessonName
+                var lesson = await _context.Lessons.SingleOrDefaultAsync(l => l.LessonName == request.ScheduleDto.LessonName);
                 if (lesson == null)
-                    return Result<ScheduleDto>.Failure("Lesson not found with the provided UniqueNumberOfLesson");
+                    return Result<ScheduleDto>.Failure("Lesson not found with the provided LessonName");
 
-                // Cari ClassRoom berdasarkan UniqueNumberOfClassRoom
-                var classRoom = await _context.ClassRooms.SingleOrDefaultAsync(cr => cr.UniqueNumberOfClassRoom == request.ScheduleDto.UniqueNumberOfClassRoom);
+                // Cari ClassRoom berdasarkan ClassName
+                var classRoom = await _context.ClassRooms.SingleOrDefaultAsync(cr => cr.ClassName == request.ScheduleDto.ClassName);
                 if (classRoom == null)
-                    return Result<ScheduleDto>.Failure("ClassRoom not found with the provided UniqueNumberOfClassRoom");
+                    return Result<ScheduleDto>.Failure("ClassRoom not found with the provided ClassName");
+
+                // Cek apakah ClassRoom yang dipilih terkait dengan Lesson yang sudah dipilih sebelumnya
+                var isClassRoomValidForLesson = await _context.LessonClassRooms
+                    .AnyAsync(lc => lc.LessonId == lesson.Id && lc.ClassRoomId == classRoom.Id);
+
+                if (!isClassRoomValidForLesson)
+                    return Result<ScheduleDto>.Failure("The selected ClassRoom is not associated with the selected Lesson.");
 
                 var schedule = new Schedule
                 {
                     Day = request.ScheduleDto.Day,
                     StartTime = request.ScheduleDto.StartTime,
                     EndTime = request.ScheduleDto.EndTime,
-                    LessonId = lesson.Id, // Setel LessonId dengan Id dari Lesson yang ditemukan
-                    ClassRoomId = classRoom.Id // Setel ClassRoomId dengan Id dari ClassRoom yang ditemukan
+                    LessonId = lesson.Id,
+                    ClassRoomId = classRoom.Id
                 };
 
                 _context.Schedules.Add(schedule);
@@ -64,9 +71,9 @@ namespace Application.Learn.Schedules
                 // Buat DTO dari jadwal yang telah dibuat
                 var scheduleDto = _mapper.Map<ScheduleDto>(schedule);
 
-                // Tambahkan UniqueNumberOfLesson dan UniqueNumberOfClassRoom ke dalam response body
-                scheduleDto.UniqueNumberOfLesson = lesson.UniqueNumberOfLesson;
-                scheduleDto.UniqueNumberOfClassRoom = classRoom.UniqueNumberOfClassRoom;
+                // Tambahkan LessonName dan ClassName ke dalam response body
+                scheduleDto.LessonName = lesson.LessonName;
+                scheduleDto.ClassName = classRoom.ClassName;
 
                 return Result<ScheduleDto>.Success(scheduleDto);
             }

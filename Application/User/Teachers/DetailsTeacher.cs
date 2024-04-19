@@ -10,12 +10,12 @@ namespace Application.User.Teacher
 {
     public class DetailsTeacher
     {
-        public class Query : IRequest<Result<TeacherGetAllDto>>
+        public class Query : IRequest<Result<TeacherGetByIdDto>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<TeacherGetAllDto>>
+        public class Handler : IRequestHandler<Query, Result<TeacherGetByIdDto>>
         {
             private readonly DataContext _context;
 
@@ -24,7 +24,7 @@ namespace Application.User.Teacher
                 _context = context;
             }
 
-            public async Task<Result<TeacherGetAllDto>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<TeacherGetByIdDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var teacher = await _context.Teachers
                     .Include(t => t.TeacherLessons)
@@ -33,10 +33,10 @@ namespace Application.User.Teacher
 
                 if (teacher == null)
                 {
-                    return Result<TeacherGetAllDto>.Failure("Teacher not found.");
+                    return Result<TeacherGetByIdDto>.Failure("Teacher not found.");
                 }
 
-                var teacherDto = new TeacherGetAllDto
+                var teacherDto = new TeacherGetByIdDto
                 {
                     Id = teacher.Id,
                     NameTeacher = teacher.NameTeacher,
@@ -52,7 +52,7 @@ namespace Application.User.Teacher
                     }).ToList()
                 };
 
-                return Result<TeacherGetAllDto>.Success(teacherDto);
+                return Result<TeacherGetByIdDto>.Success(teacherDto);
             }
 
             private List<ClassRoomDto> GetClassRoomsForLessonAndTeacher(Guid lessonId, Guid teacherId)

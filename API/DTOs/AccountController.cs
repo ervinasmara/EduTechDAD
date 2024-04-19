@@ -57,12 +57,12 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new DetailsStudent.Query { Nis = nis, Name = name, ClassName = className }, ct));
         }
 
-        //[Authorize(Policy = "RequireRole1,2,4")]
-        //[HttpGet("teachers")]
-        //public async Task<IActionResult> GetTeachers(CancellationToken ct)
-        //{
-        //    return HandleResult(await Mediator.Send(new ListTeacher.Query(), ct));
-        //}
+        [Authorize(Policy = "RequireRole1,2,4")]
+        [HttpGet("teachers")]
+        public async Task<IActionResult> GetTeachers(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new ListTeacher.Query(), ct));
+        }
 
         [Authorize(Policy = "RequireRole1,2,3,4")]
         [HttpGet("teacher/{id}")]
