@@ -1,13 +1,17 @@
-﻿using Application.Announcements;
-using Application.Core;
+﻿using Application.Core;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.OpenApi.Models;
-using Application.InfoRecaps.StatusUpdateAfter1Day;
 using Application.Interface;
 using Infrastructure.Security;
+using Application.Announcements.Query;
+using Application.InfoRecaps.Query;
+using Application.Announcements.Command;
+using Application.InfoRecaps.Command;
+using Application.Learn.Schedules.Command;
+using Application.Learn.Schedules.Query;
 
 namespace API.Extensions
 {
@@ -64,10 +68,14 @@ namespace API.Extensions
                 });
             });
 
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(List.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListAnnouncement.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListInfoRecap.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListSchedule.Handler).Assembly));
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddFluentValidationAutoValidation();
-            services.AddValidatorsFromAssemblyContaining<Create>();
+            services.AddValidatorsFromAssemblyContaining<CreateAnnouncement>();
+            services.AddValidatorsFromAssemblyContaining<CreateInfoRecap>();
+            services.AddValidatorsFromAssemblyContaining<CreateSchedule>();
             services.AddHttpContextAccessor();
             services.AddScoped<IUserAccessor, UserAccessor>();
 
