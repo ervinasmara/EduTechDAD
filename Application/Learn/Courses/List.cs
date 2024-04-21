@@ -30,7 +30,7 @@ namespace Application.Learn.Courses
                 var courses = await _context.Courses
                     .Include(c => c.Lesson)
                     .Include(c => c.CourseClassRooms) // Include CourseClassRooms
-                    .ThenInclude(ccr => ccr.ClassRoom) // Include ClassRoom for each CourseClassRoom
+                        .ThenInclude(ccr => ccr.ClassRoom) // Include ClassRoom for each CourseClassRoom
                     .ToListAsync(cancellationToken);
 
                 var courseDtos = new List<CourseGetDto>();
@@ -39,6 +39,9 @@ namespace Application.Learn.Courses
                 {
                     var courseDto = _mapper.Map<CourseGetDto>(course);
                     courseDto.UniqueNumberOfLesson = course.Lesson.UniqueNumberOfLesson; // Set UniqueNumberOfLesson from Lesson
+                    courseDto.LessonName = course.Lesson.LessonName; // Set LessonName
+                    courseDto.CreatedAt = course.CreatedAt; // Set CreatedAt
+
                     if (course.FileData != null)
                     {
                         courseDto.FileName = $"{course.CourseName}.{GetFileExtension.FileExtensionHelper(course.FileData)}";
@@ -50,6 +53,18 @@ namespace Application.Learn.Courses
 
                     // Get UniqueNumberOfClassRooms from CourseClassRooms
                     courseDto.UniqueNumberOfClassRooms = course.CourseClassRooms.Select(ccr => ccr.ClassRoom.UniqueNumberOfClassRoom).ToList();
+
+                    // Get Teacher Name
+                    var teacherCourse = await _context.TeacherCourses.FirstOrDefaultAsync(tc => tc.CourseId == course.Id, cancellationToken);
+                    if (teacherCourse != null)
+                    {
+                        var teacherId = teacherCourse.TeacherId;
+                        var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId, cancellationToken);
+                        if (teacher != null)
+                        {
+                            courseDto.NameTeacher = teacher.NameTeacher;
+                        }
+                    }
 
                     courseDtos.Add(courseDto);
                 }

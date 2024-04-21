@@ -5,7 +5,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Tasks
+namespace Application.Assignments
 {
     public class ListTasks
     {

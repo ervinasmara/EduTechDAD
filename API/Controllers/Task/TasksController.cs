@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Application.Tasks;
+using Application.Assignments;
 
 namespace API.Controllers.Tasks
 {

@@ -5,7 +5,7 @@ using Application.Core;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 
-namespace Application.Tasks
+namespace Application.Assignments
 {
     public class EditTask
     {

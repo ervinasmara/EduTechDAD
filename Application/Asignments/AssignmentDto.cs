@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Application.Tasks
+namespace Application.Assignments
 {
     public class AssignmentDto
     {
@@ -11,6 +11,7 @@ namespace Application.Tasks
         public IFormFile AssignmentFileData { get; set; }
         public string AssignmentLink { get; set; }
         public Guid CourseId { get; set; }
+        public ICollection<string> ClassNames { get; set; }
     }
 
     public class AssignmentGetDto

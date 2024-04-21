@@ -52,14 +52,28 @@ namespace Application.Learn.Courses
                 if (course.Lesson != null)
                 {
                     courseDto.UniqueNumberOfLesson = course.Lesson.UniqueNumberOfLesson;
+                    courseDto.LessonName = course.Lesson.LessonName; // Menambahkan lessonname
                 }
                 else
                 {
                     courseDto.UniqueNumberOfLesson = "UnknownUniqueNumberOfLesson";
                 }
 
+
                 // Get UniqueNumberOfClassRooms from CourseClassRooms
                 courseDto.UniqueNumberOfClassRooms = course.CourseClassRooms.Select(ccr => ccr.ClassRoom.UniqueNumberOfClassRoom).ToList();
+
+                // Get Teacher Name
+                var teacherCourse = await _context.TeacherCourses.FirstOrDefaultAsync(tc => tc.CourseId == course.Id, cancellationToken);
+                if (teacherCourse != null)
+                {
+                    var teacherId = teacherCourse.TeacherId;
+                    var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId, cancellationToken);
+                    if (teacher != null)
+                    {
+                        courseDto.NameTeacher = teacher.NameTeacher;
+                    }
+                }
 
                 return Result<CourseGetDto>.Success(courseDto);
             }

@@ -1,113 +1,141 @@
-﻿//using MediatR;
-//using Persistence;
-//using AutoMapper;
-//using FluentValidation;
-//using Application.Core;
-//using Microsoft.EntityFrameworkCore;
-//using Domain.Many_to_Many;
+﻿using Application.Core;
+using Application.Interface;
+using AutoMapper;
+using Domain.Many_to_Many;
+using FluentValidation;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Persistence;
 
-//namespace Application.Learn.Courses
-//{
-//    public class Edit
-//    {
-//        public class Command : IRequest<Result<CourseDto>>
-//        {
-//            public Guid Id { get; set; }
-//            public CourseDto CourseDto { get; set; }
-//        }
+namespace Application.Learn.Courses
+{
+    public class EditCourse
+{
+    public class Command : IRequest<Result<CourseDto>>
+    {
+        public Guid CourseId { get; set; }
+        public CourseDto CourseDto { get; set; }
+    }
 
-//        public class CommandValidatorDtos : AbstractValidator<Command>
-//        {
-//            public CommandValidatorDtos()
-//            {
-//                RuleFor(x => x.CourseDto).SetValidator(new CourseValidator());
-//            }
-//        }
+    public class CommandValidator : AbstractValidator<Command>
+    {
+        public CommandValidator()
+        {
+            RuleFor(x => x.CourseId).NotEmpty();
+            RuleFor(x => x.CourseDto).SetValidator(new CourseValidator());
+        }
+    }
 
-//        public class Handler : IRequestHandler<Command, Result<CourseDto>>
-//        {
-//            private readonly DataContext _context;
-//            private readonly IMapper _mapper;
+    public class Handler : IRequestHandler<Command, Result<CourseDto>>
+    {
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+        private readonly IUserAccessor _userAccessor;
 
-//            public Handler(DataContext context, IMapper mapper)
-//            {
-//                _context = context;
-//                _mapper = mapper;
-//            }
+        public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
+        {
+            _context = context;
+            _mapper = mapper;
+            _userAccessor = userAccessor;
+        }
 
-//            public async Task<Result<CourseDto>> Handle(Command request, CancellationToken cancellationToken)
-//            {
-//                var course = await _context.Courses
-//                    .Include(c => c.CourseClassRooms)
-//                    .FirstOrDefaultAsync(c => c.Id == request.Id);
+        public async Task<Result<CourseDto>> Handle(Command request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var existingCourse = await _context.Courses
+                    .Include(c => c.CourseClassRooms)
+                    .FirstOrDefaultAsync(c => c.Id == request.CourseId, cancellationToken);
 
-//                // Periksa apakah course ditemukan
-//                if (course == null)
-//                {
-//                    return Result<CourseDto>.Failure("Course Not Found");
-//                }
+                if (existingCourse == null)
+                    return Result<CourseDto>.Failure($"Course with id {request.CourseId} not found.");
 
-//                // Membaca data file jika FileData tidak null
-//                byte[] fileData = null;
-//                if (request.CourseDto.FileData != null)
-//                {
-//                    using (var memoryStream = new MemoryStream())
-//                    {
-//                        await request.CourseDto.FileData.CopyToAsync(memoryStream);
-//                        fileData = memoryStream.ToArray();
-//                    }
-//                }
+                // Memeriksa apakah teacherId tidak kosong
+                if (request.CourseDto.TeacherId == Guid.Empty)
+                    return Result<CourseDto>.Failure($"TeacherId cannot be empty.");
 
-//                // Memperbarui properti dari course dengan nilai yang diberikan dalam CourseDto
-//                _mapper.Map(request.CourseDto, course);
+                // Membaca data file jika CourseDto.FileData tidak null
+                byte[]? fileData = existingCourse.FileData;
+                if (request.CourseDto.FileData != null)
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await request.CourseDto.FileData.CopyToAsync(memoryStream);
+                        fileData = memoryStream.ToArray();
+                    }
+                }
 
-//                // Menetapkan properti FileData dengan data file yang telah dikonversi menjadi byte[]
-//                course.FileData = fileData ?? course.FileData;
+                // Menemukan Lesson yang sesuai berdasarkan LessonName
+                var lesson = await _context.Lessons
+                    .Include(l => l.TeacherLessons)
+                    .ThenInclude(tl => tl.Teacher)
+                    .FirstOrDefaultAsync(x => x.LessonName == request.CourseDto.LessonName, cancellationToken);
 
-//                // Menemukan Lesson terkait
-//                var lesson = await _context.Lessons.FirstOrDefaultAsync(x => x.UniqueNumberOfLesson == request.CourseDto.UniqueNumberOfLesson);
-//                if (lesson == null)
-//                {
-//                    return Result<CourseDto>.Failure("Lesson with specified UniqueNumberOfLesson not found");
-//                }
+                if (lesson == null)
+                    return Result<CourseDto>.Failure($"Lesson with LessonName {request.CourseDto.LessonName} not found.");
 
-//                // Memperbarui UniqueNumberOfLesson dengan nilai dari Lesson yang sesuai
-//                course.Lesson = lesson;
+                // Memeriksa apakah teacher memiliki keterkaitan dengan lesson yang dimasukkan
+                var teacherId = Guid.Parse(_userAccessor.GetTeacherIdFromToken());
+                if (lesson.TeacherLessons.All(tl => tl.TeacherId != teacherId))
+                    return Result<CourseDto>.Failure($"Teacher does not have this lesson.");
 
-//                // Memperbarui entri di CourseClassRoom
-//                course.CourseClassRooms.Clear(); // Hapus semua entri yang ada terlebih dahulu
+                // Memeriksa apakah teacherId memiliki keterkaitan dengan setiap uniqueNumberOfClassRoom yang dimasukkan
+                foreach (var uniqueNumberOfClassRoom in request.CourseDto.UniqueNumberOfClassRooms)
+                {
+                    var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(x => x.UniqueNumberOfClassRoom == uniqueNumberOfClassRoom, cancellationToken);
+                    if (classRoom == null)
+                        return Result<CourseDto>.Failure($"ClassRoom with UniqueNumberOfClassRoom {uniqueNumberOfClassRoom} not found.");
 
-//                foreach (var uniqueNumberOfClassRoom in request.CourseDto.UniqueNumberOfClassRooms)
-//                {
-//                    // Temukan ClassRoom yang sesuai berdasarkan UniqueNumberOfClassRoom
-//                    var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(x => x.UniqueNumberOfClassRoom == uniqueNumberOfClassRoom);
-//                    if (classRoom == null)
-//                    {
-//                        return Result<CourseDto>.Failure($"ClassRoom with UniqueNumberOfClassRoom {uniqueNumberOfClassRoom} not found");
-//                    }
+                    // Memeriksa keterkaitan teacherId dengan classroom
+                    if (!_context.TeacherClassRooms.Any(tc => tc.TeacherId == teacherId && tc.ClassRoomId == classRoom.Id))
+                        return Result<CourseDto>.Failure($"Teacher is not assigned to Classroom {uniqueNumberOfClassRoom}.");
+                }
 
-//                    // Buat entri baru di CourseClassRoom
-//                    course.CourseClassRooms.Add(new CourseClassRoom
-//                    {
-//                        CourseId = course.Id,
-//                        ClassRoomId = classRoom.Id
-//                    });
-//                }
+                // Update data course yang ada dengan data baru
+                existingCourse.CourseName = request.CourseDto.CourseName;
+                existingCourse.Description = request.CourseDto.Description;
+                existingCourse.FileData = fileData;
+                existingCourse.LinkCourse = request.CourseDto.LinkCourse;
+                existingCourse.LessonId = lesson.Id; // Mengisi LessonId dengan Id Lesson yang sesuai
 
-//                var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+                // Menghapus kelas yang terkait sebelum menambahkan yang baru
+                _context.CourseClassRooms.RemoveRange(existingCourse.CourseClassRooms);
 
-//                if (!result)
-//                {
-//                    return Result<CourseDto>.Failure("Failed to edit Course");
-//                }
+                // Menambahkan kelas yang baru
+                var addedClassRooms = new List<string>();
+                foreach (var uniqueNumberOfClassRoom in request.CourseDto.UniqueNumberOfClassRooms)
+                {
+                    // Temukan ClassRoom yang sesuai berdasarkan UniqueNumberOfClassRoom
+                    var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(x => x.UniqueNumberOfClassRoom == uniqueNumberOfClassRoom, cancellationToken);
+                    if (classRoom == null)
+                        return Result<CourseDto>.Failure($"ClassRoom with UniqueNumberOfClassRoom {uniqueNumberOfClassRoom} not found.");
 
-//                // Buat instance CourseDto yang mewakili hasil edit
-//                var editedCourseDto = _mapper.Map<CourseDto>(course);
-//                editedCourseDto.UniqueNumberOfLesson = request.CourseDto.UniqueNumberOfLesson;
-//                editedCourseDto.UniqueNumberOfClassRooms = request.CourseDto.UniqueNumberOfClassRooms;
+                    // Buat entri baru di CourseClassRoom
+                    existingCourse.CourseClassRooms.Add(new CourseClassRoom
+                    {
+                        CourseId = existingCourse.Id,
+                        ClassRoomId = classRoom.Id
+                    });
 
-//                return Result<CourseDto>.Success(editedCourseDto);
-//            }
-//        }
-//    }
-//}
+                    addedClassRooms.Add(classRoom.UniqueNumberOfClassRoom);
+                }
+
+                await _context.SaveChangesAsync(cancellationToken);
+
+                // Mengembalikan CourseDto yang berhasil diubah bersama dengan TeacherId dan UniqueNumberOfClassRooms yang berhasil ditambahkan
+                var courseDto = _mapper.Map<CourseDto>(existingCourse);
+                courseDto.LessonName = lesson.LessonName;
+                courseDto.UniqueNumberOfClassRooms = addedClassRooms;
+                courseDto.TeacherId = teacherId; // Menambahkan TeacherId ke dalam CourseDto
+                return Result<CourseDto>.Success(courseDto);
+
+            }
+            catch (Exception ex)
+            {
+                // Menangani kesalahan dan mengembalikan pesan kesalahan yang sesuai
+                return Result<CourseDto>.Failure($"Failed to update course: {ex.Message}");
+            }
+        }
+    }
+}
+}

@@ -8,14 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Application.User.Students;
 using Application.User.DTOs;
-using Application.Learn.Courses;
-using Application.Learn.Lessons;
 using Application.User.DTOs.Registration;
 using Application.User.Superadmin;
 using Application.User.Admins;
 using Application.User.Teachers;
 using Application.User.DTOs.Edit;
-using Application.Announcements;
 
 namespace API.DTOs
 {
@@ -79,6 +76,15 @@ namespace API.DTOs
             return HandleResult(result);
         }
 
+        [Authorize(Policy = "RequireRole4")]
+        [HttpPut("admin/delete/{adminId}")]
+        public async Task<IActionResult> DeleteAdmin(Guid adminId, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeactivateAdmin.Command { AdminId = adminId}, ct);
+
+            return HandleResult(result);
+        }
+
         // =========================== LOGIN =========================== //
         [AllowAnonymous]
         [HttpPost("login")]
@@ -86,7 +92,8 @@ namespace API.DTOs
         {
             var user = await _userManager.FindByNameAsync(loginDto.Username);
 
-            if (user == null) return Unauthorized();
+            if (user == null)
+                return Unauthorized();
 
             var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
 
@@ -94,16 +101,27 @@ namespace API.DTOs
             {
                 try
                 {
-                    // Tentukan jenis pengguna yang login berdasarkan peran
                     switch (user.Role)
                     {
                         case 1: // Admin
+                            var admin = await _context.Admins.FirstOrDefaultAsync(a => a.AppUserId == user.Id);
+                            if (admin != null && admin.Status == 0)
+                                return Unauthorized();
                             return await CreateUserObjectAdmin(user);
                         case 2: // Teacher
+                            var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.AppUserId == user.Id);
+                            if (teacher != null && teacher.Status == 0)
+                                return Unauthorized();
                             return await CreateUserObjectTeacher(user);
                         case 3: // Student
+                            var student = await _context.Students.FirstOrDefaultAsync(s => s.AppUserId == user.Id);
+                            if (student != null && student.Status == 0)
+                                return Unauthorized();
                             return await CreateUserObjectStudent(user);
                         case 4: // Super Admin
+                            var superAdmin = await _context.SuperAdmins.FirstOrDefaultAsync(sa => sa.AppUserId == user.Id);
+                            if (superAdmin != null && superAdmin.Status == 0)
+                                return Unauthorized();
                             return await CreateUserObjectSuperAdmin(user);
                         default:
                             return BadRequest("Invalid role");
@@ -111,7 +129,6 @@ namespace API.DTOs
                 }
                 catch (Exception ex)
                 {
-                    // Tangani jika data pengguna tidak ditemukan atau ada kesalahan lainnya
                     return BadRequest(ex.Message);
                 }
             }
@@ -324,60 +341,6 @@ namespace API.DTOs
 
             return Ok(updatedStudentDto);
         }
-
-        //[Authorize(Policy = "RequireRole1OrRole4")]
-        //[HttpPut("edit/teacher/{id}")]
-        //public async Task<IActionResult> UpdateTeacher(Guid id, EditTeacherDto teacherEditDto)
-        //{
-        //    // Mencari guru berdasarkan ID
-        //    var teacher = await _context.Teachers
-        //        .Include(t => t.Lessons) // Memuat data lesson yang terkait dengan guru
-        //        .FirstOrDefaultAsync(t => t.Id == id);
-
-        //    // Jika guru tidak ditemukan, kembalikan response 404 Not Found
-        //    if (teacher == null)
-        //        return NotFound();
-
-        //    // Update properti Address dan PhoneNumber
-        //    teacher.Address = teacherEditDto.Address;
-        //    teacher.PhoneNumber = teacherEditDto.PhoneNumber;
-
-        //    // Jika LessonIds berubah, cari Lesson baru berdasarkan ID
-        //    if (teacherEditDto.LessonIds != null)
-        //    {
-        //        // Bersihkan daftar lesson yang dimiliki guru
-        //        teacher.Lessons.Clear();
-
-        //        // Tambahkan lesson baru ke dalam daftar guru
-        //        foreach (var lessonId in teacherEditDto.LessonIds)
-        //        {
-        //            var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.Id == lessonId);
-        //            if (lesson != null)
-        //            {
-        //                teacher.Lessons.Add(lesson);
-        //            }
-        //            else
-        //            {
-        //                return BadRequest($"Lesson with ID {lessonId} not found.");
-        //            }
-        //        }
-        //    }
-
-        //    // Simpan perubahan ke database
-        //    _context.Teachers.Update(teacher);
-        //    await _context.SaveChangesAsync();
-
-        //    // Kembalikan response 200 OK bersama dengan data guru yang telah diperbarui
-        //    var updatedTeacherDto = new EditTeacherDto
-        //    {
-        //        Address = teacher.Address,
-        //        PhoneNumber = teacher.PhoneNumber,
-        //        LessonIds = teacher.Lessons.Select(l => l.Id).ToList()
-        //    };
-
-        //    return Ok(updatedTeacherDto);
-        //}
-
 
         // =========================== GET USER LOGIN =========================== //
         [Authorize]

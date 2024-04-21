@@ -6,7 +6,7 @@ using Application.Learn.Courses;
 using Application.Learn.Lessons;
 using Application.Attendances.DTOs;
 using Application.Submission;
-using Application.Tasks;
+using Application.Assignments;
 using AutoMapper;
 using Domain.Announcement;
 using Domain.Class;

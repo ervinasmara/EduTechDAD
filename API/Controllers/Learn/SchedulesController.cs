@@ -3,12 +3,30 @@ using Application.Learn.Schedules.Command;
 using Application.Learn.Schedules.Query;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static Application.Learn.Schedules.Query.ClassNameByLessonName;
 
 namespace API.Controllers.Schedules
 {
 
     public class SchedulesController : BaseApiController
     {
+        [AllowAnonymous]
+        [HttpGet("classnames/{lessonName}")]
+        public async Task<ActionResult<List<string>>> GetClassNameByLessonName(string lessonName, CancellationToken cancellationToken)
+        {
+            var result = await Mediator.Send(new ClassNameByLessonNameQuery(lessonName), cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return Ok(result.Value);
+            }
+            else
+            {
+                return NotFound(result.Error);
+            }
+        }
+
+
         [Authorize(Policy = "RequireRole1,3,4")]
         [HttpGet]
         public async Task<IActionResult> GetSchedules(CancellationToken ct)

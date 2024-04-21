@@ -3,7 +3,7 @@ using Application.Learn.GetFileName;
 using MediatR;
 using Persistence;
 
-namespace Application.Tasks
+namespace Application.Assignments
 {
     public class DownloadTask
     {

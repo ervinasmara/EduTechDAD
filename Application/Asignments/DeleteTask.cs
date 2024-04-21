@@ -1,23 +1,14 @@
 ﻿using Application.Core;
-using FluentValidation;
 using MediatR;
 using Persistence;
 
-namespace Application.Tasks
+namespace Application.Assignments
 {
-    public class EditStatus
+    public class DeleteTask
     {
         public class Command : IRequest<Result<Unit>>
         {
             public Guid Id { get; set; }
-        }
-
-        public class CommandValidator : AbstractValidator<Command>
-        {
-            public CommandValidator()
-            {
-                RuleFor(x => x.Id).NotEmpty();
-            }
         }
 
         public class Handler : IRequestHandler<Command, Result<Unit>>
@@ -33,15 +24,13 @@ namespace Application.Tasks
             {
                 var assignment = await _context.Assignments.FindAsync(request.Id);
 
-                if (assignment == null)
-                    return Result<Unit>.Failure("Assignment not found");
+                if (assignment == null) return null;
 
-                assignment.Status = 2;
+                _context.Remove(assignment);
 
-                var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+                var result = await _context.SaveChangesAsync() > 0;
 
-                if (!result)
-                    return Result<Unit>.Failure("Failed to update Assignment status");
+                if (!result) return Result<Unit>.Failure("Failed to delete Assignment");
 
                 return Result<Unit>.Success(Unit.Value);
             }

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Tasks
+namespace Application.Assignments
 {
     public class AssignmentValidator : AbstractValidator<AssignmentDto>
     {

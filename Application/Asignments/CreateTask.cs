@@ -1,11 +1,13 @@
 ﻿using Application.Core;
 using AutoMapper;
 using Domain.Assignments;
+using Domain.Many_to_Many;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Tasks
+namespace Application.Assignments
 {
     public class CreateTask
     {
@@ -42,6 +44,19 @@ namespace Application.Tasks
                     if (course == null)
                         return Result<AssignmentDto>.Failure($"Course with ID {request.AssignmentDto.CourseId} not found.");
 
+                    // Query untuk mendapatkan daftar ClassNames yang terkait dengan CourseId
+                    var classNames = await _context.CourseClassRooms
+                        .Where(ccr => ccr.CourseId == course.Id)
+                        .Select(ccr => ccr.ClassRoom.ClassName)
+                        .ToListAsync();
+
+                    // Validasi ClassNames yang dipilih
+                    foreach (var selectedClassName in request.AssignmentDto.ClassNames)
+                    {
+                        if (!classNames.Contains(selectedClassName))
+                            return Result<AssignmentDto>.Failure($"Class {selectedClassName} is not associated with the selected course.");
+                    }
+
                     // Inisialisasi fileData dengan null
                     byte[]? fileData = null;
 
@@ -64,16 +79,45 @@ namespace Application.Tasks
                         AssignmentDescription = request.AssignmentDto.AssignmentDescription,
                         FileData = fileData,
                         AssignmentLink = request.AssignmentDto.AssignmentLink,
-                        CourseId = course.Id
+                        CourseId = course.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7)
                     };
 
                     // Tambah Assignment ke database
                     _context.Assignments.Add(assignment);
                     await _context.SaveChangesAsync(cancellationToken);
 
+                    // Simpan pasangan AssignmentId dan ClassRoomId ke dalam tabel AssignmentClassRoom
+                    foreach (var selectedClassName in request.AssignmentDto.ClassNames)
+                    {
+                        var classRoom = await _context.ClassRooms
+                            .FirstOrDefaultAsync(cr => cr.ClassName == selectedClassName);
+
+                        if (classRoom != null)
+                        {
+                            var assignmentClassRoom = new AssignmentClassRoom
+                            {
+                                AssignmentId = assignment.Id,
+                                ClassRoomId = classRoom.Id
+                            };
+
+                            _context.AssignmentClassRooms.Add(assignmentClassRoom);
+                        }
+                    }
+
+                    await _context.SaveChangesAsync(cancellationToken);
+
+                    // Mendapatkan ClassNames yang sudah dipilih
+                    var assignmentClassNames = await _context.AssignmentClassRooms
+                        .Where(acr => acr.AssignmentId == assignment.Id)
+                        .Select(acr => acr.ClassRoom.ClassName)
+                        .ToListAsync();
+
                     // Memetakan entitas Assignment ke AssignmentDto
                     var assignmentDto = _mapper.Map<AssignmentDto>(assignment);
                     assignmentDto.CourseId = course.Id;
+                    assignmentDto.ClassNames = assignmentClassNames;
+
                     return Result<AssignmentDto>.Success(assignmentDto);
                 }
                 catch (Exception ex)

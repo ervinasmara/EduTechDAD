@@ -37,21 +37,32 @@ namespace Application.Learn.Schedules.Command
             public async Task<Result<ScheduleDto>> Handle(Command request, CancellationToken cancellationToken)
             {
                 // Cari Lesson berdasarkan LessonName
-                var lesson = await _context.Lessons.SingleOrDefaultAsync(l => l.LessonName == request.ScheduleDto.LessonName);
+                var lesson = await _context.Lessons
+                    .Include(l => l.LessonClassRooms)
+                    .ThenInclude(lc => lc.ClassRoom)
+                    .SingleOrDefaultAsync(l => l.LessonName == request.ScheduleDto.LessonName);
+
                 if (lesson == null)
                     return Result<ScheduleDto>.Failure("Lesson not found with the provided LessonName");
+
+                // Cek apakah Lesson memiliki hubungan dengan ruang kelas
+                if (lesson.LessonClassRooms == null || !lesson.LessonClassRooms.Any())
+                    return Result<ScheduleDto>.Failure("No ClassRooms associated with the selected Lesson");
+
+                // Ambil nama ruang kelas dari hubungan LessonClassRooms
+                var classNames = lesson.LessonClassRooms.Select(lc => lc.ClassRoom.ClassName).ToList();
+
+                if (classNames.Count == 0)
+                    return Result<ScheduleDto>.Failure("No ClassRooms associated with the selected Lesson");
+
+                // Mengecek apakah ClassName yang dimasukkan ada di dalam list classNames
+                if (!classNames.Contains(request.ScheduleDto.ClassName))
+                    return Result<ScheduleDto>.Failure("The selected ClassName is not associated with the selected Lesson.");
 
                 // Cari ClassRoom berdasarkan ClassName
                 var classRoom = await _context.ClassRooms.SingleOrDefaultAsync(cr => cr.ClassName == request.ScheduleDto.ClassName);
                 if (classRoom == null)
                     return Result<ScheduleDto>.Failure("ClassRoom not found with the provided ClassName");
-
-                // Cek apakah ClassRoom yang dipilih terkait dengan Lesson yang sudah dipilih sebelumnya
-                var isClassRoomValidForLesson = await _context.LessonClassRooms
-                    .AnyAsync(lc => lc.LessonId == lesson.Id && lc.ClassRoomId == classRoom.Id);
-
-                if (!isClassRoomValidForLesson)
-                    return Result<ScheduleDto>.Failure("The selected ClassRoom is not associated with the selected Lesson.");
 
                 var schedule = new Schedule
                 {
