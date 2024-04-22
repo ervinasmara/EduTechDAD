@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Domain.Submission;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Assignments
 {
@@ -14,6 +15,19 @@ namespace Application.Assignments
         public ICollection<string> ClassNames { get; set; }
     }
 
+    //public class AssignmentGetDto
+    //{
+    //    public Guid Id { get; set; }
+    //    public string AssignmentName { get; set; }
+    //    public string AssignmentFileName { get; set; }
+    //    public DateOnly AssignmentDate { get; set; }
+    //    public DateOnly AssignmentDeadline { get; set; }
+    //    public string AssignmentDescription { get; set; }
+    //    public byte[] AssignmentFileData { get; set; }
+    //    public string AssignmentLink { get; set; }
+    //    public string CourseName { get; set; }
+    //}
+
     public class AssignmentGetDto
     {
         public Guid Id { get; set; }
@@ -22,9 +36,25 @@ namespace Application.Assignments
         public DateOnly AssignmentDate { get; set; }
         public DateOnly AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }
-        public byte[] AssignmentFileData { get; set; }
         public string AssignmentLink { get; set; }
-        public string CourseName { get; set; }
+        public string LessonName { get; set; }
+        public ICollection<string> ClassNames { get; set; }
+        public string AssignmentStatus { get; set; }
+        public byte[] AssignmentFileData { get; set; }
+    }
+
+    public class AssignmentGetByClassRoomIdDto
+    {
+        public Guid Id { get; set; }
+        public string AssignmentName { get; set; }
+        public string AssignmentFileName { get; set; }
+        public DateOnly AssignmentDate { get; set; }
+        public DateOnly AssignmentDeadline { get; set; }
+        public string AssignmentDescription { get; set; }
+        public string AssignmentLink { get; set; }
+        public string LessonName { get; set; }
+        public string AssignmentStatus { get; set; }
+        public byte[] AssignmentFileData { get; set; }
     }
 
     public class AssignmentGetByTeacherIdDto
@@ -40,7 +70,6 @@ namespace Application.Assignments
         public ICollection<string> ClassNames { get; set; }
         public byte[] AssignmentFileData { get; set; }
     }
-
     public class DownloadFileDto
     {
         public byte[] FileData { get; set; }

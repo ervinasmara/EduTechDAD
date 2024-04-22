@@ -6,21 +6,21 @@ namespace API.Controllers.Tasks
 {
     public class AssignmentsController : BaseApiController
     {
-        [Authorize(Policy = "RequireRole2,3,4")]
+        [Authorize(Policy = "RequireRole4")]
         [HttpGet]
         public async Task<IActionResult> GetAssignments(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new ListTasks.Query(), ct));
         }
 
-        [Authorize(Policy = "RequireRole2,3,4")]
+        [Authorize(Policy = "RequireRole2")]
         [HttpGet("getAssignmentByTeacherId")]
         public async Task<IActionResult> GetAssignmentstByTeacherId(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new ListAssignmentByTeacherId.Query(), ct));
         }
 
-        [Authorize(Policy = "RequireRole2,3,4")]
+        [Authorize(Policy = "RequireRole3")]
         [HttpGet("getAssignmentByClassRoomId")]
         public async Task<IActionResult> GetAssignmentstByClassRoomId(CancellationToken ct)
         {
@@ -69,21 +69,6 @@ namespace API.Controllers.Tasks
             {
                 return NotFound(result.Error);
             }
-        }
-
-        [Authorize(Policy = "RequireRole2OrRole4")]
-        [HttpPut("statusdeadline/{id}")]
-        public async Task<IActionResult> EditStatus(Guid id)
-        {
-            var command = new EditStatus.Command { Id = id };
-            var result = await Mediator.Send(command);
-
-            if (result.IsSuccess)
-            {
-                return NoContent(); // Status code 204 (No Content) jika berhasil
-            }
-
-            return BadRequest(result.Error); // Status code 400 (Bad Request) jika terjadi kesalahan
         }
 
         [Authorize(Policy = "RequireRole2OrRole4")]

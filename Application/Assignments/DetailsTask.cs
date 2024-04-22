@@ -1,4 +1,5 @@
 ﻿using Application.Core;
+using Application.Interface;
 using Application.Learn.GetFileName;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,24 +9,28 @@ namespace Application.Assignments
 {
     public class DetailsTask
     {
-        public class Query : IRequest<Result<AssignmentGetByTeacherIdDto>>
+        public class Query : IRequest<Result<AssignmentGetDto>>
         {
             public Guid AssignmentId { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<AssignmentGetByTeacherIdDto>>
+        public class Handler : IRequestHandler<Query, Result<AssignmentGetDto>>
         {
             private readonly DataContext _context;
+            private readonly IUserAccessor _userAccessor;
 
-            public Handler(DataContext context)
+            public Handler(DataContext context, IUserAccessor userAccessor)
             {
                 _context = context;
+                _userAccessor = userAccessor;
             }
 
-            public async Task<Result<AssignmentGetByTeacherIdDto>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<AssignmentGetDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 try
                 {
+                    var studentId = _userAccessor.GetStudentIdFromToken(); // Dapatkan StudentId dari token
+
                     // Dapatkan assignment berdasarkan AssignmentId
                     var assignment = await _context.Assignments
                         .Include(a => a.Course)
@@ -35,7 +40,7 @@ namespace Application.Assignments
                     // Periksa apakah assignment ditemukan
                     if (assignment == null)
                     {
-                        return Result<AssignmentGetByTeacherIdDto>.Failure("Assignment not found.");
+                        return Result<AssignmentGetDto>.Failure("Assignment not found.");
                     }
 
                     // Dapatkan nama pelajaran dari tugas yang terkait
@@ -44,8 +49,19 @@ namespace Application.Assignments
                     // Dapatkan nama-nama kelas yang terkait dengan assignment
                     var classNames = await GetClassNamesForAssignment(request.AssignmentId, cancellationToken);
 
-                    // Buat DTO AssignmentGetByTeacherIdDto
-                    var assignmentDto = new AssignmentGetByTeacherIdDto
+                    // Cek status AssignmentSubmission berdasarkan StudentId
+                    var submission = await _context.AssignmentSubmissions
+                        .FirstOrDefaultAsync(s => s.AssignmentId == request.AssignmentId && s.StudentId == Guid.Parse(studentId), cancellationToken);
+
+                    var today = DateOnly.FromDateTime(DateTime.Now); // Dapatkan tanggal hari ini tanpa informasi waktu
+                    var deadline = assignment.AssignmentDeadline; // Deadline dari tugas
+
+                    var status = submission == null
+                        ? today > deadline ? "Kamu Terlambat" : "Belum Dikerjakan"
+                        : submission.Grade.HasValue ? "Sudah Dinilai" : "Sudah Dikerjakan";
+
+                    // Buat DTO AssignmentGetDto
+                    var assignmentDto = new AssignmentGetDto
                     {
                         Id = assignment.Id,
                         AssignmentName = assignment.AssignmentName,
@@ -55,7 +71,8 @@ namespace Application.Assignments
                         AssignmentLink = assignment.AssignmentLink,
                         LessonName = lessonName,
                         AssignmentFileData = assignment.FileData,
-                        ClassNames = classNames
+                        ClassNames = classNames,
+                        AssignmentStatus = status
                     };
 
                     // Set AssignmentFileName berdasarkan AssignmentName dan AssignmentFileData extension
@@ -69,12 +86,12 @@ namespace Application.Assignments
                         assignmentDto.AssignmentFileName = "UnknownFileName";
                     }
 
-                    return Result<AssignmentGetByTeacherIdDto>.Success(assignmentDto);
+                    return Result<AssignmentGetDto>.Success(assignmentDto);
                 }
                 catch (Exception ex)
                 {
                     // Tangani pengecualian dan kembalikan pesan kesalahan yang sesuai
-                    return Result<AssignmentGetByTeacherIdDto>.Failure($"Failed to retrieve assignment: {ex.Message}");
+                    return Result<AssignmentGetDto>.Failure($"Failed to retrieve assignment: {ex.Message}");
                 }
             }
 

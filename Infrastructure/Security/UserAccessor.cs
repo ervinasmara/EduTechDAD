@@ -24,5 +24,11 @@ namespace Infrastructure.Security
             var userId = _httpContextAccessor.HttpContext.User?.FindFirstValue("ClassRoomId");
             return userId;
         }
+
+        public string GetStudentIdFromToken()
+        {
+            var userId = _httpContextAccessor.HttpContext.User?.FindFirstValue("StudentId");
+            return userId;
+        }
     }
 }

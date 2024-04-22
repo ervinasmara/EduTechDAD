@@ -4,5 +4,6 @@
     {
         string GetTeacherIdFromToken();
         string GetClassRoomIdFromToken();
+        string GetStudentIdFromToken();
     }
 }
