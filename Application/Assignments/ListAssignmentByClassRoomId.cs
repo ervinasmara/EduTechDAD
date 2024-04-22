@@ -51,6 +51,7 @@ namespace Application.Assignments
                         .Include(a => a.Course)
                         .ThenInclude(c => c.Lesson) // Termasuk informasi Lesson dalam query
                         .Where(a => assignmentIds.Contains(a.Id))
+                        .OrderByDescending(a => a.CreatedAt)
                         .ToListAsync(cancellationToken);
 
                     var assignmentDtos = new List<AssignmentGetByTeacherIdDto>();

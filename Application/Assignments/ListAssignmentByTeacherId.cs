@@ -5,11 +5,6 @@ using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Assignments
 {
@@ -23,13 +18,11 @@ namespace Application.Assignments
         public class Handler : IRequestHandler<Query, Result<List<AssignmentGetByTeacherIdDto>>>
         {
             private readonly DataContext _context;
-            private readonly IMapper _mapper;
             private readonly IUserAccessor _userAccessor;
 
-            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
+            public Handler(DataContext context, IUserAccessor userAccessor)
             {
                 _context = context;
-                _mapper = mapper;
                 _userAccessor = userAccessor;
             }
 
@@ -62,6 +55,7 @@ namespace Application.Assignments
                         .Include(a => a.Course)
                         .ThenInclude(c => c.Lesson) // Termasuk informasi Lesson dalam query
                         .Where(a => courseIds.Contains(a.CourseId))
+                        .OrderByDescending(a => a.CreatedAt)
                         .ToListAsync(cancellationToken);
 
                     // Filter tugas yang terkait dengan LessonId yang ditemukan
