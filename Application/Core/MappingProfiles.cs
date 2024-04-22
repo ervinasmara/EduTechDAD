@@ -17,8 +17,6 @@ using Domain.Learn.Lessons;
 using Domain.Attendances;
 using Domain.Submission;
 using Domain.Assignments;
-using Domain.User;
-using Application.User.DTOs;
 
 namespace Application.Core
 {
@@ -49,7 +47,6 @@ namespace Application.Core
             CreateMap<ScheduleDto, Schedule>();
             CreateMap<Schedule, ScheduleGetDto>();
             CreateMap<InfoRecap, InfoRecapCreateDto>();
-            CreateMap<Teacher, TeacherGetAllDto>();
 
 
             CreateMap<AssignmentSubmission, AssignmentSubmissionStatusDto>();

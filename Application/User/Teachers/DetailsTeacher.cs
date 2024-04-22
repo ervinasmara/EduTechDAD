@@ -10,12 +10,12 @@ namespace Application.User.Teachers
 {
     public class DetailsTeacher
     {
-        public class Query : IRequest<Result<TeacherGetByIdDto>>
+        public class Query : IRequest<Result<TeacherGetAllAndByIdDto>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<TeacherGetByIdDto>>
+        public class Handler : IRequestHandler<Query, Result<TeacherGetAllAndByIdDto>>
         {
             private readonly DataContext _context;
 
@@ -24,7 +24,7 @@ namespace Application.User.Teachers
                 _context = context;
             }
 
-            public async Task<Result<TeacherGetByIdDto>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<TeacherGetAllAndByIdDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var teacher = await _context.Teachers
                     .Include(t => t.TeacherLessons)
@@ -33,12 +33,13 @@ namespace Application.User.Teachers
 
                 if (teacher == null)
                 {
-                    return Result<TeacherGetByIdDto>.Failure("Teacher not found.");
+                    return Result<TeacherGetAllAndByIdDto>.Failure("Teacher not found.");
                 }
 
-                var teacherDto = new TeacherGetByIdDto
+                var teacherDto = new TeacherGetAllAndByIdDto
                 {
                     Id = teacher.Id,
+                    Status = teacher.Status,
                     NameTeacher = teacher.NameTeacher,
                     BirthDate = teacher.BirthDate,
                     BirthPlace = teacher.BirthPlace,
@@ -52,7 +53,7 @@ namespace Application.User.Teachers
                     }).ToList()
                 };
 
-                return Result<TeacherGetByIdDto>.Success(teacherDto);
+                return Result<TeacherGetAllAndByIdDto>.Success(teacherDto);
             }
 
             private List<ClassRoomDto> GetClassRoomsForLessonAndTeacher(Guid lessonId, Guid teacherId)

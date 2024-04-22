@@ -14,6 +14,20 @@ namespace API.Controllers.Tasks
         }
 
         [Authorize(Policy = "RequireRole2,3,4")]
+        [HttpGet("getAssignmentByTeacherId")]
+        public async Task<IActionResult> GetAssignmentstByTeacherId(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new ListAssignmentByTeacherId.Query(), ct));
+        }
+
+        [Authorize(Policy = "RequireRole2,3,4")]
+        [HttpGet("getAssignmentByClassRoomId")]
+        public async Task<IActionResult> GetAssignmentstByClassRoomId(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new ListAssignmentByClassRoomId.Query(), ct));
+        }
+
+        [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAssignmentById(Guid id, CancellationToken ct)
         {
@@ -29,25 +43,11 @@ namespace API.Controllers.Tasks
 
         [Authorize(Policy = "RequireRole2OrRole4")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> EditAssignment(Guid id, [FromForm] AssignmentDto assignmentDto)
+        public async Task<IActionResult> EditAssignment(Guid id, [FromForm] AssignmentDto assignmentDto, CancellationToken ct)
         {
-            var command = new EditTask.Command
-            {
-                Id = id,
-                AssignmentDto = assignmentDto
-            };
+            var result = await Mediator.Send(new EditTask.Command { Id = id, AssignmentDto = assignmentDto }, ct);
 
-            var result = await Mediator.Send(command);
-
-            if (result.IsSuccess)
-            {
-                var editedAssignment = result.Value;
-                return Ok(editedAssignment); // Mengembalikan respons 200 OK dengan data assignment yang berhasil diubah
-            }
-            else
-            {
-                return BadRequest(result.Error); // Mengembalikan respons 400 Bad Request dengan pesan kesalahan jika edit gagal
-            }
+            return HandleResult(result);
         }
 
         [Authorize(Policy = "RequireRole2,3,4")]

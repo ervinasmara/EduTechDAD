@@ -28,22 +28,10 @@ namespace Application.User.DTOs
         public string Nip { get; set; }
     }
 
-    public class TeacherGetAllDto
+    public class TeacherGetAllAndByIdDto
     {
         public Guid Id { get; set; }
-        public string NameTeacher { get; set; }
-        public DateOnly BirthDate { get; set; }
-        public string BirthPlace { get; set; }
-        public string Address { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Nip { get; set; }
-        public ICollection<string> LessonNames { get; set; }
-        public ICollection<string> ClassNames { get; set; }
-    }
-
-    public class TeacherGetByIdDto
-    {
-        public Guid Id { get; set; }
+        public int Status { get; set; }
         public string NameTeacher { get; set; }
         public DateOnly BirthDate { get; set; }
         public string BirthPlace { get; set; }
@@ -53,7 +41,7 @@ namespace Application.User.DTOs
         public ICollection<LessonTeacherIdGetDto> LessonTeacher { get; set; }
     }
 
-    //public class TeacherGetByIdDto
+    //public class TeacherGetAllAndByIdDto
     //{
     //    public string NameTeacher { get; set; }
     //    public DateOnly BirthDate { get; set; }

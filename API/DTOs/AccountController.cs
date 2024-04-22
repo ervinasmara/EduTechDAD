@@ -85,6 +85,24 @@ namespace API.DTOs
             return HandleResult(result);
         }
 
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPut("teacher/delete/{teacherId}")]
+        public async Task<IActionResult> DeleteTeacher(Guid teacherId, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeactivateTeacher.Command { TeacherId = teacherId}, ct);
+
+            return HandleResult(result);
+        }
+
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPut("student/delete/{studentId}")]
+        public async Task<IActionResult> DeleteStudent(Guid studentId, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeactivateStudent.Command { StudentId = studentId }, ct);
+
+            return HandleResult(result);
+        }
+
         // =========================== LOGIN =========================== //
         [AllowAnonymous]
         [HttpPost("login")]

@@ -1,4 +1,6 @@
-﻿using Application.Core;
+﻿using Application.ClassRooms;
+using Application.Core;
+using Application.Learn.Lessons;
 using Application.User.DTOs;
 using AutoMapper;
 using MediatR;
@@ -9,55 +11,62 @@ namespace Application.User.Teachers
 {
     public class ListTeacher
     {
-        public class Query : IRequest<Result<List<TeacherGetAllDto>>>
+        public class Query : IRequest<Result<List<TeacherGetAllAndByIdDto>>>
         {
             // Tidak memerlukan parameter tambahan untuk meneruskan ke query
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<TeacherGetAllDto>>>
+        public class Handler : IRequestHandler<Query, Result<List<TeacherGetAllAndByIdDto>>>
         {
             private readonly DataContext _context;
-            private readonly IMapper _mapper;
 
-            public Handler(DataContext context, IMapper mapper)
+            public Handler(DataContext context)
             {
                 _context = context;
-                _mapper = mapper;
             }
 
-            public async Task<Result<List<TeacherGetAllDto>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<List<TeacherGetAllAndByIdDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                // Mengambil daftar guru dari basis data, termasuk informasi mapel yang diajarkan oleh masing-masing guru.
                 var teachers = await _context.Teachers
                     .Include(t => t.TeacherLessons)
-                        .ThenInclude(tl => tl.Lesson) // Meng-include informasi mapel yang diajarkan oleh guru
-                    .ToListAsync(cancellationToken);
+                        .ThenInclude(tl => tl.Lesson)
+                    .ToListAsync();
 
-                // Inisialisasi daftar DTO untuk menyimpan informasi guru.
-                var teacherDtos = new List<TeacherGetAllDto>();
-
-                // Iterasi melalui setiap guru untuk membuat DTO dan mengumpulkan informasi terkait.
-                foreach (var teacher in teachers)
+                if (teachers == null || !teachers.Any())
                 {
-                    var teacherDto = _mapper.Map<TeacherGetAllDto>(teacher);
-
-                    // Ambil nama-nama mapel dari pivot TeacherLesson.
-                    teacherDto.LessonNames = teacher.TeacherLessons.Select(tl => tl.Lesson.LessonName).ToList();
-
-                    // Ambil nama-nama kelas dari pivot LessonClassRoom yang terkait dengan setiap pelajaran yang diajarkan oleh guru.
-                    var classNames = teacher.TeacherLessons
-                        .SelectMany(tl => tl.Lesson.LessonClassRooms.Select(lcr => lcr.ClassRoom.ClassName))
-                        .Where(className => className != null) // Filter nilai null
-                        .Distinct() // Hapus nilai duplikat
-                        .ToList();
-
-                    teacherDto.ClassNames = classNames;
-
-                    teacherDtos.Add(teacherDto);
+                    return Result<List<TeacherGetAllAndByIdDto>>.Failure("No teachers found.");
                 }
 
-                // Mengembalikan hasil yang berhasil bersama dengan daftar DTO yang berisi informasi guru.
-                return Result<List<TeacherGetAllDto>>.Success(teacherDtos);
+                var teacherDtos = teachers.Select(teacher => new TeacherGetAllAndByIdDto
+                {
+                    Id = teacher.Id,
+                    Status = teacher.Status,
+                    NameTeacher = teacher.NameTeacher,
+                    BirthDate = teacher.BirthDate,
+                    BirthPlace = teacher.BirthPlace,
+                    Address = teacher.Address,
+                    PhoneNumber = teacher.PhoneNumber,
+                    Nip = teacher.Nip,
+                    LessonTeacher = teacher.TeacherLessons.Select(tl => new LessonTeacherIdGetDto
+                    {
+                        LessonName = tl.Lesson.LessonName,
+                        ClassRooms = GetClassRoomsForLessonAndTeacher(tl.Lesson.Id, teacher.Id)
+                    }).ToList()
+                }).ToList();
+
+                return Result<List<TeacherGetAllAndByIdDto>>.Success(teacherDtos);
+            }
+
+            private List<ClassRoomDto> GetClassRoomsForLessonAndTeacher(Guid lessonId, Guid teacherId)
+            {
+                return _context.TeacherClassRooms
+                    .Where(tc => tc.TeacherId == teacherId && tc.ClassRoom.LessonClassRooms.Any(lcr => lcr.LessonId == lessonId))
+                    .Select(tc => new ClassRoomDto
+                    {
+                        ClassName = tc.ClassRoom.ClassName,
+                        UniqueNumberOfClassRoom = tc.ClassRoom.UniqueNumberOfClassRoom
+                    })
+                    .ToList();
             }
         }
     }

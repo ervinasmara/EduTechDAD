@@ -27,6 +27,19 @@ namespace Application.Assignments
         public string CourseName { get; set; }
     }
 
+    public class AssignmentGetByTeacherIdDto
+    {
+        public Guid Id { get; set; }
+        public string AssignmentName { get; set; }
+        public string AssignmentFileName { get; set; }
+        public DateOnly AssignmentDate { get; set; }
+        public DateOnly AssignmentDeadline { get; set; }
+        public string AssignmentDescription { get; set; }
+        public string AssignmentLink { get; set; }
+        public string LessonName { get; set; }
+        public byte[] AssignmentFileData { get; set; }
+    }
+
     public class DownloadFileDto
     {
         public byte[] FileData { get; set; }
