@@ -71,6 +71,9 @@ namespace Application.Assignments
                             // Dapatkan nama pelajaran dari tugas yang terkait
                             var lessonName = assignment.Course.Lesson.LessonName;
 
+                            // Dapatkan nama-nama kelas yang terkait dengan assignment
+                            var classNames = await GetClassNamesForAssignment(assignment.Id, cancellationToken);
+
                             // Buat DTO AssignmentGetByTeacherIdDto
                             var assignmentDto = new AssignmentGetByTeacherIdDto
                             {
@@ -81,7 +84,8 @@ namespace Application.Assignments
                                 AssignmentDescription = assignment.AssignmentDescription,
                                 AssignmentLink = assignment.AssignmentLink,
                                 LessonName = lessonName,
-                                AssignmentFileData = assignment.FileData
+                                AssignmentFileData = assignment.FileData,
+                                ClassNames = classNames
                             };
 
                             // Set AssignmentFileName berdasarkan AssignmentName dan AssignmentFileData extension
@@ -106,6 +110,16 @@ namespace Application.Assignments
                     // Tangani pengecualian dan kembalikan pesan kesalahan yang sesuai
                     return Result<List<AssignmentGetByTeacherIdDto>>.Failure($"Failed to retrieve assignments: {ex.Message}");
                 }
+            }
+
+            private async Task<ICollection<string>> GetClassNamesForAssignment(Guid assignmentId, CancellationToken cancellationToken)
+            {
+                var classNames = await _context.AssignmentClassRooms
+                    .Where(acr => acr.AssignmentId == assignmentId)
+                    .Select(acr => acr.ClassRoom.ClassName)
+                    .ToListAsync(cancellationToken);
+
+                return classNames;
             }
         }
     }
