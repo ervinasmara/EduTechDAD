@@ -26,5 +26,8 @@ namespace Domain.Assignments
 
         // Relasi many-to-many dengan ClassRoom melalui tabel pivot CourseClassRoom
         public ICollection<AssignmentClassRoom> AssignmentClassRooms { get; set; }
+
+        // Properti navigasi ke TeacherAssignment
+        public ICollection<TeacherAssignment> TeacherAssignments { get; set; }
     }
 }

@@ -61,7 +61,6 @@ namespace Application.Submission
                     {
                         AssignmentId = assignment.Id,
                         StudentId = request.AssignmentSubmissionStatusDto.StudentId,
-                        Status = 1 // Set nilai default status
                     };
 
                     // Tambah AssignmentSubmission ke database

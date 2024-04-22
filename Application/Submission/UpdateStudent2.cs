@@ -50,8 +50,6 @@ namespace Application.Submission
                     // Kemudian bisa menyimpan submissionTime ke database
                     assignmentSubmission.SubmissionTime = submissionTime;
 
-                    assignmentSubmission.Status = 2; // Mengubah status menjadi 2 (sudah dikerjakan)
-
                     // Mengupdate FileData jika disediakan
                     if (request.AssignmentSubmissionStudentDto.FileData != null)
                     {

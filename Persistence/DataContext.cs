@@ -82,6 +82,7 @@ namespace Persistence
                 .HasForeignKey(z => z.StudentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
             // Menentukan kunci utama untuk entitas perantara TeacherCourse
             modelBuilder.Entity<TeacherCourse>()
                 .HasKey(tc => new { tc.TeacherId, tc.CourseId });
@@ -97,6 +98,23 @@ namespace Persistence
                 .HasOne(tc => tc.Course) // TeacherCourse memiliki satu Course
                 .WithMany(c => c.TeacherCourses) // Course memiliki banyak TeacherCourse
                 .HasForeignKey(tc => tc.CourseId); // Kunci asing TeacherCourse adalah CourseId
+
+
+            // Menentukan kunci utama untuk entitas perantara TeacherAssignment
+            modelBuilder.Entity<TeacherAssignment>()
+                .HasKey(tc => new { tc.TeacherId, tc.AssignmentId });
+
+            // Menentukan hubungan antara TeacherAssignment dan Teacher
+            modelBuilder.Entity<TeacherAssignment>()
+                .HasOne(tc => tc.Teacher) // TeacherAssignment memiliki satu Teacher
+                .WithMany(t => t.TeacherAssignments) // Teacher memiliki banyak TeacherAssignment
+                .HasForeignKey(tc => tc.TeacherId); // Kunci asing TeacherAssignment adalah TeacherId
+
+            // Menentukan hubungan antara TeacherAssignment dan Assignment
+            modelBuilder.Entity<TeacherAssignment>()
+                .HasOne(tc => tc.Assignment) // TeacherAssignment memiliki satu Assignment
+                .WithMany(c => c.TeacherAssignments) // Assignment memiliki banyak TeacherAssignment
+                .HasForeignKey(tc => tc.AssignmentId); // Kunci asing TeacherAssignment adalah AssignmentId
 
             // ======================== Many to Many ============================
             // Konfigurasi many-to-many relasi antara Lesson dan ClassRoom
@@ -207,6 +225,7 @@ namespace Persistence
         public DbSet<TeacherLesson> TeacherLessons { get; set; }
         public DbSet<TeacherClassRoom> TeacherClassRooms { get; set; }
         public DbSet<TeacherCourse> TeacherCourses { get; set; }
+        public DbSet<TeacherAssignment> TeacherAssignments { get; set; }
         public DbSet<LessonClassRoom> LessonClassRooms { get; set; }
     }
 }

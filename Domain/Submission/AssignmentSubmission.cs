@@ -8,7 +8,6 @@ namespace Domain.Submission
     {
         public Guid Id { get; set; }
         public DateTime? SubmissionTime { get; set; }
-        public int Status { get; set; }
         public byte[]? FileData { get; set; }
         public string? Link { get; set; }
         public float? Grade { get; set; }

@@ -1,4 +1,5 @@
-﻿using Domain.Learn.Courses;
+﻿using Domain.Assignments;
+using Domain.Learn.Courses;
 using Domain.Many_to_Many;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -28,5 +29,8 @@ namespace Domain.User
 
         // Properti navigasi ke TeacherCourse
         public ICollection<TeacherCourse> TeacherCourses { get; set; }
+
+        // Properti navigasi ke TeacherAssignment
+        public ICollection<TeacherAssignment> TeacherAssignments { get; set; }
     }
 }

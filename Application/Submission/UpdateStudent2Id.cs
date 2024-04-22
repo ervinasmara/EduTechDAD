@@ -48,7 +48,6 @@ namespace Application.Submission
 
                     // Update assignmentSubmission properties
                     assignmentSubmission.SubmissionTime = DateTime.UtcNow.AddHours(7); // Adding 7 hours to UTC time
-                    assignmentSubmission.Status = 2; // Mengubah status menjadi 2 (sudah dikerjakan)
 
                     // Mengupdate FileData jika disediakan
                     if (request.AssignmentSubmissionStudentDto.FileData != null)

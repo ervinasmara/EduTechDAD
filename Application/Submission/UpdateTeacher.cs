@@ -48,9 +48,6 @@ namespace Application.Submission
                     assignmentSubmission.Grade = request.AssignmentSubmissionTeacherDto.Grade;
                     assignmentSubmission.Comment = request.AssignmentSubmissionTeacherDto.Comment;
 
-                    // Mengubah status menjadi 3 (selesai)
-                    assignmentSubmission.Status = 3;
-
                     await _context.SaveChangesAsync(cancellationToken);
 
                     // Memetakan entitas AssignmentSubmission ke AssignmentSubmissionTeacherDto
