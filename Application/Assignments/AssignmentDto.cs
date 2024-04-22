@@ -37,6 +37,7 @@ namespace Application.Assignments
         public string AssignmentDescription { get; set; }
         public string AssignmentLink { get; set; }
         public string LessonName { get; set; }
+        public ICollection<string> ClassNames { get; set; }
         public byte[] AssignmentFileData { get; set; }
     }
 

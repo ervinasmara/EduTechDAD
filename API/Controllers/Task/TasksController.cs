@@ -31,7 +31,7 @@ namespace API.Controllers.Tasks
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAssignmentById(Guid id, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new DetailsTask.Query { Id = id }, ct));
+            return HandleResult(await Mediator.Send(new DetailsTask.Query { AssignmentId = id }, ct));
         }
 
         [Authorize(Policy = "RequireRole2OrRole4")]
