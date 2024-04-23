@@ -1,16 +1,9 @@
-﻿using Application.Assignments;
-using Application.Core;
+﻿using Application.Core;
 using Application.Interface;
 using AutoMapper;
-using Domain.Many_to_Many;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Submission
 {
