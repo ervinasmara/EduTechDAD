@@ -37,6 +37,12 @@ namespace Application.Assignments
 
                 var studentId = _userAccessor.GetStudentIdFromToken(); // Dapatkan StudentId dari token
 
+                // Periksa apakah studentId valid
+                if (string.IsNullOrEmpty(studentId))
+                {
+                    return Result<List<AssignmentGetByClassRoomIdDto>>.Failure("StudentId not found in token.");
+                }
+
                 try
                 {
                     // Dapatkan semua AssignmentId yang terkait dengan ClassRoomId

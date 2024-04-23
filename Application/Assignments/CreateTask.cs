@@ -1,4 +1,5 @@
 ﻿using Application.Core;
+using Application.Interface;
 using AutoMapper;
 using Domain.Assignments;
 using Domain.Many_to_Many;
@@ -28,17 +29,28 @@ namespace Application.Assignments
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
+            private readonly IUserAccessor _userAccessor;
 
-            public Handler(DataContext context, IMapper mapper)
+            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
             {
                 _context = context;
                 _mapper = mapper;
+                _userAccessor = userAccessor;
             }
 
             public async Task<Result<AssignmentDto>> Handle(Command request, CancellationToken cancellationToken)
             {
                 try
                 {
+                    // Mendapatkan ID guru dari token
+                    var teacherId = _userAccessor.GetTeacherIdFromToken();
+
+                    // Periksa apakah teacherId valid
+                    if (string.IsNullOrEmpty(teacherId))
+                    {
+                        return Result<AssignmentDto>.Failure("TeacherId not found in token.");
+                    }
+
                     // Periksa apakah Course dengan CourseId yang diberikan ada
                     var course = await _context.Courses.FindAsync(request.AssignmentDto.CourseId);
                     if (course == null)
@@ -105,6 +117,14 @@ namespace Application.Assignments
                         }
                     }
 
+                    // Simpan pasangan TeacherId dan AssignmentId ke dalam tabel TeacherAssignment
+                    var teacherAssignment = new TeacherAssignment
+                    {
+                        TeacherId = Guid.Parse(teacherId),
+                        AssignmentId = assignment.Id
+                    };
+
+                    _context.TeacherAssignments.Add(teacherAssignment);
                     await _context.SaveChangesAsync(cancellationToken);
 
                     // Mendapatkan ClassNames yang sudah dipilih

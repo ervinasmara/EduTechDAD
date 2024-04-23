@@ -48,13 +48,18 @@ namespace Application.Core
             CreateMap<Schedule, ScheduleGetDto>();
             CreateMap<InfoRecap, InfoRecapCreateDto>();
 
+            CreateMap<Assignment, SubmissionGetAssignmentNameByClassNameDto>();
 
             CreateMap<AssignmentSubmission, AssignmentSubmissionStatusDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionStudentDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionTeacherDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionGetDto>();
+            CreateMap<AssignmentSubmission, SubmissionCreateDto>();
             CreateMap<AssignmentSubmission, AssignmentSubmissionGetByIdCRandA>();
             //CreateMap<AssignmentSubmissionGetByIdCRandA, AssignmentSubmission>();
+
+            CreateMap<AssignmentSubmission, SubmissionCreateDto>()
+                .ForMember(dest => dest.FileData, opt => opt.Ignore());
 
             CreateMap<AssignmentSubmission, AssignmentSubmissionStudentDto>()
                 .ForMember(dest => dest.FileData, opt => opt.Ignore());

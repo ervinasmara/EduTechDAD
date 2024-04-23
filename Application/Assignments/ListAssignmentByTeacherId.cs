@@ -1,7 +1,6 @@
 ﻿using Application.Core;
 using Application.Interface;
 using Application.Learn.GetFileName;
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -38,76 +37,52 @@ namespace Application.Assignments
 
                 try
                 {
-                    // Dapatkan semua LessonId yang terkait dengan TeacherId
-                    var lessonIds = await _context.TeacherLessons
-                        .Where(tl => tl.TeacherId == Guid.Parse(teacherId))
-                        .Select(tl => tl.LessonId)
-                        .ToListAsync(cancellationToken);
-
-                    // Dapatkan semua CourseId yang terkait dengan TeacherId
-                    var courseIds = await _context.TeacherCourses
-                        .Where(tc => tc.TeacherId == Guid.Parse(teacherId))
-                        .Select(tc => tc.CourseId)
-                        .ToListAsync(cancellationToken);
-
-                    // Dapatkan semua tugas yang terkait dengan CourseId yang ditemukan
-                    var assignments = await _context.Assignments
-                        .Include(a => a.Course)
-                        .ThenInclude(c => c.Lesson) // Termasuk informasi Lesson dalam query
-                        .Where(a => courseIds.Contains(a.CourseId))
+                    // Dapatkan semua tugas yang terkait dengan guru
+                    var assignments = await _context.TeacherAssignments
+                        .Include(ta => ta.Assignment)
+                        .ThenInclude(a => a.Course)
+                        .ThenInclude(c => c.Lesson)
+                        .Where(ta => ta.TeacherId == Guid.Parse(teacherId))
+                        .Select(ta => ta.Assignment)
                         .OrderByDescending(a => a.CreatedAt)
                         .ToListAsync(cancellationToken);
-
-                    // Filter tugas yang terkait dengan LessonId yang ditemukan
-                    assignments = assignments.Where(a => a.Course != null && a.Course.Lesson != null && lessonIds.Contains(a.Course.Lesson.Id)).ToList();
 
                     var assignmentDtos = new List<AssignmentGetByTeacherIdDto>();
 
                     foreach (var assignment in assignments)
                     {
-                        // Periksa null sebelum mengakses properti-properti assignment, Course, dan Lesson
-                        if (assignment != null && assignment.Course != null && assignment.Course.Lesson != null)
+                        var lessonName = assignment.Course?.Lesson?.LessonName;
+                        var classNames = await GetClassNamesForAssignment(assignment.Id, cancellationToken);
+
+                        var assignmentDto = new AssignmentGetByTeacherIdDto
                         {
-                            // Dapatkan nama pelajaran dari tugas yang terkait
-                            var lessonName = assignment.Course.Lesson.LessonName;
+                            Id = assignment.Id,
+                            AssignmentName = assignment.AssignmentName,
+                            AssignmentDate = assignment.AssignmentDate,
+                            AssignmentDeadline = assignment.AssignmentDeadline,
+                            AssignmentDescription = assignment.AssignmentDescription,
+                            AssignmentLink = assignment.AssignmentLink,
+                            LessonName = lessonName,
+                            AssignmentFileData = assignment.FileData,
+                            ClassNames = classNames
+                        };
 
-                            // Dapatkan nama-nama kelas yang terkait dengan assignment
-                            var classNames = await GetClassNamesForAssignment(assignment.Id, cancellationToken);
-
-                            // Buat DTO AssignmentGetByTeacherIdDto
-                            var assignmentDto = new AssignmentGetByTeacherIdDto
-                            {
-                                Id = assignment.Id,
-                                AssignmentName = assignment.AssignmentName,
-                                AssignmentDate = assignment.AssignmentDate,
-                                AssignmentDeadline = assignment.AssignmentDeadline,
-                                AssignmentDescription = assignment.AssignmentDescription,
-                                AssignmentLink = assignment.AssignmentLink,
-                                LessonName = lessonName,
-                                AssignmentFileData = assignment.FileData,
-                                ClassNames = classNames
-                            };
-
-                            // Set AssignmentFileName berdasarkan AssignmentName dan AssignmentFileData extension
-                            if (!string.IsNullOrEmpty(assignment.AssignmentName) && assignment.FileData != null)
-                            {
-                                assignmentDto.AssignmentFileName = $"{assignment.AssignmentName}.{GetFileExtension.FileExtensionHelper(assignment.FileData)}";
-                            }
-                            else
-                            {
-                                // Handle nilai null dengan benar
-                                assignmentDto.AssignmentFileName = "UnknownFileName";
-                            }
-
-                            assignmentDtos.Add(assignmentDto);
+                        if (!string.IsNullOrEmpty(assignment.AssignmentName) && assignment.FileData != null)
+                        {
+                            assignmentDto.AssignmentFileName = $"{assignment.AssignmentName}.{GetFileExtension.FileExtensionHelper(assignment.FileData)}";
                         }
+                        else
+                        {
+                            assignmentDto.AssignmentFileName = "UnknownFileName";
+                        }
+
+                        assignmentDtos.Add(assignmentDto);
                     }
 
                     return Result<List<AssignmentGetByTeacherIdDto>>.Success(assignmentDtos);
                 }
                 catch (Exception ex)
                 {
-                    // Tangani pengecualian dan kembalikan pesan kesalahan yang sesuai
                     return Result<List<AssignmentGetByTeacherIdDto>>.Failure($"Failed to retrieve assignments: {ex.Message}");
                 }
             }
