@@ -4,7 +4,7 @@ using Application.Announcements.Query;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers.Announcements
+namespace API.Controllers.Announcement
 {
 
     public class AnnouncementsController : BaseApiController

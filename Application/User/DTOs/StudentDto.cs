@@ -34,6 +34,7 @@
     public class StudentGetAllDto
     {
         public Guid Id { get; set; }
+        public string Status { get; set; }
         public string NameStudent { get; set; }
         public string Nis { get; set; }
         public DateOnly BirthDate { get; set; }
@@ -51,6 +52,7 @@
 
     public class StudentGetByIdDto
     {
+        public string Status { get; set; }
         public string NameStudent { get; set; }
         public string Nis { get; set; }
         public DateOnly BirthDate { get; set; }

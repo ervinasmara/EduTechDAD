@@ -4,7 +4,7 @@ using Application.InfoRecaps.Query;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers.InfoRecaps
+namespace API.Controllers.InfoRecap
 {
     [Authorize(Policy = "RequireRole1OrRole4")]
     public class InfoRecapsController : BaseApiController

@@ -2,7 +2,7 @@
 
 namespace Application.Learn.Courses
 {
-    public class CourseValidator : AbstractValidator<CourseDto>
+    public class CourseValidator : AbstractValidator<CourseCreateAndEditDto>
     {
         public CourseValidator()
         {
@@ -15,15 +15,6 @@ namespace Application.Learn.Courses
                 .NotEmpty()
                 .When(x => x.FileData == null) // Hanya memeriksa LinkCourse jika FileData kosong
                 .WithMessage("LinkCourse must be provided if FileData is not provided.");
-        }
-
-        private bool BeInRange(string uniqueNumber)
-        {
-            if (int.TryParse(uniqueNumber, out int number))
-            {
-                return number >= 1 && number <= 99;
-            }
-            return false;
         }
     }
 }

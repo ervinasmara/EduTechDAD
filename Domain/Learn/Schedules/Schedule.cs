@@ -1,5 +1,4 @@
-﻿using Domain.Class;
-using Domain.Learn.Lessons;
+﻿using Domain.Learn.Lessons;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Learn.Schedules
@@ -15,10 +14,5 @@ namespace Domain.Learn.Schedules
         public Guid LessonId { get; set; }
         [ForeignKey("LessonId")]
         public Lesson Lesson { get; set; }
-
-        // Kunci asing ke ClassRoom (Kelas)
-        public Guid ClassRoomId { get; set; }
-        [ForeignKey("ClassRoomId")]
-        public ClassRoom ClassRoom { get; set; }
     }
 }

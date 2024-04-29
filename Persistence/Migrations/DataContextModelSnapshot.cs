@@ -48,8 +48,8 @@ namespace Persistence.Migrations
                     b.Property<DateOnly>("AssignmentDate")
                         .HasColumnType("date");
 
-                    b.Property<DateOnly>("AssignmentDeadline")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("AssignmentDeadline")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("AssignmentDescription")
                         .HasColumnType("text");
@@ -66,29 +66,17 @@ namespace Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<byte[]>("FileData")
-                        .HasColumnType("bytea");
+                    b.Property<string>("FilePath")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
 
                     b.ToTable("Assignments");
-                });
-
-            modelBuilder.Entity("Domain.Assignments.TeacherAssignment", b =>
-                {
-                    b.Property<Guid>("TeacherId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("AssignmentId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("TeacherId", "AssignmentId");
-
-                    b.HasIndex("AssignmentId");
-
-                    b.ToTable("TeacherAssignments");
                 });
 
             modelBuilder.Entity("Domain.Attendances.Attendance", b =>
@@ -121,6 +109,12 @@ namespace Persistence.Migrations
 
                     b.Property<string>("ClassName")
                         .HasColumnType("text");
+
+                    b.Property<string>("LongClassName")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<string>("UniqueNumberOfClassRoom")
                         .HasColumnType("text");
@@ -165,14 +159,17 @@ namespace Persistence.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<byte[]>("FileData")
-                        .HasColumnType("bytea");
+                    b.Property<string>("FilePath")
+                        .HasColumnType("text");
 
                     b.Property<Guid>("LessonId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("LinkCourse")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -181,34 +178,27 @@ namespace Persistence.Migrations
                     b.ToTable("Courses");
                 });
 
-            modelBuilder.Entity("Domain.Learn.Courses.TeacherCourse", b =>
-                {
-                    b.Property<Guid>("TeacherId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("TeacherId", "CourseId");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("TeacherCourses");
-                });
-
             modelBuilder.Entity("Domain.Learn.Lessons.Lesson", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("ClassRoomId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("LessonName")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<string>("UniqueNumberOfLesson")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClassRoomId");
 
                     b.ToTable("Lessons");
                 });
@@ -217,9 +207,6 @@ namespace Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ClassRoomId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Day")
@@ -236,71 +223,9 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassRoomId");
-
                     b.HasIndex("LessonId");
 
                     b.ToTable("Schedules");
-                });
-
-            modelBuilder.Entity("Domain.Many_to_Many.AssignmentClassRoom", b =>
-                {
-                    b.Property<Guid>("AssignmentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ClassRoomId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("AssignmentId", "ClassRoomId");
-
-                    b.HasIndex("ClassRoomId");
-
-                    b.ToTable("AssignmentClassRooms");
-                });
-
-            modelBuilder.Entity("Domain.Many_to_Many.CourseClassRoom", b =>
-                {
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ClassRoomId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("CourseId", "ClassRoomId");
-
-                    b.HasIndex("ClassRoomId");
-
-                    b.ToTable("CourseClassRooms");
-                });
-
-            modelBuilder.Entity("Domain.Many_to_Many.LessonClassRoom", b =>
-                {
-                    b.Property<Guid>("LessonId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ClassRoomId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("LessonId", "ClassRoomId");
-
-                    b.HasIndex("ClassRoomId");
-
-                    b.ToTable("LessonClassRooms");
-                });
-
-            modelBuilder.Entity("Domain.Many_to_Many.TeacherClassRoom", b =>
-                {
-                    b.Property<Guid>("TeacherId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ClassRoomId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("TeacherId", "ClassRoomId");
-
-                    b.HasIndex("ClassRoomId");
-
-                    b.ToTable("TeacherClassRooms");
                 });
 
             modelBuilder.Entity("Domain.Many_to_Many.TeacherLesson", b =>
@@ -330,19 +255,22 @@ namespace Persistence.Migrations
                     b.Property<string>("Comment")
                         .HasColumnType("text");
 
-                    b.Property<byte[]>("FileData")
-                        .HasColumnType("bytea");
+                    b.Property<string>("FilePath")
+                        .HasColumnType("text");
 
-                    b.Property<float?>("Grade")
+                    b.Property<float>("Grade")
                         .HasColumnType("real");
 
                     b.Property<string>("Link")
                         .HasColumnType("text");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("SubmissionTime")
+                    b.Property<DateTime>("SubmissionTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -534,6 +462,9 @@ namespace Persistence.Migrations
                     b.Property<string>("BirthPlace")
                         .HasColumnType("text");
 
+                    b.Property<int>("Gender")
+                        .HasColumnType("integer");
+
                     b.Property<string>("NameTeacher")
                         .HasColumnType("text");
 
@@ -697,25 +628,6 @@ namespace Persistence.Migrations
                     b.Navigation("Course");
                 });
 
-            modelBuilder.Entity("Domain.Assignments.TeacherAssignment", b =>
-                {
-                    b.HasOne("Domain.Assignments.Assignment", "Assignment")
-                        .WithMany("TeacherAssignments")
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.User.Teacher", "Teacher")
-                        .WithMany("TeacherAssignments")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Assignment");
-
-                    b.Navigation("Teacher");
-                });
-
             modelBuilder.Entity("Domain.Attendances.Attendance", b =>
                 {
                     b.HasOne("Domain.User.Student", "Student")
@@ -738,118 +650,26 @@ namespace Persistence.Migrations
                     b.Navigation("Lesson");
                 });
 
-            modelBuilder.Entity("Domain.Learn.Courses.TeacherCourse", b =>
+            modelBuilder.Entity("Domain.Learn.Lessons.Lesson", b =>
                 {
-                    b.HasOne("Domain.Learn.Courses.Course", "Course")
-                        .WithMany("TeacherCourses")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
+                        .WithMany("Lessons")
+                        .HasForeignKey("ClassRoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.User.Teacher", "Teacher")
-                        .WithMany("TeacherCourses")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-
-                    b.Navigation("Teacher");
+                    b.Navigation("ClassRoom");
                 });
 
             modelBuilder.Entity("Domain.Learn.Schedules.Schedule", b =>
                 {
-                    b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
-                        .WithMany("Schedules")
-                        .HasForeignKey("ClassRoomId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Domain.Learn.Lessons.Lesson", "Lesson")
                         .WithMany("Schedules")
                         .HasForeignKey("LessonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ClassRoom");
-
                     b.Navigation("Lesson");
-                });
-
-            modelBuilder.Entity("Domain.Many_to_Many.AssignmentClassRoom", b =>
-                {
-                    b.HasOne("Domain.Assignments.Assignment", "Assignment")
-                        .WithMany("AssignmentClassRooms")
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
-                        .WithMany("AssignmentClassRooms")
-                        .HasForeignKey("ClassRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Assignment");
-
-                    b.Navigation("ClassRoom");
-                });
-
-            modelBuilder.Entity("Domain.Many_to_Many.CourseClassRoom", b =>
-                {
-                    b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
-                        .WithMany("CourseClassRooms")
-                        .HasForeignKey("ClassRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Learn.Courses.Course", "Course")
-                        .WithMany("CourseClassRooms")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClassRoom");
-
-                    b.Navigation("Course");
-                });
-
-            modelBuilder.Entity("Domain.Many_to_Many.LessonClassRoom", b =>
-                {
-                    b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
-                        .WithMany("LessonClassRooms")
-                        .HasForeignKey("ClassRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Learn.Lessons.Lesson", "Lesson")
-                        .WithMany("LessonClassRooms")
-                        .HasForeignKey("LessonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClassRoom");
-
-                    b.Navigation("Lesson");
-                });
-
-            modelBuilder.Entity("Domain.Many_to_Many.TeacherClassRoom", b =>
-                {
-                    b.HasOne("Domain.Class.ClassRoom", "ClassRoom")
-                        .WithMany("TeacherClassRooms")
-                        .HasForeignKey("ClassRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.User.Teacher", "Teacher")
-                        .WithMany("TeacherClassRooms")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClassRoom");
-
-                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Domain.Many_to_Many.TeacherLesson", b =>
@@ -987,42 +807,24 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Assignments.Assignment", b =>
                 {
-                    b.Navigation("AssignmentClassRooms");
-
                     b.Navigation("AssignmentSubmissions");
-
-                    b.Navigation("TeacherAssignments");
                 });
 
             modelBuilder.Entity("Domain.Class.ClassRoom", b =>
                 {
-                    b.Navigation("AssignmentClassRooms");
-
-                    b.Navigation("CourseClassRooms");
-
-                    b.Navigation("LessonClassRooms");
-
-                    b.Navigation("Schedules");
+                    b.Navigation("Lessons");
 
                     b.Navigation("Students");
-
-                    b.Navigation("TeacherClassRooms");
                 });
 
             modelBuilder.Entity("Domain.Learn.Courses.Course", b =>
                 {
                     b.Navigation("Assignments");
-
-                    b.Navigation("CourseClassRooms");
-
-                    b.Navigation("TeacherCourses");
                 });
 
             modelBuilder.Entity("Domain.Learn.Lessons.Lesson", b =>
                 {
                     b.Navigation("Courses");
-
-                    b.Navigation("LessonClassRooms");
 
                     b.Navigation("Schedules");
 
@@ -1049,12 +851,6 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.User.Teacher", b =>
                 {
-                    b.Navigation("TeacherAssignments");
-
-                    b.Navigation("TeacherClassRooms");
-
-                    b.Navigation("TeacherCourses");
-
                     b.Navigation("TeacherLessons");
                 });
 #pragma warning restore 612, 618

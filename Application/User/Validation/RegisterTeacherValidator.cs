@@ -14,17 +14,15 @@ namespace Application.User.Validation
             RuleFor(x => x.PhoneNumber).NotEmpty().WithMessage("Phone number is required.")
                                           .Matches("^[0-9]{8,13}$").WithMessage("Phone number must be between 8 and 13 digits and contain only numbers.");
             RuleFor(x => x.Nip).NotEmpty().WithMessage("Nip is required.");
+            RuleFor(x => x.Gender).NotEmpty().WithMessage("Gender is required.")
+                                  .InclusiveBetween(1, 2).WithMessage("Gender must be 1 for Male or 2 for Female.");
             RuleFor(x => x.Username).NotEmpty().WithMessage("Username is required.");
             RuleFor(x => x.Password)
                 .NotEmpty()
                 .Matches("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{8,16}")
                 .WithMessage("Password must be complex");
-            RuleFor(x => x.Role).NotEmpty().WithMessage("Role is required.")
-                                 .Equal(2).WithMessage("Role must be 2.");
 
-            RuleFor(x => x.LessonName).NotEmpty().WithMessage("LessonName is required.");
-
-            RuleFor(x => x.ClassNames).NotEmpty().WithMessage("ClassNames is required.");
+            RuleFor(x => x.LessonNames).NotEmpty().WithMessage("LessonNames is required.");
         }
     }
 }

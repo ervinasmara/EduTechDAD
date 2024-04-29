@@ -6,19 +6,20 @@ namespace Application.ClassRooms
     {
         public Guid Id { get; set; }
         public string ClassName { get; set; }
+        public string LongClassName { get; set; }
         public string UniqueNumberOfClassRoom { get; set; }
     }
 
-    public class ClassRoomDto
+    public class ClassRoomCreateAndEditDto
     {
         public string ClassName { get; set; }
-        public string UniqueNumberOfClassRoom { get; set; }
+        public string LongClassName { get; set; }
     }
 
     public class TeacherClassRoomDto
     {
         public string ClassName { get; set; }
         public string UniqueNumberOfClassRoom { get; set; }
-        public ICollection<LessonDto> Lessons { get; set; }
+        public ICollection<LessonGetByTeacherIdOrClassRoomIdDto> Lessons { get; set; }
     }
 }

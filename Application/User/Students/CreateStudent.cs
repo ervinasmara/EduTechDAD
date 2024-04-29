@@ -72,7 +72,7 @@ namespace Application.User.Students
                 var user = new AppUser
                 {
                     UserName = username,
-                    Role = studentDto.Role,
+                    Role = 3,
                 };
 
                 var student = new Student

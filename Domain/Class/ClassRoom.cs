@@ -1,5 +1,4 @@
-﻿using Domain.Many_to_Many;
-using Domain.Learn.Schedules;
+﻿using Domain.Learn.Lessons;
 using Domain.User;
 
 namespace Domain.Class
@@ -8,24 +7,14 @@ namespace Domain.Class
     {
         public Guid Id { get; set; }
         public string ClassName { get; set; }
+        public string LongClassName { get; set; }
         public string UniqueNumberOfClassRoom { get; set; }
+        public int Status { get; set; }
+
+        // Relasi dengan mapel
+        public ICollection<Lesson> Lessons { get; set; }
 
         // Relasi dengan siswa
         public ICollection<Student> Students { get; set; }
-
-        // Relasi dengan jadwal
-        public ICollection<Schedule> Schedules { get; set; }
-
-        // Relasi many-to-many dengan ClassRoom melalui tabel pivot CourseClassRoom
-        public ICollection<CourseClassRoom> CourseClassRooms { get; set; }
-
-        // Relasi many-to-many dengan ClassRoom melalui tabel pivot CourseClassRoom
-        public ICollection<AssignmentClassRoom> AssignmentClassRooms { get; set; }
-
-        // Relasi many-to-many dengan ClassRoom melalui tabel pivot TeacherClassRoom
-        public ICollection<TeacherClassRoom> TeacherClassRooms { get; set; }
-
-        // Relasi many-to-many dengan ClassRoom melalui tabel pivot LessonClassRoom
-        public ICollection<LessonClassRoom> LessonClassRooms { get; set; }
     }
 }

@@ -1,51 +1,77 @@
 ﻿using Application.Learn.Lessons;
+using Application.Learn.Lessons.Command;
+using Application.Learn.Lessons.Query;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers.Lessons
+namespace API.Controllers.Learn
 {
     public class LessonsController : BaseApiController
     {
-        [Authorize(Policy = "RequireRole1,2,3,4")]
+        /** Get All Lesson By Admin And SuperAdmin **/
+        [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpGet]
         public async Task<IActionResult> GetLessons(CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new List.Query(), ct));
+            return HandleResult(await Mediator.Send(new ListLesson.Query(), ct));
         }
 
-        [Authorize(Policy = "RequireRole1,2,3,4")]
+        /** Get Lesson By LessonId **/
+        [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetLesson(Guid id, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new Details.Query { Id = id }, ct));
+            return HandleResult(await Mediator.Send(new DetailsLesson.Query { LessonId = id }, ct));
         }
 
-        [Authorize(Policy = "RequireRole1,3,4")]
+        /** Get Lesson By ClassRoomId **/
+        [Authorize(Policy = "RequireRole3")]
         [HttpGet("lessonClassRoomId")]
         public async Task<IActionResult> GetLessonsByClassRoomId(CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new LessonByClassRoomId.Query(), ct));
         }
 
-        [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpPost]
-        public async Task<IActionResult> CreateLessonDto(LessonCreateDto lessonDto, CancellationToken ct)
+        /** Get Lesson By TeacherId **/
+        [Authorize(Policy = "RequireRole2")]
+        [HttpGet("lessonTeacherId")]
+        public async Task<IActionResult> GetLessonsByTeacherId(CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new Create.Command { LessonCreateDto = lessonDto }, ct));
+            return HandleResult(await Mediator.Send(new LessonByTeacherId.Query(), ct));
         }
 
+        /** Create Lesson By Admin And SuperAdmin **/
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPost]
+        public async Task<IActionResult> CreateLessonDto(LessonCreateAndEditDto lessonDto, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new CreateLesson.Command { LessonCreateAndEditDto = lessonDto }, ct));
+        }
+
+        /** Update Lesson By Admin And SuperAdmin **/
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> EditLessonDto(Guid id, LessonDto lessonDto, CancellationToken ct)
+        public async Task<IActionResult> EditLessonDto(Guid id, LessonCreateAndEditDto lessonDto, CancellationToken ct)
         {
-            var result = await Mediator.Send(new Edit.Command { Id = id, LessonDto = lessonDto }, ct);
+            var result = await Mediator.Send(new EditLesson.Command { LessonId = id, LessonCreateAndEditDto = lessonDto }, ct);
             return HandleResult(result);
         }
-               [Authorize(Policy = "RequireRole1OrRole4")]
+
+        /** Deactivate Lesson By Admin And SuperAdmin **/
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPut("deactivate/{id}")]
+        public async Task<IActionResult> DeactivateLessonDto(Guid id, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeactivateLesson.Command { Id = id }, ct);
+            return HandleResult(result);
+        }
+
+        /** Delete Lesson By Admin And SuperAdmin **/
+        [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLesson(Guid id, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new Delete.Command { Id = id }, ct));
+            return HandleResult(await Mediator.Send(new DeleteLesson.Command { Id = id }, ct));
         }
     }
 }

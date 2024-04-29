@@ -28,6 +28,7 @@ namespace Application.User.Students
                     .Select(s => new StudentGetAllDto
                     {
                         Id = s.Id,
+                        Status = s.Status == 1 ? "IsActive" : "NotActive",
                         NameStudent = s.NameStudent,
                         Nis = s.Nis,
                         BirthDate = s.BirthDate,

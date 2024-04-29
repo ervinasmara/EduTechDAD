@@ -20,11 +20,12 @@ namespace Persistence
         {
             base.OnModelCreating(modelBuilder);
 
-            //modelBuilder.Entity<Lesson>()
-            //    .HasOne(l => l.Teacher)  // Satu pelajaran memiliki satu guru
-            //    .WithMany(t => t.Lessons)  // Satu guru dapat mengajar banyak pelajaran
-            //    .HasForeignKey(l => l.TeacherId) // Foreign key di Lesson untuk TeacherId
-            //    .OnDelete(DeleteBehavior.Restrict); // Aturan penghapusan (opsional)
+            // One To Many, 1 ClassRoom have many Lesson
+            modelBuilder.Entity<Lesson>()
+                .HasOne(l => l.ClassRoom)  // Satu pelajaran memiliki satu kelas
+                .WithMany(t => t.Lessons)  // Satu kelas dapat dipunyai banyak pelajaran
+                .HasForeignKey(l => l.ClassRoomId) // Foreign key di Lesson untuk ClassRoomId
+                .OnDelete(DeleteBehavior.Restrict); // Aturan penghapusan (opsional)
 
             // One To Many, 1 ClassRoom have many Student
             modelBuilder.Entity<Student>()
@@ -54,13 +55,6 @@ namespace Persistence
                 .HasForeignKey(a => a.StudentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // One To Many, 1 ClassRoom have many Schedule
-            modelBuilder.Entity<Schedule>()
-                .HasOne(s => s.ClassRoom)
-                .WithMany(c => c.Schedules)
-                .HasForeignKey(s => s.ClassRoomId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // One To Many, 1 Lesson have many Schedule
             modelBuilder.Entity<Schedule>()
                 .HasOne(s => s.Lesson)
@@ -82,92 +76,7 @@ namespace Persistence
                 .HasForeignKey(z => z.StudentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
-            // Menentukan kunci utama untuk entitas perantara TeacherCourse
-            modelBuilder.Entity<TeacherCourse>()
-                .HasKey(tc => new { tc.TeacherId, tc.CourseId });
-
-            // Menentukan hubungan antara TeacherCourse dan Teacher
-            modelBuilder.Entity<TeacherCourse>()
-                .HasOne(tc => tc.Teacher) // TeacherCourse memiliki satu Teacher
-                .WithMany(t => t.TeacherCourses) // Teacher memiliki banyak TeacherCourse
-                .HasForeignKey(tc => tc.TeacherId); // Kunci asing TeacherCourse adalah TeacherId
-
-            // Menentukan hubungan antara TeacherCourse dan Course
-            modelBuilder.Entity<TeacherCourse>()
-                .HasOne(tc => tc.Course) // TeacherCourse memiliki satu Course
-                .WithMany(c => c.TeacherCourses) // Course memiliki banyak TeacherCourse
-                .HasForeignKey(tc => tc.CourseId); // Kunci asing TeacherCourse adalah CourseId
-
-
-            // Menentukan kunci utama untuk entitas perantara TeacherAssignment
-            modelBuilder.Entity<TeacherAssignment>()
-                .HasKey(tc => new { tc.TeacherId, tc.AssignmentId });
-
-            // Menentukan hubungan antara TeacherAssignment dan Teacher
-            modelBuilder.Entity<TeacherAssignment>()
-                .HasOne(tc => tc.Teacher) // TeacherAssignment memiliki satu Teacher
-                .WithMany(t => t.TeacherAssignments) // Teacher memiliki banyak TeacherAssignment
-                .HasForeignKey(tc => tc.TeacherId); // Kunci asing TeacherAssignment adalah TeacherId
-
-            // Menentukan hubungan antara TeacherAssignment dan Assignment
-            modelBuilder.Entity<TeacherAssignment>()
-                .HasOne(tc => tc.Assignment) // TeacherAssignment memiliki satu Assignment
-                .WithMany(c => c.TeacherAssignments) // Assignment memiliki banyak TeacherAssignment
-                .HasForeignKey(tc => tc.AssignmentId); // Kunci asing TeacherAssignment adalah AssignmentId
-
             // ======================== Many to Many ============================
-            // Konfigurasi many-to-many relasi antara Lesson dan ClassRoom
-            modelBuilder.Entity<LessonClassRoom>()
-                .HasKey(ccr => new { ccr.LessonId, ccr.ClassRoomId });
-
-            // LessonClassRoom memiliki relasi one-to-many ke Lesson
-            modelBuilder.Entity<LessonClassRoom>()
-                .HasOne(ccr => ccr.Lesson) // Setiap LessonClassRoom memiliki satu Lesson
-                .WithMany(course => course.LessonClassRooms) // Setiap Lesson memiliki banyak LessonClassRoom
-                .HasForeignKey(ccr => ccr.LessonId); // ForeignKey LessonId di LessonClassRoom
-
-            // LessonClassRoom memiliki relasi one-to-many ke ClassRoom
-            modelBuilder.Entity<LessonClassRoom>()
-                .HasOne(ccr => ccr.ClassRoom) // Setiap LessonClassRoom memiliki satu ClassRoom
-                .WithMany(classRoom => classRoom.LessonClassRooms) // Setiap ClassRoom memiliki banyak LessonClassRoom
-                .HasForeignKey(ccr => ccr.ClassRoomId); // ForeignKey ClassRoomId di LessonClassRoom
-
-
-            // Konfigurasi many-to-many relasi antara Course dan ClassRoom
-            modelBuilder.Entity<CourseClassRoom>()
-                .HasKey(ccr => new { ccr.CourseId, ccr.ClassRoomId });
-
-            // CourseClassRoom memiliki relasi one-to-many ke Course
-            modelBuilder.Entity<CourseClassRoom>()
-                .HasOne(ccr => ccr.Course) // Setiap CourseClassRoom memiliki satu Course
-                .WithMany(course => course.CourseClassRooms) // Setiap Course memiliki banyak CourseClassRoom
-                .HasForeignKey(ccr => ccr.CourseId); // ForeignKey CourseId di CourseClassRoom
-
-            // CourseClassRoom memiliki relasi one-to-many ke ClassRoom
-            modelBuilder.Entity<CourseClassRoom>()
-                .HasOne(ccr => ccr.ClassRoom) // Setiap CourseClassRoom memiliki satu ClassRoom
-                .WithMany(classRoom => classRoom.CourseClassRooms) // Setiap ClassRoom memiliki banyak CourseClassRoom
-                .HasForeignKey(ccr => ccr.ClassRoomId); // ForeignKey ClassRoomId di CourseClassRoom
-
-
-            // Konfigurasi many-to-many relasi antara Assignment dan ClassRoom
-            modelBuilder.Entity<AssignmentClassRoom>()
-                .HasKey(ccr => new { ccr.AssignmentId, ccr.ClassRoomId });
-
-            // AssignmentClassRoom memiliki relasi one-to-many ke Assignment
-            modelBuilder.Entity<AssignmentClassRoom>()
-                .HasOne(ccr => ccr.Assignment) // Setiap AssignmentClassRoom memiliki satu Assignment
-                .WithMany(course => course.AssignmentClassRooms) // Setiap Assignment memiliki banyak AssignmentClassRoom
-                .HasForeignKey(ccr => ccr.AssignmentId); // ForeignKey AssignmentId di AssignmentClassRoom
-
-            // AssignmentClassRoom memiliki relasi one-to-many ke ClassRoom
-            modelBuilder.Entity<AssignmentClassRoom>()
-                .HasOne(ccr => ccr.ClassRoom) // Setiap AssignmentClassRoom memiliki satu ClassRoom
-                .WithMany(classRoom => classRoom.AssignmentClassRooms) // Setiap ClassRoom memiliki banyak AssignmentClassRoom
-                .HasForeignKey(ccr => ccr.ClassRoomId); // ForeignKey ClassRoomId di AssignmentClassRoom
-
-
             // Konfigurasi many-to-many relasi antara Teacher dan Lesson
             modelBuilder.Entity<TeacherLesson>()
                 .HasKey(ccr => new { ccr.TeacherId, ccr.LessonId });
@@ -183,23 +92,6 @@ namespace Persistence
                 .HasOne(ccr => ccr.Lesson) // Setiap TeacherLesson memiliki satu Lesson
                 .WithMany(classRoom => classRoom.TeacherLessons) // Setiap Lesson memiliki banyak TeacherLesson
                 .HasForeignKey(ccr => ccr.LessonId); // ForeignKey LessonId di TeacherLesson
-
-
-            // Konfigurasi many-to-many relasi antara Teacher dan ClassRoom
-            modelBuilder.Entity<TeacherClassRoom>()
-                .HasKey(ccr => new { ccr.TeacherId, ccr.ClassRoomId });
-
-            // TeacherClassRoom memiliki relasi one-to-many ke Teacher
-            modelBuilder.Entity<TeacherClassRoom>()
-                .HasOne(ccr => ccr.Teacher) // Setiap TeacherClassRoom memiliki satu Teacher
-                .WithMany(course => course.TeacherClassRooms) // Setiap Teacher memiliki banyak TeacherClassRoom
-                .HasForeignKey(ccr => ccr.TeacherId); // ForeignKey TeacherId di TeacherClassRoom
-
-            // TeacherClassRoom memiliki relasi one-to-many ke ClassRoom
-            modelBuilder.Entity<TeacherClassRoom>()
-                .HasOne(ccr => ccr.ClassRoom) // Setiap TeacherClassRoom memiliki satu ClassRoom
-                .WithMany(classRoom => classRoom.TeacherClassRooms) // Setiap ClassRoom memiliki banyak TeacherClassRoom
-                .HasForeignKey(ccr => ccr.ClassRoomId); // ForeignKey ClassRoomId di TeacherClassRoom
         }
 
         public DataContext(DbContextOptions options) : base(options)
@@ -220,12 +112,6 @@ namespace Persistence
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
         public DbSet<InfoRecap> InfoRecaps { get; set; }
-        public DbSet<CourseClassRoom> CourseClassRooms { get; set; }
-        public DbSet<AssignmentClassRoom> AssignmentClassRooms { get; set; }
         public DbSet<TeacherLesson> TeacherLessons { get; set; }
-        public DbSet<TeacherClassRoom> TeacherClassRooms { get; set; }
-        public DbSet<TeacherCourse> TeacherCourses { get; set; }
-        public DbSet<TeacherAssignment> TeacherAssignments { get; set; }
-        public DbSet<LessonClassRoom> LessonClassRooms { get; set; }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Application.Learn.Courses;
+using Application.Learn.Courses.Command;
+using Application.Learn.Courses.Query;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,95 +8,91 @@ namespace API.Controllers.Learn
 {
     public class CoursesController : BaseApiController
     {
+        /** Get All Course By SuperAdmin **/
         [Authorize(Policy = "RequireRole4")]
         [HttpGet]
         public async Task<IActionResult> GetCourses(CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new List.Query(), ct));
+            return HandleResult(await Mediator.Send(new ListCourse.Query(), ct));
         }
 
-        [Authorize(Policy = "RequireRole3")]
-        [HttpGet("studentcourseclassroom")]
-        public async Task<IActionResult> GetStudentCourses(CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new CourseStudentClassRoom.Query(), ct));
-        }
-
-        [Authorize(Policy = "RequireRole2")]
-        [HttpGet("teachercourses")]
-        public async Task<IActionResult> GetTeacherCourses(CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new CourseTeacher.Query(), ct));
-        }
-
-
+        /** Get Course By CourseId **/
         [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetCourse(Guid id, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new Details.Query { Id = id }, ct));
+            return HandleResult(await Mediator.Send(new DetailsCourse.Query { CourseId = id }, ct));
         }
 
-        [Authorize(Policy = "RequireRole2OrRole4")]
-        [HttpPost]
-        public async Task<IActionResult> Course([FromForm] CourseDto courseDto, CancellationToken ct)
+        /** Get All Course By ClassRoomId **/
+        [Authorize(Policy = "RequireRole3")]
+        [HttpGet("getCourseByClassRoomId")]
+        public async Task<IActionResult> GetStudentCourses(CancellationToken ct)
         {
-            // Ambil TeacherId dari token autentikasi
-            var teacherId = Guid.Parse(HttpContext.User.FindFirst("TeacherId").Value);
-
-            // Tetapkan TeacherId dari token autentikasi ke dalam CourseDto
-            courseDto.TeacherId = teacherId;
-
-            // Buat command menggunakan CourseDto yang diterima
-            var command = new Create.Command { CourseDto = courseDto };
-
-            // Kirim command ke handler untuk diproses
-            return HandleResult(await Mediator.Send(command, ct));
+            return HandleResult(await Mediator.Send(new ListCourseByClassRoomId.Query(), ct));
         }
 
-        [Authorize(Policy = "RequireRole2OrRole4")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> EditCourse(Guid id, [FromForm] CourseDto courseDto, CancellationToken ct)
+        /** Get All Course By TeacherId **/
+        [Authorize(Policy = "RequireRole2")]
+        [HttpGet("getCourseByTeacherId")]
+        public async Task<IActionResult> GetTeacherCourses(CancellationToken ct)
         {
-            // Ambil TeacherId dari token autentikasi
-            var teacherId = Guid.Parse(HttpContext.User.FindFirst("TeacherId").Value);
-
-            // Tetapkan TeacherId dari token autentikasi ke dalam CourseDto
-            courseDto.TeacherId = teacherId;
-
-            // Buat command menggunakan CourseDto yang diterima dan ID kursus yang diberikan
-            var command = new EditCourse.Command { CourseId = id, CourseDto = courseDto };
-
-            // Kirim command ke handler untuk diproses
-            return HandleResult(await Mediator.Send(command, ct));
+            return HandleResult(await Mediator.Send(new ListCourseByTeacherId.Query(), ct));
         }
 
+        /** Download Course By CourseId **/
         [Authorize(Policy = "RequireRole2,3,4")]
         [HttpGet("download/{id}")]
-        public async Task<IActionResult> Download(Guid id, CancellationToken cancellationToken)
+        public async Task<IActionResult> DownloadCourse(Guid id)
         {
-            var result = await Mediator.Send(new Download.Query { Id = id }, cancellationToken);
+            var result = await Mediator.Send(new DownloadCourse.Query { CourseId = id });
 
-            if (result.IsSuccess && result.Value != null)
-            {
-                var downloadFile = result.Value;
-                var fileBytes = downloadFile.FileData;
-                var contentType = downloadFile.ContentType;
-                var fileName = downloadFile.FileName; // Nama file yang diunduh berdasarkan CourseName
-
-                return File(fileBytes, contentType, fileName);
-            }
-            else
+            if (!result.IsSuccess)
             {
                 return NotFound(result.Error);
             }
+
+            var downloadFileDto = result.Value;
+            if (downloadFileDto.FileData == null || downloadFileDto.ContentType == null)
+            {
+                return NotFound("File data or content type is null.");
+            }
+
+            return File(downloadFileDto.FileData, downloadFileDto.ContentType, downloadFileDto.FileName);
         }
 
-        [Authorize(Policy = "RequireRole2OrRole4")]
+        /** Create Course Who TeacherId **/
+        [Authorize(Policy = "RequireRole2")]
+        [HttpPost]
+        public async Task<IActionResult> CreateCourseDto(CourseCreateAndEditDto courseDto, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new CreateCourse.Command { CourseCreateAndEditDto = courseDto }, ct));
+        }
+
+        /** Edit Course Who TeacherId **/
+        [Authorize(Policy = "RequireRole2")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> EditCourse(Guid id, [FromForm] CourseCreateAndEditDto courseDto, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new EditCourse.Command { CourseId = id, CourseCreateAndEditDto = courseDto }, ct);
+            return HandleResult(result);
+        }
+
+        /** Deactivate Course Who TeacherId **/
+        [Authorize(Policy = "RequireRole2")]
+        [HttpPut("deactivate/{id}")]
+        public async Task<IActionResult> DeleteCourse(Guid id, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeactivateCourse.Command { CourseId = id }, ct);
+            return HandleResult(result);
+        }
+
+        /** Delete Course By SuperAdmin **/
+        [Authorize(Policy = "RequireRole4")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClassRoom(Guid id, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new Delete.Command { Id = id }, ct));
+            return HandleResult(await Mediator.Send(new DeleteCourse.Command { CourseId = id }, ct));
         }
     }
 }

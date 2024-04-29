@@ -2,7 +2,7 @@
 
 namespace Application.Assignments
 {
-    public class AssignmentValidator : AbstractValidator<AssignmentDto>
+    public class AssignmentValidator : AbstractValidator<AssignmentCreateAndEditDto>
     {
         public AssignmentValidator()
         {

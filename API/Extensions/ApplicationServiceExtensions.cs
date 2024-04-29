@@ -10,8 +10,8 @@ using Application.Announcements.Query;
 using Application.InfoRecaps.Query;
 using Application.Announcements.Command;
 using Application.InfoRecaps.Command;
-using Application.Learn.Schedules.Command;
-using Application.Learn.Schedules.Query;
+using Infrastructure.PathFile;
+using Infrastructure.Validation_Submission;
 
 namespace API.Extensions
 {
@@ -70,14 +70,14 @@ namespace API.Extensions
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListAnnouncement.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListInfoRecap.Handler).Assembly));
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListSchedule.Handler).Assembly));
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddFluentValidationAutoValidation();
             services.AddValidatorsFromAssemblyContaining<CreateAnnouncement>();
             services.AddValidatorsFromAssemblyContaining<CreateInfoRecap>();
-            services.AddValidatorsFromAssemblyContaining<CreateSchedule>();
             services.AddHttpContextAccessor();
             services.AddScoped<IUserAccessor, UserAccessor>();
+            services.AddScoped<IFileService, FileService>();
+            services.AddScoped<ISubmissionService, SubmissionService>();
 
             return services;
         }

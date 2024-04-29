@@ -11,8 +11,9 @@ using Application.User.DTOs;
 using Application.User.DTOs.Registration;
 using Application.User.Superadmin;
 using Application.User.Admins;
-using Application.User.Teachers;
 using Application.User.DTOs.Edit;
+using Application.User.Teachers.Command;
+using Application.User.Teachers.Query;
 
 namespace API.DTOs
 {
@@ -64,14 +65,14 @@ namespace API.DTOs
         [HttpGet("teacher/{id}")]
         public async Task<ActionResult> GetTeacherByTeacherId(Guid id, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new DetailsTeacher.Query { Id = id }, ct));
+            return HandleResult(await Mediator.Send(new DetailsTeacher.Query { TeacherId = id }, ct));
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpPut("teacher/{teacherId}")]
-        public async Task<IActionResult> EditTeacherByTeacherId(Guid teacherId, EditTeacherDto editTeacherDto, CancellationToken ct)
+        [HttpPut("teacher/{id}")]
+        public async Task<IActionResult> EditTeacherByTeacherId(Guid id, EditTeacherDto editTeacherDto, CancellationToken ct)
         {
-            var result = await Mediator.Send(new EditTeacher.EditTeacherCommand { TeacherId = teacherId, TeacherDto = editTeacherDto }, ct);
+            var result = await Mediator.Send(new EditTeacher.EditTeacherCommand { TeacherId = id, TeacherDto = editTeacherDto }, ct);
 
             return HandleResult(result);
         }

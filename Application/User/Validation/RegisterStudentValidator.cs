@@ -19,7 +19,6 @@ namespace Application.User.Validation
                 .NotEmpty().WithMessage("Gender is required")
                 .Must(gender => gender >= 1 && gender <= 2)
                 .WithMessage("Invalid Gender value. Use 1 for Male, 2 for Female");
-            RuleFor(x => x.Role).Equal(3).WithMessage("Role must be 3");
             RuleFor(x => x.UniqueNumberOfClassRoom).NotEmpty().WithMessage("UniqueNumberOfClassRoom is required");
         }
     }

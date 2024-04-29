@@ -2,12 +2,12 @@
 
 namespace Application.Learn.Lessons
 {
-    public class LessonCreateValidator : AbstractValidator<LessonCreateDto>
+    public class LessonCreateAndEditValidator : AbstractValidator<LessonCreateAndEditDto>
     {
-        public LessonCreateValidator()
+        public LessonCreateAndEditValidator()
         {
             RuleFor(x => x.LessonName).NotEmpty();
-            RuleFor(x => x.ClassNames).NotEmpty();
+            RuleFor(x => x.ClassName).NotEmpty();
         }
     }
 }
