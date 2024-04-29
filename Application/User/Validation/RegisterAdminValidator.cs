@@ -13,7 +13,6 @@ namespace Application.User.Validation
                 .NotEmpty()
                 .Matches("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{8,16}")
                 .WithMessage("Password must be complex");
-            RuleFor(x => x.Role).Equal(1).WithMessage("Role must be 1");
         }
     }
 }

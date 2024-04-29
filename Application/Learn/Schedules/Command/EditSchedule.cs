@@ -9,22 +9,22 @@ namespace Application.Learn.Schedules.Command
 {
     public class EditSchedule
     {
-        public class Command : IRequest<Result<ScheduleDto>>
+        public class Command : IRequest<Result<ScheduleCreateAndEditDto>>
         {
-            public Guid Id { get; set; } // ID dari jadwal yang ingin diubah
-            public ScheduleDto ScheduleDto { get; set; } // Data jadwal yang baru
+            public Guid ScheduleId { get; set; }
+            public ScheduleCreateAndEditDto ScheduleCreateAndEditDto { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
             public CommandValidator()
             {
-                RuleFor(x => x.Id).NotEmpty();
-                RuleFor(x => x.ScheduleDto).SetValidator(new ScheduleValidator());
+                RuleFor(x => x.ScheduleId).NotEmpty();
+                RuleFor(x => x.ScheduleCreateAndEditDto).SetValidator(new ScheduleValidator());
             }
         }
 
-        public class Handler : IRequestHandler<Command, Result<ScheduleDto>>
+        public class Handler : IRequestHandler<Command, Result<ScheduleCreateAndEditDto>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -35,52 +35,45 @@ namespace Application.Learn.Schedules.Command
                 _mapper = mapper;
             }
 
-            public async Task<Result<ScheduleDto>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<ScheduleCreateAndEditDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                // Cari jadwal yang akan diubah berdasarkan ID
-                var schedule = await _context.Schedules.FindAsync(request.Id);
+                try
+                {
+                    // Temukan jadwal yang akan diedit
+                    var schedule = await _context.Schedules.FindAsync(request.ScheduleId);
 
-                if (schedule == null)
-                    return Result<ScheduleDto>.Failure("Schedule not found");
+                    if (schedule == null)
+                        return Result<ScheduleCreateAndEditDto>.Failure($"Schedule with id '{request.ScheduleId}' not found.");
 
-                // Cari Lesson berdasarkan LessonName
-                var lesson = await _context.Lessons.SingleOrDefaultAsync(l => l.LessonName == request.ScheduleDto.LessonName);
-                if (lesson == null)
-                    return Result<ScheduleDto>.Failure("Lesson not found with the provided LessonName");
+                    // Temukan lesson berdasarkan LessonName yang diberikan
+                    var lesson = await _context.Lessons
+                        .FirstOrDefaultAsync(l => l.LessonName == request.ScheduleCreateAndEditDto.LessonName, cancellationToken);
 
-                // Cari ClassRoom berdasarkan ClassName
-                var classRoom = await _context.ClassRooms.SingleOrDefaultAsync(cr => cr.ClassName == request.ScheduleDto.ClassName);
-                if (classRoom == null)
-                    return Result<ScheduleDto>.Failure("ClassRoom not found with the provided ClassName");
+                    if (lesson == null)
+                        return Result<ScheduleCreateAndEditDto>.Failure($"Lesson with name '{request.ScheduleCreateAndEditDto.LessonName}' not found.");
 
-                // Cek apakah ClassRoom yang dipilih terkait dengan Lesson yang sudah dipilih sebelumnya
-                var isClassRoomValidForLesson = await _context.LessonClassRooms
-                    .AnyAsync(lc => lc.LessonId == lesson.Id && lc.ClassRoomId == classRoom.Id);
+                    // Perbarui properti jadwal
+                    schedule.Day = request.ScheduleCreateAndEditDto.Day;
+                    schedule.StartTime = request.ScheduleCreateAndEditDto.StartTime;
+                    schedule.EndTime = request.ScheduleCreateAndEditDto.EndTime;
+                    schedule.LessonId = lesson.Id;
 
-                if (!isClassRoomValidForLesson)
-                    return Result<ScheduleDto>.Failure("The selected ClassRoom is not associated with the selected Lesson.");
+                    // Simpan perubahan ke database
+                    var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                // Update informasi jadwal
-                schedule.Day = request.ScheduleDto.Day;
-                schedule.StartTime = request.ScheduleDto.StartTime;
-                schedule.EndTime = request.ScheduleDto.EndTime;
-                schedule.LessonId = lesson.Id;
-                schedule.ClassRoomId = classRoom.Id;
+                    if (!result)
+                        return Result<ScheduleCreateAndEditDto>.Failure("Failed to edit Schedule");
 
-                // Simpan perubahan ke dalam database
-                var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+                    // Buat DTO respons dan kembalikan
+                    var scheduleDto = _mapper.Map<ScheduleCreateAndEditDto>(schedule);
+                    scheduleDto.LessonName = lesson.LessonName; // Set LessonName in response
 
-                if (!result)
-                    return Result<ScheduleDto>.Failure("Failed to update Schedule");
-
-                // Buat DTO dari jadwal yang telah diubah
-                var scheduleDto = _mapper.Map<ScheduleDto>(schedule);
-
-                // Tambahkan LessonName dan ClassName ke dalam response body
-                scheduleDto.LessonName = lesson.LessonName;
-                scheduleDto.ClassName = classRoom.ClassName;
-
-                return Result<ScheduleDto>.Success(scheduleDto);
+                    return Result<ScheduleCreateAndEditDto>.Success(scheduleDto);
+                }
+                catch (Exception ex)
+                {
+                    return Result<ScheduleCreateAndEditDto>.Failure($"Failed to edit schedule: {ex.Message}");
+                }
             }
         }
     }

@@ -57,7 +57,7 @@ namespace Application.User.Superadmin
                 var user = new AppUser
                 {
                     UserName = superAdminDto.Username,
-                    Role = superAdminDto.Role,
+                    Role = 4,
                 };
 
                 var superAdmin = new SuperAdmin

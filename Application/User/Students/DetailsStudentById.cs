@@ -36,6 +36,7 @@ namespace Application.User.Students
 
                 var studentDto = new StudentGetByIdDto
                 {
+                    Status = student.Status == 1 ? "IsActive" : "NotActive",
                     NameStudent = student.NameStudent,
                     Nis = student.Nis,
                     BirthDate = student.BirthDate,

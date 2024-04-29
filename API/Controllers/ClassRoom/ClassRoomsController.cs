@@ -1,9 +1,10 @@
 ﻿using Application.ClassRooms;
-using Domain.Class;
+using Application.ClassRooms.Command;
+using Application.ClassRooms.Query;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers.ClassRooms
+namespace API.Controllers.ClassRoom
 {
     public class ClassRoomsController : BaseApiController
     {
@@ -30,25 +31,34 @@ namespace API.Controllers.ClassRooms
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost]
-        public async Task<IActionResult> CreateClassRoomDto(ClassRoomDto classRoomDto, CancellationToken ct)
+        public async Task<IActionResult> CreateClassRoomDto(ClassRoomCreateAndEditDto classRoomDto, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new Create.Command { ClassRoomDto = classRoomDto }, ct));
+            return HandleResult(await Mediator.Send(new CreateClassRoom.Command { ClassRoomCreateAndEditDto = classRoomDto }, ct));
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> EditClassRoomDto(Guid id, ClassRoomDto classRoomDto, CancellationToken ct)
+        public async Task<IActionResult> EditClassRoomDto(Guid id, ClassRoomCreateAndEditDto classRoomDto, CancellationToken ct)
         {
-            var result = await Mediator.Send(new Edit.Command { Id = id, ClassRoomDto = classRoomDto }, ct);
+            var result = await Mediator.Send(new EditClassRoom.Command { Id = id, ClassRoomCreateAndEditDto = classRoomDto }, ct);
 
             return HandleResult(result);
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteClassRoom(Guid id, CancellationToken ct)
+        [HttpPut("deactive/{id}")]
+        public async Task<IActionResult> DeactiveClassRoomDto(Guid id, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new Delete.Command { Id = id }, ct));
+            var result = await Mediator.Send(new DeactiveClassRoom.Command { Id = id }, ct);
+
+            return HandleResult(result);
         }
+
+        //[Authorize(Policy = "RequireRole1OrRole4")]
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteClassRoom(Guid id, CancellationToken ct)
+        //{
+        //    return HandleResult(await Mediator.Send(new DeleteClassRoom.Command { Id = id }, ct));
+        //}
     }
 }

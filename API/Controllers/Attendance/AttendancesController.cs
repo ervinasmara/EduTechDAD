@@ -3,7 +3,7 @@ using Application.Attendances.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers.Attendances
+namespace API.Controllers.Attendance
 {
     public class AttendancesController : BaseApiController
     {
@@ -40,7 +40,7 @@ namespace API.Controllers.Attendances
         public async Task<IActionResult> EditAttendanceDto(Guid id, AttendanceEditDto announcementEditDto, CancellationToken ct)
         {
             var result = await Mediator.Send(new Edit.Command { Id = id, AttendanceEditDto = announcementEditDto }, ct);
-                return HandleResult(result);
+            return HandleResult(result);
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]

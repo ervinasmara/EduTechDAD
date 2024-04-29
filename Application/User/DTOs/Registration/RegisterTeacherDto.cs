@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Application.User.DTOs.Registration
+﻿namespace Application.User.DTOs.Registration
 {
     public class RegisterTeacherDto
     {
@@ -10,10 +8,9 @@ namespace Application.User.DTOs.Registration
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
         public string Nip { get; set; }
+        public int Gender { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        public int Role { get; set; }
-        public ICollection<string> LessonName { get; set; }
-        public ICollection<string> ClassNames { get; set; }
+        public ICollection<string> LessonNames { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Application.Learn.Schedules
 {
-    public class ScheduleValidator : AbstractValidator<ScheduleDto>
+    public class ScheduleValidator : AbstractValidator<ScheduleCreateAndEditDto>
     {
         public ScheduleValidator()
         {
@@ -17,7 +17,6 @@ namespace Application.Learn.Schedules
                 .WithMessage("EndTime must be greater than StartTime");
 
             RuleFor(x => x.LessonName).NotEmpty();
-            RuleFor(x => x.ClassName).NotEmpty();
         }
     }
 }

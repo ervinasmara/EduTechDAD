@@ -50,7 +50,7 @@ namespace Application.User.Admins
                 var user = new AppUser
                 {
                     UserName = adminDto.Username,
-                    Role = adminDto.Role,
+                    Role = 1,
                 };
 
                 var admin = new Admin

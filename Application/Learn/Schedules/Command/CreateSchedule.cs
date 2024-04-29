@@ -10,20 +10,20 @@ namespace Application.Learn.Schedules.Command
 {
     public class CreateSchedule
     {
-        public class Command : IRequest<Result<ScheduleDto>>
+        public class Command : IRequest<Result<ScheduleCreateAndEditDto>>
         {
-            public ScheduleDto ScheduleDto { get; set; }
+            public ScheduleCreateAndEditDto ScheduleCreateAndEditDto { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
             public CommandValidator()
             {
-                RuleFor(x => x.ScheduleDto).SetValidator(new ScheduleValidator());
+                RuleFor(x => x.ScheduleCreateAndEditDto).SetValidator(new ScheduleValidator());
             }
         }
 
-        public class Handler : IRequestHandler<Command, Result<ScheduleDto>>
+        public class Handler : IRequestHandler<Command, Result<ScheduleCreateAndEditDto>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -34,59 +34,41 @@ namespace Application.Learn.Schedules.Command
                 _mapper = mapper;
             }
 
-            public async Task<Result<ScheduleDto>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<ScheduleCreateAndEditDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                // Cari Lesson berdasarkan LessonName
-                var lesson = await _context.Lessons
-                    .Include(l => l.LessonClassRooms)
-                    .ThenInclude(lc => lc.ClassRoom)
-                    .SingleOrDefaultAsync(l => l.LessonName == request.ScheduleDto.LessonName);
-
-                if (lesson == null)
-                    return Result<ScheduleDto>.Failure("Lesson not found with the provided LessonName");
-
-                // Cek apakah Lesson memiliki hubungan dengan ruang kelas
-                if (lesson.LessonClassRooms == null || !lesson.LessonClassRooms.Any())
-                    return Result<ScheduleDto>.Failure("No ClassRooms associated with the selected Lesson");
-
-                // Ambil nama ruang kelas dari hubungan LessonClassRooms
-                var classNames = lesson.LessonClassRooms.Select(lc => lc.ClassRoom.ClassName).ToList();
-
-                if (classNames.Count == 0)
-                    return Result<ScheduleDto>.Failure("No ClassRooms associated with the selected Lesson");
-
-                // Mengecek apakah ClassName yang dimasukkan ada di dalam list classNames
-                if (!classNames.Contains(request.ScheduleDto.ClassName))
-                    return Result<ScheduleDto>.Failure("The selected ClassName is not associated with the selected Lesson.");
-
-                // Cari ClassRoom berdasarkan ClassName
-                var classRoom = await _context.ClassRooms.SingleOrDefaultAsync(cr => cr.ClassName == request.ScheduleDto.ClassName);
-                if (classRoom == null)
-                    return Result<ScheduleDto>.Failure("ClassRoom not found with the provided ClassName");
-
-                var schedule = new Schedule
+                try
                 {
-                    Day = request.ScheduleDto.Day,
-                    StartTime = request.ScheduleDto.StartTime,
-                    EndTime = request.ScheduleDto.EndTime,
-                    LessonId = lesson.Id,
-                    ClassRoomId = classRoom.Id
-                };
+                    // Temukan lesson berdasarkan LessonName yang diberikan
+                    var lesson = await _context.Lessons
+                        .FirstOrDefaultAsync(l => l.LessonName == request.ScheduleCreateAndEditDto.LessonName, cancellationToken);
 
-                _context.Schedules.Add(schedule);
+                    if (lesson == null)
+                        return Result<ScheduleCreateAndEditDto>.Failure($"Lesson with name '{request.ScheduleCreateAndEditDto.LessonName}' not found.");
 
-                var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+                    var schedule = new Schedule
+                    {
+                        Day = request.ScheduleCreateAndEditDto.Day,
+                        StartTime = request.ScheduleCreateAndEditDto.StartTime,
+                        EndTime = request.ScheduleCreateAndEditDto.EndTime,
+                        LessonId = lesson.Id
+                    };
 
-                if (!result) return Result<ScheduleDto>.Failure("Failed to create Schedule");
+                    _context.Schedules.Add(schedule);
 
-                // Buat DTO dari jadwal yang telah dibuat
-                var scheduleDto = _mapper.Map<ScheduleDto>(schedule);
+                    var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                // Menambahkan LessonName dan ClassName ke dalam response body
-                scheduleDto.LessonName = lesson.LessonName;
-                scheduleDto.ClassName = classRoom.ClassName;
+                    if (!result)
+                        return Result<ScheduleCreateAndEditDto>.Failure("Failed to create Schedule");
 
-                return Result<ScheduleDto>.Success(scheduleDto);
+                    var scheduleDto = _mapper.Map<ScheduleCreateAndEditDto>(schedule);
+                    scheduleDto.LessonName = lesson.LessonName; // Set LessonName in response
+
+                    return Result<ScheduleCreateAndEditDto>.Success(scheduleDto);
+                }
+                catch (Exception ex)
+                {
+                    return Result<ScheduleCreateAndEditDto>.Failure($"Failed to create schedule: {ex.Message}");
+                }
             }
         }
     }

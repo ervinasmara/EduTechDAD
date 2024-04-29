@@ -1,46 +1,22 @@
-﻿using Domain.Submission;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
 namespace Application.Assignments
 {
-    public class AssignmentDto
-    {
-        public string AssignmentName { get; set; }
-        public DateOnly AssignmentDate { get; set; }
-        public DateOnly AssignmentDeadline { get; set; }
-        public string AssignmentDescription { get; set; }
-        public IFormFile AssignmentFileData { get; set; }
-        public string AssignmentLink { get; set; }
-        public Guid CourseId { get; set; }
-        public ICollection<string> ClassNames { get; set; }
-    }
-
-    //public class AssignmentGetDto
-    //{
-    //    public Guid Id { get; set; }
-    //    public string AssignmentName { get; set; }
-    //    public string AssignmentFileName { get; set; }
-    //    public DateOnly AssignmentDate { get; set; }
-    //    public DateOnly AssignmentDeadline { get; set; }
-    //    public string AssignmentDescription { get; set; }
-    //    public byte[] AssignmentFileData { get; set; }
-    //    public string AssignmentLink { get; set; }
-    //    public string CourseName { get; set; }
-    //}
-
-    public class AssignmentGetDto
+    public class AssignmentGetAllAndByIdDto
     {
         public Guid Id { get; set; }
         public string AssignmentName { get; set; }
         public string AssignmentFileName { get; set; }
         public DateOnly AssignmentDate { get; set; }
-        public DateOnly AssignmentDeadline { get; set; }
+        public DateTime AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }
         public string AssignmentLink { get; set; }
+        public string NameTeacher { get; set; }
         public string LessonName { get; set; }
-        public ICollection<string> ClassNames { get; set; }
+        public string ClassName { get; set; }
+        public string LongClassName { get; set; }
         public string AssignmentStatus { get; set; }
-        public byte[] AssignmentFileData { get; set; }
+        public string AssignmentFilePath { get; set; }
     }
 
     public class AssignmentGetByClassRoomIdDto
@@ -49,12 +25,13 @@ namespace Application.Assignments
         public string AssignmentName { get; set; }
         public string AssignmentFileName { get; set; }
         public DateOnly AssignmentDate { get; set; }
-        public DateOnly AssignmentDeadline { get; set; }
+        public DateTime AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }
         public string AssignmentLink { get; set; }
         public string LessonName { get; set; }
         public string AssignmentStatus { get; set; }
-        public byte[] AssignmentFileData { get; set; }
+        public string AssignmentSubmissionStatus { get; set; }
+        public string AssignmentFilePath { get; set; }
     }
 
     public class AssignmentGetByTeacherIdDto
@@ -63,13 +40,25 @@ namespace Application.Assignments
         public string AssignmentName { get; set; }
         public string AssignmentFileName { get; set; }
         public DateOnly AssignmentDate { get; set; }
-        public DateOnly AssignmentDeadline { get; set; }
+        public DateTime AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }
         public string AssignmentLink { get; set; }
         public string LessonName { get; set; }
-        public ICollection<string> ClassNames { get; set; }
-        public byte[] AssignmentFileData { get; set; }
+        public string ClassName { get; set; }
+        public string AssignmentFilePath { get; set; }
     }
+
+    public class AssignmentCreateAndEditDto
+    {
+        public string AssignmentName { get; set; }
+        public DateOnly AssignmentDate { get; set; }
+        public DateTime AssignmentDeadline { get; set; }
+        public string AssignmentDescription { get; set; }
+        public IFormFile AssignmentFileData { get; set; }
+        public string AssignmentLink { get; set; }
+        public Guid CourseId { get; set; }
+    }
+
     public class DownloadFileDto
     {
         public byte[] FileData { get; set; }

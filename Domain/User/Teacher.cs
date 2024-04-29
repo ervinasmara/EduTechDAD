@@ -1,6 +1,4 @@
-﻿using Domain.Assignments;
-using Domain.Learn.Courses;
-using Domain.Many_to_Many;
+﻿using Domain.Many_to_Many;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.User
@@ -14,6 +12,7 @@ namespace Domain.User
         public string Address { get; set; }
         public string PhoneNumber { get; set; }
         public string Nip { get; set; }
+        public int Gender { get; set; }
         public int Status { get; set; } = 1;
 
         // Menunjukkan kunci asing ke AppUser
@@ -23,14 +22,5 @@ namespace Domain.User
 
         // Relasi many-to-many dengan Lesson melalui tabel pivot TeacherLesson
         public ICollection<TeacherLesson> TeacherLessons { get; set; }
-
-        // Relasi many-to-many dengan ClassRoom melalui tabel pivot TeacherClassRoom
-        public ICollection<TeacherClassRoom> TeacherClassRooms { get; set; }
-
-        // Properti navigasi ke TeacherCourse
-        public ICollection<TeacherCourse> TeacherCourses { get; set; }
-
-        // Properti navigasi ke TeacherAssignment
-        public ICollection<TeacherAssignment> TeacherAssignments { get; set; }
     }
 }

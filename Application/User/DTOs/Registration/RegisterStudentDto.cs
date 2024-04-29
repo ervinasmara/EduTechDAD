@@ -11,7 +11,6 @@ namespace Application.User.DTOs.Registration
         public string PhoneNumber { get; set; }
         public string ParentName { get; set; }
         public int Gender { get; set; }
-        public int Role { get; set; } = 3;
         public string UniqueNumberOfClassRoom { get; set; }
     }
 

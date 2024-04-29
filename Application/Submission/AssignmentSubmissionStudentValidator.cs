@@ -2,10 +2,11 @@
 
 namespace Application.Submission
 {
-    public class AssignmentSubmissionStudentValidator : AbstractValidator<AssignmentSubmissionStudentDto>
+    public class AssignmentSubmissionStudentValidator : AbstractValidator<SubmissionCreateByStudentIdDto>
     {
         public AssignmentSubmissionStudentValidator()
         {
+            RuleFor(x => x.AssignmentId).NotEmpty();
             RuleFor(x => x.Link)
                 .NotEmpty()
                 .When(x => x.FileData == null) // Hanya memeriksa Link jika FileData kosong

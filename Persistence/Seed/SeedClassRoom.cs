@@ -13,16 +13,19 @@ namespace Persistence.Seed
                 new ClassRoom
                 {
                     ClassName = "TKJ",
+                    LongClassName = "Teknik Komputer Jaringan",
                     UniqueNumberOfClassRoom = "001",
                 },
                 new ClassRoom
                 {
                     ClassName = "TKR",
+                    LongClassName = "Teknik Kendaraan Ringan",
                     UniqueNumberOfClassRoom = "002",
                 },
                 new ClassRoom
                 {
                     ClassName = "RPL",
+                    LongClassName = "Rekayasa Perangkat Lunak",
                     UniqueNumberOfClassRoom = "003",
                 },
             };

@@ -2,35 +2,30 @@
 
 namespace Application.Submission
 {
-    public class AssignmentSubmissionGetDto
+
+    public class SubmissionCreateByStudentIdDto
     {
-        public Guid Id { get; set; }
-        public DateTime SubmissionTime { get; set; }
+        public Guid AssignmentId { get; set; }
+        public IFormFile FileData { get; set; }
         public string Link { get; set; }
-        public float Grade { get; set; }
-        public string Comment { get; set; }
-        public string AssignmentId { get; set; }
-        public string StudentId { get; set; }
-        public string ClassName { get; set; }
-        public byte[] FileData { get; set; }
     }
 
-    public class AssignmentSubmissionGetByIdCRandA
-    {
-        public Guid Id { get; set; }
-        public DateTime SubmissionTime { get; set; }
-        public int Status { get; set; }
-        public string Link { get; set; }
-        public float Grade { get; set; }
-        public string Comment { get; set; }
-        public string StudentId { get; set; }
-        public byte[] FileData { get; set; }
-    }
-
-    public class AssignmentSubmissionStudentDto
+    public class SubmissionEditByStudentIdDto
     {
         public IFormFile FileData { get; set; }
         public string Link { get; set; }
+    }
+
+    public class AssignmentSubmissionGetByAssignmentIdAndStudentId
+    {
+        public Guid Id { get; set; }
+        public DateTime SubmissionTime { get; set; }
+        public string Status { get; set; }
+        public string SubmissionTimeStatus { get; set; }
+        public string Link { get; set; }
+        public float Grade { get; set; }
+        public string Comment { get; set; }
+        public string FileData { get; set; }
     }
 
     public class AssignmentSubmissionTeacherDto
@@ -39,25 +34,45 @@ namespace Application.Submission
         public string Comment { get; set; }
     }
 
-
-    public class AssignmentSubmissionStatusDto
-    {
-        public Guid StudentId { get; set; } // ID siswa yang mengumpulkan tugas
-        public Guid AssignmentId { get; set; } // ID tugas yang dikumpulkan
-    }
-
-    public class SubmissionCreateDto
-    {
-        public Guid StudentId { get; set; }
-        public Guid AssignmentId { get; set; }
-        public IFormFile FileData { get; set; }
-        public string Link { get; set; }
-    }
-
     public class SubmissionGetAssignmentNameByClassNameDto
     {
         public string AssignmentName { get; set; }
         public string AssignmentNameLessonCourse { get; set; }
         public string ClassName { get; set; }
+    }
+
+    /** Get DTO For Teacher Grade And Not Submitted **/
+    public class NotSubmittedDto
+    {
+        public Guid StudentId { get; set; }
+        public string StudentName { get; set; }
+        public string ClassName { get; set; }
+        public string LongClassName { get; set; }
+    }
+
+    public class AssignmentSubmissionListGradeDto
+    {
+        public Guid Id { get; set; }
+        public DateTime SubmissionTime { get; set; }
+        public string Status { get; set; }
+        public string SubmissionTimeStatus { get; set; }
+        public string Link { get; set; }
+        public float Grade { get; set; }
+        public string Comment { get; set; }
+        public string AssignmentId { get; set; }
+        public string AssignmentName { get; set; }
+        public string StudentId { get; set; }
+        public string StudentName { get; set; }
+        public string ClassName { get; set; }
+        public string FileData { get; set; }
+    }
+
+    public class AssignmentSubmissionListForTeacherGradeDto
+    {
+        public string AlreadyGrades { get; set; }
+        public string NotAlreadyGrades { get; set; }
+        public string NotYetSubmit { get; set; }
+        public ICollection<AssignmentSubmissionListGradeDto> AssignmentSubmissionList { get; set; }
+        public ICollection<NotSubmittedDto> StudentNotYetSubmit { get; set; }
     }
 }

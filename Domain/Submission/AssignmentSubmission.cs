@@ -7,11 +7,12 @@ namespace Domain.Submission
     public class AssignmentSubmission
     {
         public Guid Id { get; set; }
-        public DateTime? SubmissionTime { get; set; }
-        public byte[]? FileData { get; set; }
-        public string? Link { get; set; }
-        public float? Grade { get; set; }
-        public string? Comment { get; set; }
+        public DateTime SubmissionTime { get; set; }
+        public string FilePath { get; set; }
+        public string Link { get; set; }
+        public float Grade { get; set; }
+        public string Comment { get; set; }
+        public int Status { get; set; }
 
         // Kunci asing ke Assignment
         public Guid AssignmentId { get; set; }
@@ -23,5 +24,4 @@ namespace Domain.Submission
         [ForeignKey("StudentId")]
         public Student Student { get; set; }
     }
-
 }

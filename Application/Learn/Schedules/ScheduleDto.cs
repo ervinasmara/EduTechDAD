@@ -1,12 +1,11 @@
 ﻿namespace Application.Learn.Schedules
 {
-    public class ScheduleDto
+    public class ScheduleCreateAndEditDto
     {
         public int Day { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
         public string LessonName { get; set; }
-        public string ClassName { get; set; }
     }
 
     public class ScheduleGetDto
