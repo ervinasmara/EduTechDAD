@@ -1,5 +1,8 @@
 ﻿using Application.Core;
+using Application.Learn.Lessons;
 using Application.User.DTOs;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -16,33 +19,18 @@ namespace Application.User.Students
         public class Handler : IRequestHandler<Query, Result<List<StudentGetAllDto>>>
         {
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            public Handler(DataContext context)
+            public Handler(DataContext context, IMapper mapper)
             {
                 _context = context;
+                _mapper = mapper;
             }
 
             public async Task<Result<List<StudentGetAllDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var students = await _context.Students
-                    .Select(s => new StudentGetAllDto
-                    {
-                        Id = s.Id,
-                        Status = s.Status == 1 ? "IsActive" : "NotActive",
-                        NameStudent = s.NameStudent,
-                        Nis = s.Nis,
-                        BirthDate = s.BirthDate,
-                        BirthPlace = s.BirthPlace,
-                        Address = s.Address,
-                        PhoneNumber = s.PhoneNumber,
-                        ParentName = s.ParentName,
-                        Username = s.User.UserName,
-                        Role = s.User.Role,
-                        Gender = s.Gender,
-                        ClassRoomId = s.ClassRoom.Id,
-                        ClassName = s.ClassRoom.ClassName,
-                        UniqueNumberOfClassRoom = s.ClassRoom.UniqueNumberOfClassRoom
-                    })
+                    .ProjectTo<StudentGetAllDto>(_mapper.ConfigurationProvider)
                     .ToListAsync(cancellationToken);
 
                 return Result<List<StudentGetAllDto>>.Success(students);

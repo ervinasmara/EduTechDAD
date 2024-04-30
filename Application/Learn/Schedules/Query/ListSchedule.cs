@@ -1,5 +1,7 @@
 ﻿using Application.Core;
+using Application.Learn.Lessons;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -27,34 +29,11 @@ namespace Application.Learn.Schedules.Query
             {
                 try
                 {
-                    var schedules = await _context.Schedules
-                        .Include(s => s.Lesson)
-                            .ThenInclude(l => l.ClassRoom)
-                        .Include(s => s.Lesson)
-                            .ThenInclude(l => l.TeacherLessons)
-                            .ThenInclude(tl => tl.Teacher)
-                        .OrderBy(s => s.Day) // Urutkan berdasarkan Day
-                        .ToListAsync(cancellationToken);
+                    var schedule = await _context.Schedules
+                    .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
+                    .ToListAsync(cancellationToken);
 
-                    var scheduleDtos = schedules.Select(schedule =>
-                    {
-                        var lessonName = schedule.Lesson?.LessonName;
-                        var className = schedule.Lesson?.ClassRoom?.ClassName;
-                        var nameTeacher = schedule.Lesson?.TeacherLessons?.FirstOrDefault()?.Teacher?.NameTeacher;
-
-                        return new ScheduleGetDto
-                        {
-                            Id = schedule.Id,
-                            Day = schedule.Day,
-                            StartTime = schedule.StartTime,
-                            EndTime = schedule.EndTime,
-                            LessonName = lessonName,
-                            ClassName = className,
-                            NameTeacher = nameTeacher
-                        };
-                    }).ToList();
-
-                    return Result<List<ScheduleGetDto>>.Success(scheduleDtos);
+                    return Result<List<ScheduleGetDto>>.Success(schedule);
                 }
                 catch (Exception ex)
                 {

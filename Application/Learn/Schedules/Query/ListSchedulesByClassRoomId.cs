@@ -1,6 +1,7 @@
 ﻿using Application.Core;
 using Application.Interface;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -17,12 +18,14 @@ namespace Application.Learn.Schedules.Query
         public class Handler : IRequestHandler<Query, Result<List<ScheduleGetDto>>>
         {
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
             private readonly IUserAccessor _userAccessor;
 
-            public Handler(DataContext context, IUserAccessor userAccessor)
+            public Handler(DataContext context, IUserAccessor userAccessor, IMapper mapper)
             {
                 _context = context;
                 _userAccessor = userAccessor;
+                _mapper = mapper;
             }
 
             public async Task<Result<List<ScheduleGetDto>>> Handle(Query request, CancellationToken cancellationToken)
@@ -34,31 +37,14 @@ namespace Application.Learn.Schedules.Query
                     if (string.IsNullOrEmpty(classRoomId))
                         return Result<List<ScheduleGetDto>>.Failure("Classroom ID not found in token");
 
-                    var schedules = await _context.Schedules
-                        .Include(s => s.Lesson)
-                            .ThenInclude(l => l.ClassRoom)
-                        .Include(s => s.Lesson)
-                            .ThenInclude(l => l.TeacherLessons)
-                            .ThenInclude(tl => tl.Teacher)
-                        .Where(s => s.Lesson.ClassRoomId.ToString() == classRoomId)
-                        .OrderBy(s => s.Day)
-                        .ToListAsync(cancellationToken);
+                    var schedule = await _context.Schedules
+                    .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
+                    .ToListAsync(cancellationToken);
 
-                    if (!schedules.Any())
+                    if (!schedule.Any())
                         return Result<List<ScheduleGetDto>>.Failure("Schedules not found for this classroom.");
 
-                    var scheduleDtos = schedules.Select(schedule => new ScheduleGetDto
-                    {
-                        Id = schedule.Id,
-                        Day = schedule.Day,
-                        StartTime = schedule.StartTime,
-                        EndTime = schedule.EndTime,
-                        LessonName = schedule.Lesson?.LessonName,
-                        ClassName = schedule.Lesson?.ClassRoom?.ClassName,
-                        NameTeacher = schedule.Lesson?.TeacherLessons?.FirstOrDefault()?.Teacher?.NameTeacher
-                    }).ToList();
-
-                    return Result<List<ScheduleGetDto>>.Success(scheduleDtos);
+                    return Result<List<ScheduleGetDto>>.Success(schedule);
                 }
                 catch (Exception ex)
                 {

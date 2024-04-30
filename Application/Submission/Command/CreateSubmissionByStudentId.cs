@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Application.Core;
 using Application.Interface;
-using Application.Assignments;
 using FluentValidation;
 using Application.Submission.Validator;
 
@@ -33,11 +32,14 @@ namespace Application.Submission.Command
 
             public async Task<Result<SubmissionCreateByStudentIdDto>> Handle(Command request, CancellationToken cancellationToken)
             {
+                /** Langkah 1: Memanggil layanan untuk membuat pengajuan **/
                 var createResult = await _submissionService.CreateSubmissionAsync(request.SubmissionDto, cancellationToken);
 
+                /** Langkah 2: Memeriksa apakah pembuatan pengajuan berhasil **/
                 if (!createResult.IsSuccess)
                     return Result<SubmissionCreateByStudentIdDto>.Failure(createResult.Error);
 
+                /** Langkah 3: Mengembalikan hasil yang berhasil **/
                 return Result<SubmissionCreateByStudentIdDto>.Success(request.SubmissionDto);
             }
         }

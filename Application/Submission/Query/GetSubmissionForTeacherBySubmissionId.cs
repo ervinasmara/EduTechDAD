@@ -29,31 +29,47 @@ namespace Application.Submission.Query
 
             public async Task<Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var teacherIdFromToken = Guid.Parse(_userAccessor.GetTeacherIdFromToken());
-                if (teacherIdFromToken == Guid.Empty)
-                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("Teacher ID not found in token.");
+                try
+                {
+                    /** Langkah 1: Mendapatkan ID guru dari token **/
+                    var teacherIdFromToken = Guid.Parse(_userAccessor.GetTeacherIdFromToken());
 
-                var assignmentSubmission = await _context.AssignmentSubmissions
-                    .Include(s => s.Assignment)
-                        .ThenInclude(a => a.Course)
-                            .ThenInclude(c => c.Lesson)
-                                .ThenInclude(l => l.TeacherLessons)
-                    .Where(s => s.Id == request.SubmissionId)
-                    .SingleOrDefaultAsync(cancellationToken);
+                    /** Langkah 2: Memeriksa apakah ID guru ditemukan di token **/
+                    if (teacherIdFromToken == Guid.Empty)
+                        return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("Teacher ID not found in token.");
 
-                if (assignmentSubmission == null)
-                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("No assignment submission found.");
+                    /** Langkah 3: Mendapatkan pengajuan tugas dengan menyertakan informasi yang terkait **/
+                    var assignmentSubmission = await _context.AssignmentSubmissions
+                        .Include(s => s.Assignment)
+                            .ThenInclude(a => a.Course)
+                                .ThenInclude(c => c.Lesson)
+                                    .ThenInclude(l => l.TeacherLessons)
+                        .Where(s => s.Id == request.SubmissionId)
+                        .SingleOrDefaultAsync(cancellationToken);
 
-                // Check if the teacher is related to the lesson
-                var isTeacherRelatedToLesson = assignmentSubmission.Assignment.Course.Lesson.TeacherLessons
-                    .Any(tl => tl.TeacherId == teacherIdFromToken);
+                    /** Langkah 4: Memeriksa apakah pengajuan tugas ditemukan **/
+                    if (assignmentSubmission == null)
+                        return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("No assignment submission found.");
 
-                if (!isTeacherRelatedToLesson)
-                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("The submission is not related to the teacher.");
+                    /** Langkah 5: Memeriksa apakah guru terkait dengan pelajaran **/
+                    var isTeacherRelatedToLesson = assignmentSubmission.Assignment.Course.Lesson.TeacherLessons
+                        .Any(tl => tl.TeacherId == teacherIdFromToken);
 
-                var assignmentSubmissionDto = _mapper.Map<AssignmentSubmissionGetByAssignmentIdAndStudentId>(assignmentSubmission);
+                    /** Langkah 6: Memeriksa apakah pengajuan tugas terkait dengan guru **/
+                    if (!isTeacherRelatedToLesson)
+                        return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("The submission is not related to the teacher.");
 
-                return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Success(assignmentSubmissionDto);
+                    /** Langkah 7: Mengonversi entity pengajuan tugas menjadi DTO **/
+                    var assignmentSubmissionDto = _mapper.Map<AssignmentSubmissionGetByAssignmentIdAndStudentId>(assignmentSubmission);
+
+                    /** Langkah 8: Mengembalikan pengajuan tugas yang berhasil ditemukan **/
+                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Success(assignmentSubmissionDto);
+                }
+                catch (Exception ex)
+                {
+                    /** Langkah 9: Menangani kesalahan jika terjadi **/
+                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure($"Failed to handle assignment submission: {ex.Message}");
+                }
             }
         }
     }

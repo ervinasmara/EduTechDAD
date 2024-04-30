@@ -12,6 +12,8 @@ using Application.Announcements.Command;
 using Application.InfoRecaps.Command;
 using Infrastructure.PathFile;
 using Infrastructure.Validation_Submission;
+using Application.Interface.User;
+using Infrastructure.User;
 
 namespace API.Extensions
 {
@@ -77,6 +79,7 @@ namespace API.Extensions
             services.AddHttpContextAccessor();
             services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddScoped<IFileService, FileService>();
+            services.AddScoped<IUserTeacher, UserTeacher>();
             services.AddScoped<ISubmissionService, SubmissionService>();
 
             return services;

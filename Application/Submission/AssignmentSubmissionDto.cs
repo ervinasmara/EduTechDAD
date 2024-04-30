@@ -2,8 +2,8 @@
 
 namespace Application.Submission
 {
-    /** //////////////////////////////////////// **/
-    /** STUDENT **/
+    /** //////////////// STUDENT //////////////////////// **/
+    /** Create Submission For Student **/
     public class SubmissionCreateByStudentIdDto
     {
         public Guid AssignmentId { get; set; }
@@ -11,12 +11,7 @@ namespace Application.Submission
         public string Link { get; set; }
     }
 
-    public class SubmissionEditByStudentIdDto
-    {
-        public IFormFile FileData { get; set; }
-        public string Link { get; set; }
-    }
-
+    /** Get Submission By AssignmentId For Student **/
     public class AssignmentSubmissionGetByAssignmentIdAndStudentId
     {
         public Guid Id { get; set; }
@@ -29,8 +24,8 @@ namespace Application.Submission
         public string FileData { get; set; }
     }
 
-    /** //////////////////////////////////////// **/
-    /** Get DTO For Teacher Grade And Not Submitted **/
+    /** //////////////// TEACHER //////////////////////// **/
+    /** Get Not Submitted **/
     public class NotSubmittedDto
     {
         public Guid StudentId { get; set; }
@@ -39,12 +34,14 @@ namespace Application.Submission
         public string LongClassName { get; set; }
     }
 
+    /** Edit Submission For Teacher Grades **/
     public class AssignmentSubmissionTeacherDto
     {
         public float Grade { get; set; }
         public string Comment { get; set; }
     }
 
+    /** List Submission For Teacher **/
     public class AssignmentSubmissionListGradeDto
     {
         public Guid Id { get; set; }
@@ -62,6 +59,7 @@ namespace Application.Submission
         public string FileData { get; set; }
     }
 
+    /** List Submission For Teacher **/
     public class AssignmentSubmissionListForTeacherGradeDto
     {
         public string AlreadyGrades { get; set; }

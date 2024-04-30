@@ -2,10 +2,18 @@
 
 namespace Application.Attendances
 {
+    /// //////////////////////////////// ///
+    /** Attendance Create **/
     public class AttendanceDto
     {
         public DateOnly Date { get; set; }
         public ICollection<AttendanceStudentCreateDto> AttendanceStudentCreate { get; set; }
+    }
+
+    public class AttendanceStudentCreateDto
+    {
+        public int Status { get; set; }
+        public Guid StudentId { get; set; }
     }
 
     public class AttendanceEditDto
@@ -44,9 +52,10 @@ namespace Application.Attendances
         public int Status { get; set; }
     }
 
-    public class AttendanceStudentCreateDto
+    public class AttendanceSummaryDto
     {
-        public int Status { get; set; }
-        public Guid StudentId { get; set; }
+        public int PresentCount { get; set; }
+        public int ExcusedCount { get; set; }
+        public int AbsentCount { get; set; }
     }
 }

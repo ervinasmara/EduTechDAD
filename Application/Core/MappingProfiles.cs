@@ -20,6 +20,7 @@ using Application.User.DTOs;
 using Domain.User;
 using Application.Learn.GetFileName;
 using Application.Attendances;
+using Application.User.DTOs.Registration;
 
 namespace Application.Core
 {
@@ -40,7 +41,6 @@ namespace Application.Core
             CreateMap<AttendanceEditDto, Attendance>();
             CreateMap<Schedule, ScheduleCreateAndEditDto>();
             CreateMap<ScheduleCreateAndEditDto, Schedule>();
-            CreateMap<Schedule, ScheduleGetDto>();
             CreateMap<InfoRecap, InfoRecapCreateDto>();
 
             CreateMap<Teacher, TeacherGetAllAndByIdDto>();
@@ -97,11 +97,6 @@ namespace Application.Core
 
             /// ===================================== ASSIGNMENTSUBMISSION ============================================== //
             /// ===================================== ASSIGNMENTSUBMISSION ============================================== //
-            /** Get Details AssignmentSubmission By SubmissionId And StudentId **/
-            CreateMap<AssignmentSubmission, SubmissionEditByStudentIdDto>()
-                .ForMember(dest => dest.FileData, opt => opt.Ignore()) // Karena IFormFile tidak bisa dipetakan secara langsung
-                .ForMember(dest => dest.Link, opt => opt.MapFrom(src => src.Link));
-
             /** Get Details AssignmentSubmission By AssignmentId And StudentId **/
             CreateMap<AssignmentSubmission, AssignmentSubmissionGetByAssignmentIdAndStudentId>()
                 .ForMember(dest => dest.FileData, opt => opt.MapFrom(src => src.FilePath))
@@ -139,15 +134,16 @@ namespace Application.Core
                 .ForMember(dest => dest.FilePath, opt => opt.Ignore()) // FilePath akan dihandle secara terpisah
                 .ForMember(dest => dest.AssignmentId, opt => opt.Ignore()); // Karena AssignmentId akan di-set secara terpisah
 
-            /** Create AssignmentSubmission By TeacherId **/
+            /** Edit AssignmentSubmission By TeacherId For Grades **/
             CreateMap<AssignmentSubmission, AssignmentSubmissionTeacherDto>();
             CreateMap<AssignmentSubmissionTeacherDto, AssignmentSubmission>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => 2));
 
-            /** Edit AssignmentSubmission By StudentId **/
-            CreateMap<SubmissionEditByStudentIdDto, AssignmentSubmission>()
-                .ForMember(dest => dest.SubmissionTime, opt => opt.MapFrom(src => DateTime.UtcNow.AddHours(7))) // Set waktu pembuatan
-                .ForMember(dest => dest.FilePath, opt => opt.Ignore()); // FilePath akan dihandle secara terpisah
+            CreateMap<AssignmentSubmission, DownloadFileDto>()
+                .ForMember(dest => dest.FileData, opt => opt.MapFrom<AssignmentSubmissionFileDataResolver>()) // Menggunakan resolver kustom
+                .ForMember(dest => dest.FileName, opt => opt.MapFrom(src => $"{src.Student.NameStudent}_{src.Assignment.AssignmentName}{Path.GetExtension(src.FilePath)}"))
+                .ForMember(dest => dest.ContentType, opt => opt.MapFrom(src => FileHelper.GetContentType(Path.GetExtension(src.FilePath).TrimStart('.'))));
+
 
             /// ===================================== COURSE ============================================== //
             /// ===================================== COURSE ============================================== //
@@ -225,6 +221,53 @@ namespace Application.Core
                         dest.ClassRoomId = classroom.Id; // Simpan ID kelas
                     }
                 });
+
+            /// ===================================== SCHEDULE ============================================== //
+            /// ===================================== SCHEDULE ============================================== //
+            /** Get All Schedule **/
+            CreateMap<Schedule, ScheduleGetDto>()
+                .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.LessonName))
+                .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Lesson.ClassRoom.ClassName))
+                .ForMember(dest => dest.NameTeacher, opt => opt.MapFrom(src =>
+                    src.Lesson.TeacherLessons.Select(tl => tl.Teacher.NameTeacher).FirstOrDefault() ?? "Belum Ada Guru"));
+
+            /// ===================================== STUDENT ============================================== //
+            /// ===================================== STUDENT ============================================== //
+            /** Get All Student **/
+            CreateMap<Student, StudentGetAllDto>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.UserName))
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.User.Role))
+                .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.ClassRoom.ClassName))
+                .ForMember(dest => dest.UniqueNumberOfClassRoom, opt => opt.MapFrom(src => src.ClassRoom.UniqueNumberOfClassRoom))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status == 1 ? "Aktif" : "Tidak Aktif"));
+
+
+
+            //CreateMap<RegisterTeacherDto, AppUser>()
+            //.ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username))
+            //.ForMember(dest => dest.Role, opt => opt.MapFrom(src => 2));
+
+            //CreateMap<AppUser, RegisterTeacherDto>()
+            //    .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.UserName));
+
+            CreateMap<RegisterTeacherDto, Teacher>()
+                .ForMember(dest => dest.NameTeacher, opt => opt.MapFrom(src => src.NameTeacher))
+                .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate))
+                .ForMember(dest => dest.BirthPlace, opt => opt.MapFrom(src => src.BirthPlace))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
+                .ForMember(dest => dest.Nip, opt => opt.MapFrom(src => src.Nip))
+                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender));
+
+            CreateMap<Teacher, RegisterTeacherDto>()
+                .ForMember(dest => dest.NameTeacher, opt => opt.MapFrom(src => src.NameTeacher))
+                .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate))
+                .ForMember(dest => dest.BirthPlace, opt => opt.MapFrom(src => src.BirthPlace))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
+                .ForMember(dest => dest.Nip, opt => opt.MapFrom(src => src.Nip))
+                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender))
+                .ForMember(dest => dest.LessonNames, opt => opt.MapFrom(src => src.TeacherLessons.Select(tl => tl.Lesson.LessonName)));
         }
     }
 }

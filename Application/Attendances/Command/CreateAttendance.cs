@@ -2,7 +2,6 @@
 using Persistence;
 using FluentValidation;
 using Application.Core;
-using AutoMapper;
 using Domain.Attendances;
 using Microsoft.EntityFrameworkCore;
 using Application.Attendances.Validator;

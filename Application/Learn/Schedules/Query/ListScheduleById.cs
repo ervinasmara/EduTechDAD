@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -16,10 +17,12 @@ namespace Application.Learn.Schedules.Query
         public class Handler : IRequestHandler<Query, Result<ScheduleGetDto>>
         {
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            public Handler(DataContext context)
+            public Handler(DataContext context, IMapper mapper)
             {
                 _context = context;
+                _mapper = mapper;
             }
 
             public async Task<Result<ScheduleGetDto>> Handle(Query request, CancellationToken cancellationToken)
@@ -27,32 +30,15 @@ namespace Application.Learn.Schedules.Query
                 try
                 {
                     var schedule = await _context.Schedules
-                        .Include(s => s.Lesson)
-                            .ThenInclude(l => l.ClassRoom)
-                        .Include(s => s.Lesson)
-                            .ThenInclude(l => l.TeacherLessons)
-                            .ThenInclude(tl => tl.Teacher)
-                        .FirstOrDefaultAsync(s => s.Id == request.ScheduleId, cancellationToken);
+                    .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync(s => s.Id == request.ScheduleId, cancellationToken);
 
                     if (schedule == null)
-                        return Result<ScheduleGetDto>.Failure("Schedule not found");
-
-                    var lessonName = schedule.Lesson?.LessonName;
-                    var className = schedule.Lesson?.ClassRoom?.ClassName;
-                    var nameTeacher = schedule.Lesson?.TeacherLessons?.FirstOrDefault()?.Teacher?.NameTeacher;
-
-                    var scheduleDto = new ScheduleGetDto
                     {
-                        Id = schedule.Id,
-                        Day = schedule.Day,
-                        StartTime = schedule.StartTime,
-                        EndTime = schedule.EndTime,
-                        LessonName = lessonName,
-                        ClassName = className,
-                        NameTeacher = nameTeacher
-                    };
+                        return Result<ScheduleGetDto>.Failure("Schedule not found");
+                    }
 
-                    return Result<ScheduleGetDto>.Success(scheduleDto);
+                    return Result<ScheduleGetDto>.Success(schedule);
                 }
                 catch (Exception ex)
                 {

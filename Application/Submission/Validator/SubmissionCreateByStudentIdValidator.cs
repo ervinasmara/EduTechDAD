@@ -1,5 +1,4 @@
-﻿using Application.Submission;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Application.Submission.Validator
 {
@@ -10,7 +9,7 @@ namespace Application.Submission.Validator
             RuleFor(x => x.AssignmentId).NotEmpty();
             RuleFor(x => x.Link)
                 .NotEmpty()
-                .When(x => x.FileData == null) // Hanya memeriksa AssignmentLink jika FileData kosong
+                .When(x => x.FileData == null) // Hanya memeriksa Link jika FileData kosong
                 .WithMessage("AssignmentLink must be provided if FileData is not provided.");
         }
     }

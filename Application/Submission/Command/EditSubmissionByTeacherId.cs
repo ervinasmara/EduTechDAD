@@ -1,4 +1,5 @@
 ﻿using Application.Core;
+using Application.Submission.Validator;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
@@ -18,11 +19,7 @@ namespace Application.Submission.Command
         {
             public CommandValidator()
             {
-                RuleFor(x => x.AssignmentSubmissionTeacherDto.Grade)
-                  .NotEmpty()
-                  .InclusiveBetween(0.0f, 100.0f)
-                  .WithMessage("Grade must be a number between 0 and 100");
-                RuleFor(x => x.AssignmentSubmissionTeacherDto.Comment).NotEmpty();
+                RuleFor(x => x.AssignmentSubmissionTeacherDto).SetValidator(new SubmissionGradesForTeacherValidator());
             }
         }
 
@@ -41,23 +38,27 @@ namespace Application.Submission.Command
             {
                 try
                 {
-                    // Find AssignmentSubmission
+                    /** Langkah 1: Mencari AssignmentSubmission berdasarkan ID yang diberikan **/
                     var assignmentSubmission = await _context.AssignmentSubmissions.FindAsync(request.SubmissionId);
 
+                    /** Langkah 2: Memeriksa apakah AssignmentSubmission ditemukan **/
                     if (assignmentSubmission == null)
                     {
                         return Result<AssignmentSubmissionTeacherDto>.Failure($"AssignmentSubmission with ID {request.SubmissionId} not found");
                     }
 
-                    // Update using AutoMapper
+                    /** Langkah 3: Menggunakan AutoMapper untuk memperbarui AssignmentSubmission **/
                     _mapper.Map(request.AssignmentSubmissionTeacherDto, assignmentSubmission);
 
+                    /** Langkah 4: Menyimpan perubahan ke database **/
                     await _context.SaveChangesAsync(cancellationToken);
 
+                    /** Langkah 5: Mengembalikan hasil yang berhasil **/
                     return Result<AssignmentSubmissionTeacherDto>.Success(request.AssignmentSubmissionTeacherDto); // Mapped automatically
                 }
                 catch (Exception ex)
                 {
+                    /** Langkah 6: Menangani kesalahan jika terjadi **/
                     return Result<AssignmentSubmissionTeacherDto>.Failure($"Failed to update AssignmentSubmission: {ex.Message}");
                 }
             }

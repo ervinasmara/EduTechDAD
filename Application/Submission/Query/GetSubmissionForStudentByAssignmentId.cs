@@ -30,19 +30,33 @@ namespace Application.Submission.Query
 
             public async Task<Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var studentIdFromToken = Guid.Parse(_userAccessor.GetStudentIdFromToken());
-                if (studentIdFromToken == Guid.Empty)
-                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("Student ID not found in token.");
+                try
+                {
+                    /** Langkah 1: Mendapatkan ID siswa dari token **/
+                    var studentIdFromToken = Guid.Parse(_userAccessor.GetStudentIdFromToken());
 
-                var assignmentSubmissionDto = await _context.AssignmentSubmissions
-                    .Where(s => s.AssignmentId == request.AssignmentId && s.StudentId == studentIdFromToken)
-                    .ProjectTo<AssignmentSubmissionGetByAssignmentIdAndStudentId>(_mapper.ConfigurationProvider)
-                    .SingleOrDefaultAsync(cancellationToken);
+                    /** Langkah 2: Memeriksa apakah ID siswa ditemukan di token **/
+                    if (studentIdFromToken == Guid.Empty)
+                        return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("Student ID not found in token.");
 
-                if (assignmentSubmissionDto == null)
-                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("No assignment submission found.");
+                    /** Langkah 3: Mencari pengajuan tugas berdasarkan ID tugas dan ID siswa **/
+                    var assignmentSubmissionDto = await _context.AssignmentSubmissions
+                        .Where(s => s.AssignmentId == request.AssignmentId && s.StudentId == studentIdFromToken)
+                        .ProjectTo<AssignmentSubmissionGetByAssignmentIdAndStudentId>(_mapper.ConfigurationProvider)
+                        .SingleOrDefaultAsync(cancellationToken);
 
-                return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Success(assignmentSubmissionDto);
+                    /** Langkah 4: Memeriksa apakah pengajuan tugas ditemukan **/
+                    if (assignmentSubmissionDto == null)
+                        return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("No assignment submission found.");
+
+                    /** Langkah 5: Mengembalikan pengajuan tugas yang berhasil ditemukan **/
+                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Success(assignmentSubmissionDto);
+                }
+                catch (Exception ex)
+                {
+                    /** Langkah 6: Menangani kesalahan jika terjadi **/
+                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure($"Failed to handle assignment submission: {ex.Message}");
+                }
             }
         }
     }

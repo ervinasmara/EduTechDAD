@@ -33,7 +33,8 @@ namespace API.DTOs
         }
 
         // =========================== GET DATA =========================== //
-        [Authorize(Policy = "RequireRole1,2,3,4")]
+        /** Get All Students **/
+        [Authorize(Policy = "RequireRole1,2,4")]
         [HttpGet("students")]
         public async Task<IActionResult> GetStudents(CancellationToken ct)
         {

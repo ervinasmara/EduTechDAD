@@ -31,75 +31,83 @@ namespace Application.Submission.Query
 
             public async Task<Result<AssignmentSubmissionListForTeacherGradeDto>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var teacherId = Guid.Parse(_userAccessor.GetTeacherIdFromToken());
-
-                // Verify the teacher is related to the lesson via TeacherLesson
-                var lesson = await _context.Lessons
-                    .Include(l => l.TeacherLessons)
-                    .SingleOrDefaultAsync(l => l.Id == request.LessonId && l.TeacherLessons.Any(tl => tl.TeacherId == teacherId), cancellationToken);
-
-                if (lesson == null)
+                try
                 {
-                    return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure("Lesson not found or not related to the teacher.");
+                    /** Langkah 1: Mendapatkan ID guru dari token **/
+                    var teacherId = Guid.Parse(_userAccessor.GetTeacherIdFromToken());
+
+                    /** Langkah 2: Memverifikasi apakah guru terkait dengan pelajaran melalui TeacherLesson **/
+                    var lesson = await _context.Lessons
+                        .Include(l => l.TeacherLessons)
+                        .SingleOrDefaultAsync(l => l.Id == request.LessonId && l.TeacherLessons.Any(tl => tl.TeacherId == teacherId), cancellationToken);
+
+                    /** Langkah 3: Memeriksa apakah pelajaran ditemukan dan terkait dengan guru **/
+                    if (lesson == null)
+                    {
+                        return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure("Lesson not found or not related to the teacher.");
+                    }
+
+                    /** Langkah 4: Memverifikasi apakah tugas terkait dengan pelajaran **/
+                    var assignment = await _context.Assignments
+                        .Include(c => c.Course)
+                        .SingleOrDefaultAsync(a => a.Id == request.AssignmentId && a.Course.LessonId == request.LessonId, cancellationToken);
+
+                    /** Langkah 5: Memeriksa apakah tugas ditemukan dan terkait dengan pelajaran **/
+                    if (assignment == null)
+                    {
+                        return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure("Assignment not found or not related to the lesson.");
+                    }
+
+                    /** Langkah 6: Mendapatkan daftar pengajuan tugas untuk tugas yang diberikan **/
+                    var submissions = await _context.AssignmentSubmissions
+                        .Where(s => s.AssignmentId == request.AssignmentId)
+                        .ProjectTo<AssignmentSubmissionListGradeDto>(_mapper.ConfigurationProvider)
+                        .ToListAsync(cancellationToken);
+
+                    /** Langkah 7: Menghitung jumlah Pengajuan yang sudah dinilai, belum dinilai, dan belum dikumpulkan **/
+                    var alreadyGradesCount = submissions.Count(s => s.Grade > 0);
+                    var notAlreadyGradesCount = submissions.Count(s => s.Grade == 0);
+                    var totalStudents = await _context.Students.CountAsync(s => s.ClassRoom.Lessons.Any(l => l.Id == request.LessonId), cancellationToken);
+                    var notYetSubmitCount = totalStudents - submissions.Count;
+
+                    /** Langkah 8: Mendapatkan daftar siswa yang terdaftar dalam kelas yang terkait dengan pelajaran **/
+                    var studentsInClass = await _context.Students
+                        .Include(s => s.ClassRoom)
+                        .Where(s => s.ClassRoom.Lessons.Any(l => l.Id == request.LessonId))
+                        .ToListAsync(cancellationToken);
+
+                    /** Langkah 9: Mendapatkan daftar siswa yang sudah mengumpulkan tugas **/
+                    var studentsWhoSubmitted = await _context.AssignmentSubmissions
+                        .Where(s => s.AssignmentId == request.AssignmentId)
+                        .Select(s => s.StudentId)
+                        .ToListAsync(cancellationToken);
+
+                    /** Langkah 10: Mendapatkan daftar siswa yang seharusnya mengumpulkan tugas tetapi belum mengumpulkan **/
+                    var notYetSubmit = studentsInClass
+                        .Where(s => !studentsWhoSubmitted.Contains(s.Id))
+                        .Select(_mapper.Map<NotSubmittedDto>)
+                        .ToList();
+
+                    /** Langkah 11: Membuat DTO hasil **/
+                    var resultDto = new AssignmentSubmissionListForTeacherGradeDto
+                    {
+                        AlreadyGrades = alreadyGradesCount.ToString(),
+                        NotAlreadyGrades = notAlreadyGradesCount.ToString(),
+                        NotYetSubmit = notYetSubmitCount.ToString(),
+                        AssignmentSubmissionList = submissions,
+                        StudentNotYetSubmit = notYetSubmit
+                    };
+
+                    /** Langkah 12: Mengembalikan hasil yang berhasil **/
+                    return Result<AssignmentSubmissionListForTeacherGradeDto>.Success(resultDto);
                 }
-
-                // Verify the assignment is related to the lesson
-                var assignment = await _context.Assignments
-                    .Include(c => c.Course)
-                    .SingleOrDefaultAsync(a => a.Id == request.AssignmentId && a.Course.LessonId == request.LessonId, cancellationToken);
-
-                if (assignment == null)
+                catch (Exception ex)
                 {
-                    return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure("Assignment not found or not related to the lesson.");
+                    /** Langkah 13: Menangani kesalahan jika terjadi **/
+                    return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure($"Failed to handle assignment submission: {ex.Message}");
                 }
-
-                // Get the list of AssignmentSubmissions for the Assignment
-                var submissions = await _context.AssignmentSubmissions
-                    .Where(s => s.AssignmentId == request.AssignmentId)
-                    .ProjectTo<AssignmentSubmissionListGradeDto>(_mapper.ConfigurationProvider)
-                    .ToListAsync(cancellationToken);
-
-                // Calculate the counts for AlreadyGrades, NotAlreadyGrades, and NotYetSubmit
-                var alreadyGradesCount = submissions.Count(s => s.Grade > 0);
-                var notAlreadyGradesCount = submissions.Count(s => s.Grade == 0);
-                var totalStudents = await _context.Students.CountAsync(s => s.ClassRoom.Lessons.Any(l => l.Id == request.LessonId), cancellationToken);
-                var notYetSubmitCount = totalStudents - submissions.Count;
-
-                // Dapatkan semua student yang terdaftar dalam ClassRoom yang terkait dengan Lesson
-                var studentsInClass = await _context.Students
-                    .Include(s => s.ClassRoom)
-                    .Where(s => s.ClassRoom.Lessons.Any(l => l.Id == request.LessonId))
-                    .ToListAsync(cancellationToken);
-
-                // Dapatkan semua student yang sudah mengumpulkan tugas
-                var studentsWhoSubmitted = await _context.AssignmentSubmissions
-                    .Where(s => s.AssignmentId == request.AssignmentId)
-                    .Select(s => s.StudentId)
-                    .ToListAsync(cancellationToken);
-
-                // Dapatkan semua student yang seharusnya submit tetapi belum submit
-                var expectedSubmissions = studentsInClass
-                    .Where(s => !studentsWhoSubmitted.Contains(s.Id))
-                    .ToList();
-
-                // Dapatkan semua student yang seharusnya submit tetapi belum submit
-                var notYetSubmit = studentsInClass
-                    .Where(s => !studentsWhoSubmitted.Contains(s.Id))
-                    .Select(_mapper.Map<NotSubmittedDto>)
-                    .ToList();
-
-                // Create the result DTO
-                var resultDto = new AssignmentSubmissionListForTeacherGradeDto
-                {
-                    AlreadyGrades = alreadyGradesCount.ToString(),
-                    NotAlreadyGrades = notAlreadyGradesCount.ToString(),
-                    NotYetSubmit = notYetSubmitCount.ToString(),
-                    AssignmentSubmissionList = submissions,
-                    StudentNotYetSubmit = notYetSubmit
-                };
-
-                return Result<AssignmentSubmissionListForTeacherGradeDto>.Success(resultDto);
             }
+
         }
     }
 }
