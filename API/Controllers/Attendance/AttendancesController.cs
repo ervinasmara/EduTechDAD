@@ -3,16 +3,16 @@
 //using Microsoft.AspNetCore.Authorization;
 //using Microsoft.AspNetCore.Mvc;
 
-//namespace API.Controllers.Attendance
-//{
-//    public class AttendancesController : BaseApiController
-//    {
-//        [Authorize(Policy = "RequireRole1,3,4")]
-//        [HttpGet]
-//        public async Task<IActionResult> GetAttendances(CancellationToken ct)
-//        {
-//            return HandleResult(await Mediator.Send(new List.Query(), ct));
-//        }
+namespace API.Controllers.Attendance
+{
+    public class AttendancesController : BaseApiController
+    {
+        [Authorize(Policy = "RequireRole1,3,4")]
+        [HttpGet]
+        public async Task<IActionResult> GetAttendances(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new List.Query(), ct));
+        }
 
 //        [Authorize(Policy = "RequireRole1OrRole4")]
 //        [HttpGet("{id}")]
@@ -35,13 +35,13 @@
 //            return HandleResult(await Mediator.Send(new Create.Command { AttendanceDto = announcementDto }, ct));
 //        }
 
-//        [Authorize(Policy = "RequireRole1OrRole4")]
-//        [HttpPut("{id}")]
-//        public async Task<IActionResult> EditAttendanceDto(Guid id, AttendanceEditDto announcementEditDto, CancellationToken ct)
-//        {
-//            var result = await Mediator.Send(new Edit.Command { Id = id, AttendanceEditDto = announcementEditDto }, ct);
-//            return HandleResult(result);
-//        }
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> EditAttendanceDto(Guid id, AttendanceEditDto announcementEditDto, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new Edit.Command { Id = id, AttendanceEditDto = announcementEditDto }, ct);
+            return HandleResult(result);
+        }
 
 //        [Authorize(Policy = "RequireRole1OrRole4")]
 //        [HttpDelete("{id}")]
