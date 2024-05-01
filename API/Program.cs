@@ -1,6 +1,5 @@
 using API.Extensions;
 using API.Middleware;
-using Application.InfoRecaps.StatusUpdateAfter1Day;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +16,6 @@ builder.Services.AddControllers(opt =>
 });
 
 builder.Services.AddApplicationServices(builder.Configuration);
-
-builder.Services.AddHostedService<StatusUpdateService>();
 
 builder.Services.AddIdentityService(builder.Configuration);
 
@@ -112,9 +109,7 @@ try
 
     await context.Database.MigrateAsync();
 
-    await SeedAnnouncement.SeedData(context);
     await SeedClassRoom.SeedData(context);
-    await SeedInfoRecap.SeedData(context);
     //await SeedLesson.SeedData(context);
     //await SeedUser.SeedData(context, userManager);
 }

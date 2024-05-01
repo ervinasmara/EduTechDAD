@@ -6,14 +6,13 @@ using FluentValidation.AspNetCore;
 using Microsoft.OpenApi.Models;
 using Application.Interface;
 using Infrastructure.Security;
-using Application.Announcements.Query;
-using Application.InfoRecaps.Query;
-using Application.Announcements.Command;
-using Application.InfoRecaps.Command;
 using Infrastructure.PathFile;
 using Infrastructure.Validation_Submission;
 using Application.Interface.User;
 using Infrastructure.User;
+using Application.User.Students;
+using Application.Learn.Courses.Query;
+using Application.Learn.Courses.Command;
 
 namespace API.Extensions
 {
@@ -70,12 +69,24 @@ namespace API.Extensions
                 });
             });
 
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListAnnouncement.Handler).Assembly));
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListInfoRecap.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListStudent.Handler).Assembly));
+
+            /** COURSE **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListCourse.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DetailsCourse.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListCourseByClassRoomId.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListCourseByTeacherId.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DownloadCourse.Handler).Assembly));
+
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddFluentValidationAutoValidation();
-            services.AddValidatorsFromAssemblyContaining<CreateAnnouncement>();
-            services.AddValidatorsFromAssemblyContaining<CreateInfoRecap>();
+
+            /**  COURSE **/
+            services.AddValidatorsFromAssemblyContaining<CreateCourse>();
+            services.AddValidatorsFromAssemblyContaining<DeactivateCourse>();
+            services.AddValidatorsFromAssemblyContaining<EditCourse>();
+
+            services.AddValidatorsFromAssemblyContaining<CreateStudent>();
             services.AddHttpContextAccessor();
             services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddScoped<IFileService, FileService>();

@@ -1,15 +1,11 @@
-﻿using Application.Announcements;
-using Application.ClassRooms;
-using Application.InfoRecaps;
+﻿using Application.ClassRooms;
 using Application.Learn.Schedules;
 using Application.Learn.Courses;
 using Application.Learn.Lessons;
 using Application.Submission;
 using Application.Assignments;
 using AutoMapper;
-using Domain.Announcement;
 using Domain.Class;
-using Domain.InfoRecaps;
 using Domain.Learn.Schedules;
 using Domain.Learn.Courses;
 using Domain.Learn.Lessons;
@@ -28,8 +24,6 @@ namespace Application.Core
     {
         public MappingProfiles()
         {
-            CreateMap<Announcement, AnnouncementDto>();
-            CreateMap<AnnouncementDto, Announcement>();
             CreateMap<ClassRoom, ClassRoomCreateAndEditDto>();
             CreateMap<ClassRoom, ClassRoomGetDto>();
             CreateMap<ClassRoomCreateAndEditDto, ClassRoom>();
@@ -37,7 +31,6 @@ namespace Application.Core
 
             CreateMap<Schedule, ScheduleCreateAndEditDto>();
             CreateMap<ScheduleCreateAndEditDto, Schedule>();
-            CreateMap<InfoRecap, InfoRecapCreateDto>();
 
             CreateMap<Teacher, TeacherGetAllAndByIdDto>();
 

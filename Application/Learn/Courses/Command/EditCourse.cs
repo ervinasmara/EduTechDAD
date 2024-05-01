@@ -4,6 +4,7 @@ using MediatR;
 using Persistence;
 using Microsoft.EntityFrameworkCore;
 using Application.Interface;
+using FluentValidation;
 
 namespace Application.Learn.Courses.Command
 {
@@ -13,6 +14,22 @@ namespace Application.Learn.Courses.Command
         {
             public Guid CourseId { get; set; }
             public CourseCreateAndEditDto CourseCreateAndEditDto { get; set; }
+        }
+
+        public class CommandValidatorDto : AbstractValidator<Command>
+        {
+            public CommandValidatorDto()
+            {
+                RuleFor(x => x.CourseCreateAndEditDto.CourseName).NotEmpty();
+                RuleFor(x => x.CourseCreateAndEditDto.Description).NotEmpty();
+                RuleFor(x => x.CourseCreateAndEditDto.LessonName).NotEmpty();
+
+                // Validasi untuk memastikan bahwa setidaknya satu dari LinkCourse diisi
+                RuleFor(x => x.CourseCreateAndEditDto.LinkCourse)
+                    .NotEmpty()
+                    .When(x => x.CourseCreateAndEditDto.FileData == null) // Hanya memeriksa LinkCourse jika FileData kosong
+                    .WithMessage("LinkCourse must be provided if FileData is not provided.");
+            }
         }
 
         public class Handler : IRequestHandler<Command, Result<CourseCreateAndEditDto>>

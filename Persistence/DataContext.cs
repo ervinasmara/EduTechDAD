@@ -1,5 +1,4 @@
 ﻿using Domain.User;
-using Domain.Announcement;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Domain.Class;
@@ -8,7 +7,6 @@ using Domain.Learn.Lessons;
 using Domain.Learn.Courses;
 using Domain.Learn.Schedules;
 using Domain.Submission;
-using Domain.InfoRecaps;
 using Domain.Many_to_Many;
 using Domain.Assignments;
 
@@ -99,7 +97,6 @@ namespace Persistence
             // Biarkan kosong
         }
 
-        public DbSet<Announcement> Announcements { get; set; }
         public DbSet<SuperAdmin> SuperAdmins { get; set; }
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
@@ -111,7 +108,6 @@ namespace Persistence
         public DbSet<Assignment> Assignments { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
-        public DbSet<InfoRecap> InfoRecaps { get; set; }
         public DbSet<TeacherLesson> TeacherLessons { get; set; }
     }
 }
