@@ -29,19 +29,23 @@ namespace Application.Learn.Schedules.Query
             {
                 try
                 {
+                    /** Langkah 1: Mengambil Jadwal Berdasarkan ID **/
                     var schedule = await _context.Schedules
-                    .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
-                    .FirstOrDefaultAsync(s => s.Id == request.ScheduleId, cancellationToken);
+                        .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
+                        .FirstOrDefaultAsync(s => s.Id == request.ScheduleId, cancellationToken);
 
+                    /** Langkah 2: Memeriksa Ketersediaan Jadwal **/
                     if (schedule == null)
                     {
                         return Result<ScheduleGetDto>.Failure("Schedule not found");
                     }
 
+                    /** Langkah 3: Mengembalikan Hasil dalam Bentuk Success Result **/
                     return Result<ScheduleGetDto>.Success(schedule);
                 }
                 catch (Exception ex)
                 {
+                    /** Langkah 4: Menangani Kesalahan Jika Terjadi **/
                     return Result<ScheduleGetDto>.Failure($"Failed to retrieve schedule: {ex.Message}");
                 }
             }

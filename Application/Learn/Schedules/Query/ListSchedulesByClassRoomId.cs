@@ -32,22 +32,28 @@ namespace Application.Learn.Schedules.Query
             {
                 try
                 {
+                    /** Langkah 1: Mendapatkan ID Ruang Kelas dari Token **/
                     var classRoomId = _userAccessor.GetClassRoomIdFromToken();
 
+                    /** Langkah 2: Memeriksa Ketersediaan ID Ruang Kelas **/
                     if (string.IsNullOrEmpty(classRoomId))
                         return Result<List<ScheduleGetDto>>.Failure("Classroom ID not found in token");
 
+                    /** Langkah 3: Mengambil Jadwal **/
                     var schedule = await _context.Schedules
-                    .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
-                    .ToListAsync(cancellationToken);
+                        .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
+                        .ToListAsync(cancellationToken);
 
+                    /** Langkah 4: Memeriksa Ketersediaan Jadwal untuk Ruang Kelas Tertentu **/
                     if (!schedule.Any())
                         return Result<List<ScheduleGetDto>>.Failure("Schedules not found for this classroom.");
 
+                    /** Langkah 5: Mengembalikan Hasil dalam Bentuk Success Result **/
                     return Result<List<ScheduleGetDto>>.Success(schedule);
                 }
                 catch (Exception ex)
                 {
+                    /** Langkah 6: Menangani Kesalahan Jika Terjadi **/
                     return Result<List<ScheduleGetDto>>.Failure($"Failed to retrieve schedules: {ex.Message}");
                 }
             }

@@ -39,32 +39,35 @@ namespace Application.Learn.Schedules.Command
             {
                 try
                 {
-                    // Temukan jadwal yang akan diedit
+                    /** Langkah 1: Mencari Jadwal yang Akan Diedit **/
                     var schedule = await _context.Schedules.FindAsync(request.ScheduleId);
 
+                    /** Langkah 2: Memeriksa Ketersediaan Jadwal yang Akan Diedit **/
                     if (schedule == null)
                         return Result<ScheduleCreateAndEditDto>.Failure($"Schedule with id '{request.ScheduleId}' not found.");
 
-                    // Temukan lesson berdasarkan LessonName yang diberikan
+                    /** Langkah 3: Memetakan Data yang Diperbarui dari DTO ke Entitas Schedule menggunakan AutoMapper **/
+                    _mapper.Map(request.ScheduleCreateAndEditDto, schedule);
+
+                    /** Langkah 4: Mencari Pelajaran Berdasarkan Nama Pelajaran yang Diberikan **/
                     var lesson = await _context.Lessons
                         .FirstOrDefaultAsync(l => l.LessonName == request.ScheduleCreateAndEditDto.LessonName, cancellationToken);
 
+                    /** Langkah 5: Memeriksa Ketersediaan Pelajaran **/
                     if (lesson == null)
                         return Result<ScheduleCreateAndEditDto>.Failure($"Lesson with name '{request.ScheduleCreateAndEditDto.LessonName}' not found.");
 
-                    // Perbarui properti jadwal
-                    schedule.Day = request.ScheduleCreateAndEditDto.Day;
-                    schedule.StartTime = request.ScheduleCreateAndEditDto.StartTime;
-                    schedule.EndTime = request.ScheduleCreateAndEditDto.EndTime;
+                    /** Langkah 6: Memperbarui Properti LessonId **/
                     schedule.LessonId = lesson.Id;
 
-                    // Simpan perubahan ke database
+                    /** Langkah 7: Menyimpan Perubahan ke Database **/
                     var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
+                    /** Langkah 8: Memeriksa Hasil Simpan **/
                     if (!result)
                         return Result<ScheduleCreateAndEditDto>.Failure("Failed to edit Schedule");
 
-                    // Buat DTO respons dan kembalikan
+                    /** Langkah 9: Membuat DTO Respons dan Mengembalikan **/
                     var scheduleDto = _mapper.Map<ScheduleCreateAndEditDto>(schedule);
                     scheduleDto.LessonName = lesson.LessonName; // Set LessonName in response
 
@@ -72,6 +75,7 @@ namespace Application.Learn.Schedules.Command
                 }
                 catch (Exception ex)
                 {
+                    /** Langkah 10: Menangani Kesalahan Jika Terjadi **/
                     return Result<ScheduleCreateAndEditDto>.Failure($"Failed to edit schedule: {ex.Message}");
                 }
             }

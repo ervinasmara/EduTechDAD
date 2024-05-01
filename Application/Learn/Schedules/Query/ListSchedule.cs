@@ -1,5 +1,4 @@
 ﻿using Application.Core;
-using Application.Learn.Lessons;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -29,14 +28,17 @@ namespace Application.Learn.Schedules.Query
             {
                 try
                 {
+                    /** Langkah 1: Mengambil Jadwal dan Memetakkannya ke ScheduleGetDto **/
                     var schedule = await _context.Schedules
-                    .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
-                    .ToListAsync(cancellationToken);
+                        .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
+                        .ToListAsync(cancellationToken);
 
+                    /** Langkah 2: Mengembalikan Hasil dalam Bentuk Success Result **/
                     return Result<List<ScheduleGetDto>>.Success(schedule);
                 }
                 catch (Exception ex)
                 {
+                    /** Langkah 3: Menangani Kesalahan Jika Terjadi **/
                     return Result<List<ScheduleGetDto>>.Failure($"Failed to retrieve schedules: {ex.Message}");
                 }
             }
