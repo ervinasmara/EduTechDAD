@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Application.Learn.GetFileName;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Submission
 {
@@ -7,6 +8,7 @@ namespace Application.Submission
     public class SubmissionCreateByStudentIdDto
     {
         public Guid AssignmentId { get; set; }
+        [AllowedExtensions(new string[] { ".pdf" })]
         public IFormFile FileData { get; set; }
         public string Link { get; set; }
     }

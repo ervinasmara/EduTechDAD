@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -8,12 +9,12 @@ namespace Application.Attendances.Query
 {
     public class GetAllByStudentId
     {
-        public class Query : IRequest<Result<List<AttendanceGetAllDto>>>
+        public class Query : IRequest<Result<List<AttendanceGetByStudentIdDto>>>
         {
             public Guid StudentId { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<AttendanceGetAllDto>>>
+        public class Handler : IRequestHandler<Query, Result<List<AttendanceGetByStudentIdDto>>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -24,15 +25,14 @@ namespace Application.Attendances.Query
                 _mapper = mapper;
             }
 
-            public async Task<Result<List<AttendanceGetAllDto>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<List<AttendanceGetByStudentIdDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var attendances = await _context.Attendances
                     .Where(a => a.StudentId == request.StudentId)
+                    .ProjectTo<AttendanceGetByStudentIdDto>(_mapper.ConfigurationProvider)
                     .ToListAsync(cancellationToken);
 
-                var attendanceDtos = _mapper.Map<List<AttendanceGetAllDto>>(attendances);
-
-                return Result<List<AttendanceGetAllDto>>.Success(attendanceDtos);
+                return Result<List<AttendanceGetByStudentIdDto>>.Success(attendances);
             }
         }
     }

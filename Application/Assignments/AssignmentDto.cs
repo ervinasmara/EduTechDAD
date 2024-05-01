@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Application.Learn.GetFileName;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Assignments
 {
@@ -54,6 +55,7 @@ namespace Application.Assignments
         public DateOnly AssignmentDate { get; set; }
         public DateTime AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }
+        [AllowedExtensions(new string[] { ".pdf" })]
         public IFormFile AssignmentFileData { get; set; }
         public string AssignmentLink { get; set; }
         public Guid CourseId { get; set; }

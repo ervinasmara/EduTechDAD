@@ -36,16 +36,20 @@ namespace Application.Attendances.Command
 
             public async Task<Result<AttendanceEditDto>> Handle(Command request, CancellationToken cancellationToken)
             {
+                /** Langkah 1: Mencari kehadiran berdasarkan ID **/
                 var attendance = await _context.Attendances.FindAsync(request.Id);
 
+                /** Langkah 2: Memeriksa kehadiran **/
                 // Periksa apakah attendance ditemukan
                 if (attendance == null)
                 {
                     return Result<AttendanceEditDto>.Failure("Attendance has not found");
                 }
 
+                /** Langkah 3: Memetakan data edit ke kehadiran yang ditemukan **/
                 _mapper.Map(request.AttendanceEditDto, attendance);
 
+                /** Langkah 4: Menyimpan perubahan ke database **/
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
                 if (!result)
@@ -53,7 +57,7 @@ namespace Application.Attendances.Command
                     return Result<AttendanceEditDto>.Failure("Failed to edit Attendance");
                 }
 
-                // Buat instance AttendanceEditDto yang mewakili hasil edit
+                /** Langkah 5: Membuat instance AttendanceEditDto untuk hasil edit **/
                 var editedAttendanceEditDto = _mapper.Map<AttendanceEditDto>(attendance);
 
                 return Result<AttendanceEditDto>.Success(editedAttendanceEditDto);

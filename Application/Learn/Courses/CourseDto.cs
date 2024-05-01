@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Application.Learn.GetFileName;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Learn.Courses
 {
@@ -6,6 +7,7 @@ namespace Application.Learn.Courses
     {
         public string CourseName { get; set; }
         public string Description { get; set; }
+        [AllowedExtensions(new string[] { ".pdf" })]
         public IFormFile FileData { get; set; }
         public string LinkCourse { get; set; }
         public string LessonName { get; set; }

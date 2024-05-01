@@ -4,7 +4,7 @@ namespace Application.Attendances
 {
     /// //////////////////////////////// ///
     /** Attendance Create **/
-    public class AttendanceDto
+    public class AttendanceCreateDto
     {
         public DateOnly Date { get; set; }
         public ICollection<AttendanceStudentCreateDto> AttendanceStudentCreate { get; set; }
@@ -22,7 +22,7 @@ namespace Application.Attendances
         public int Status { get; set; }
     }
 
-    public class AttendanceGetAllDto
+    public class AttendanceGetByStudentIdDto
     {
         public Guid Id { get; set; }
         public DateOnly Date { get; set; }

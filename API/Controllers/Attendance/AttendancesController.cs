@@ -23,10 +23,10 @@ namespace API.Controllers.Attendance
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpGet("calculate/{ClassRoomId?}")]
-        public async Task<ActionResult> GetCalculateAttendance(Guid? ClassRoomId, CancellationToken ct)
+        [HttpGet("calculate")]
+        public async Task<ActionResult> GetCalculateAttendance([FromQuery] Guid? classRoomId, [FromQuery] string year, [FromQuery] string month, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new CalculateAttendance.AttendanceQuery { ClassRoomId = ClassRoomId }, ct));
+            return HandleResult(await Mediator.Send(new CalculateAttendance.AttendanceQuery { ClassRoomId = classRoomId, Year = year, Month = month }, ct));
         }
 
         [Authorize(Policy = "RequireRole1,3,4")]
@@ -38,9 +38,9 @@ namespace API.Controllers.Attendance
 
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost]
-        public async Task<IActionResult> CreateAttendanceDto(AttendanceDto announcementDto, CancellationToken ct)
+        public async Task<IActionResult> CreateAttendanceDto(AttendanceCreateDto announcementDto, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new CreateAttendance.Command { AttendanceDto = announcementDto }, ct));
+            return HandleResult(await Mediator.Send(new CreateAttendance.Command { AttendanceCreateDto = announcementDto }, ct));
         }
 
         [Authorize(Policy = "RequireRole1OrRole4")]
@@ -49,13 +49,6 @@ namespace API.Controllers.Attendance
         {
             var result = await Mediator.Send(new EditAttendance.Command { Id = id, AttendanceEditDto = announcementEditDto }, ct);
             return HandleResult(result);
-        }
-
-        [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAttendance(Guid id, CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new DeleteAttendance.Command { Id = id }, ct));
         }
     }
 }

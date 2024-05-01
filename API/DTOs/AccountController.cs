@@ -41,6 +41,13 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new ListStudent.Query(), ct));
         }
 
+        [Authorize(Policy = "RequireRole1,2,4")]
+        [HttpGet("calculateTeacherStudent")]
+        public async Task<IActionResult> GetUsersCalculate(CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new ActiveCountUser.ActiveCountQuery(), ct));
+        }
+
         [Authorize(Policy = "RequireRole1,2,3,4")]
         [HttpGet("student/{id}")]
         public async Task<ActionResult> GetStudentById(Guid id, CancellationToken ct)

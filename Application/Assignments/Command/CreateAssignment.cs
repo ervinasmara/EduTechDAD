@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using Application.Interface;
+using Application.Learn.Courses;
 using AutoMapper;
 using Domain.Assignments;
 using FluentValidation;
@@ -68,6 +69,15 @@ namespace Application.Assignments.Command
                     string relativeFolderPath = "Upload/FileAssignment";
                     assignment.FilePath = await _fileService.SaveFileAsync(request.AssignmentCreateAndEditDto.AssignmentFileData,
                         relativeFolderPath, request.AssignmentCreateAndEditDto.AssignmentName, assignment.CreatedAt);
+                }
+
+                if (request.AssignmentCreateAndEditDto.AssignmentFileData != null)
+                {
+                    string fileExtension = Path.GetExtension(request.AssignmentCreateAndEditDto.AssignmentFileData.FileName);
+                    if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return Result<AssignmentCreateAndEditDto>.Failure("Only PDF files are allowed.");
+                    }
                 }
 
                 /** Langkah 5: Tambahkan Assignment ke Course **/

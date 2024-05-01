@@ -6,6 +6,7 @@ using MediatR;
 using Persistence;
 using Microsoft.EntityFrameworkCore;
 using Application.Interface;
+using Application.Submission;
 
 namespace Application.Learn.Courses.Command
 {
@@ -75,6 +76,15 @@ namespace Application.Learn.Courses.Command
                 {
                     string relativeFolderPath = "Upload/FileCourse";
                     filePath = await _fileService.SaveFileAsync(request.CourseCreateAndEditDto.FileData, relativeFolderPath, request.CourseCreateAndEditDto.CourseName, course.CreatedAt);
+                }
+
+                if (request.CourseCreateAndEditDto.FileData != null)
+                {
+                    string fileExtension = Path.GetExtension(request.CourseCreateAndEditDto.FileData.FileName);
+                    if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return Result<CourseCreateAndEditDto>.Failure("Only PDF files are allowed.");
+                    }
                 }
 
                 // Setelah menyimpan file, set FilePath pada course

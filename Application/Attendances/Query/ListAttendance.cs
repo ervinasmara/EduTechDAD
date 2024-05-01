@@ -1,5 +1,6 @@
 using Application.Core;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -26,43 +27,28 @@ namespace Application.Attendances.Query
 
             public async Task<Result<List<AttendanceGetDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var students = await _context.Students
-                    .Include(s => s.ClassRoom) // Memuat data ruang kelas terkait dengan siswa
+                /** Langkah 1: Mendapatkan Query awal untuk siswa **/
+                var studentsQuery = _context.Students
+                    .Include(s => s.ClassRoom)
+                    .Include(s => s.Attendances)
+                    .AsQueryable();
+
+                /** Langkah 2: Proyeksi ke AttendanceGetDto menggunakan AutoMapper **/
+                var attendanceDtos = await studentsQuery
+                    .ProjectTo<AttendanceGetDto>(_mapper.ConfigurationProvider)
                     .ToListAsync(cancellationToken);
 
-                // Mendapatkan semua siswa yang sudah absensi
-                var attendances = await _context.Attendances.ToListAsync(cancellationToken);
-
-                var groupedAttendances = students
-                    .Select(student =>
+                // Langkah 3: Menyaring siswa yang tidak memiliki kehadiran
+                attendanceDtos.ForEach(dto =>
+                {
+                    if (dto.AttendanceStudent != null && dto.AttendanceStudent.Count == 0)
                     {
-                        var attendanceStudentDtos = attendances
-                            .Where(a => a.StudentId == student.Id)
-                            .Select(attendance => new AttendanceStudentDto
-                            {
-                                AttendanceId = attendance.Id,
-                                Date = attendance.Date,
-                                Status = attendance.Status
-                            })
-                            .ToList();
+                        dto.AttendanceStudent = null;
+                    }
+                });
 
-                        // Jika siswa belum absen, daftar kehadiran diisi dengan nilai null
-                        if (attendanceStudentDtos.Count == 0)
-                        {
-                            attendanceStudentDtos = null;
-                        }
-
-                        return new AttendanceGetDto
-                        {
-                            StudentId = student.Id,
-                            NameStudent = student.NameStudent,
-                            UniqueNumberOfClassRoom = student.ClassRoom.UniqueNumberOfClassRoom,
-                            AttendanceStudent = attendanceStudentDtos
-                        };
-                    })
-                    .ToList();
-
-                return Result<List<AttendanceGetDto>>.Success(groupedAttendances);
+                /** Langkah 4: Mengembalikan hasil dalam bentuk Success Result **/
+                return Result<List<AttendanceGetDto>>.Success(attendanceDtos);
             }
         }
     }
