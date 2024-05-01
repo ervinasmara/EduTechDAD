@@ -4,7 +4,6 @@ using FluentValidation;
 using Application.Core;
 using Domain.Attendances;
 using Microsoft.EntityFrameworkCore;
-using Application.Attendances.Validator;
 using AutoMapper;
 
 namespace Application.Attendances.Command

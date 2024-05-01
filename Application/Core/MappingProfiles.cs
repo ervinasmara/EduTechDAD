@@ -59,7 +59,8 @@ namespace Application.Core
                 .ForMember(dest => dest.AssignmentFileName, opt => opt.MapFrom(src =>
                     !string.IsNullOrEmpty(src.AssignmentName) && src.FilePath != null
                         ? $"{src.AssignmentName}{Path.GetExtension(src.FilePath)}"
-                        : "No File"));
+                        : "No File"))
+                .ForAllMembers(opts => opts.Condition((src, dest, member) => src.Status != 0));
 
             /** Get Assignment By ClassRoomId **/
             CreateMap<Assignment, AssignmentGetByClassRoomIdDto>()

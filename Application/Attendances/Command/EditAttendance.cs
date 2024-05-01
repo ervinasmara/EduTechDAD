@@ -3,7 +3,6 @@ using Persistence;
 using AutoMapper;
 using FluentValidation;
 using Application.Core;
-using Application.Attendances.Validator;
 
 namespace Application.Attendances.Command
 {
@@ -19,7 +18,9 @@ namespace Application.Attendances.Command
         {
             public CommandValidatorDto()
             {
-                RuleFor(x => x.AttendanceEditDto).SetValidator(new AttendanceEditValidator());
+                RuleFor(x => x.AttendanceEditDto.Date).NotEmpty();
+                RuleFor(x => x.AttendanceEditDto.Status).NotEmpty().WithMessage("Status is required.");
+                RuleFor(x => x.AttendanceEditDto.Status).InclusiveBetween(1, 3).WithMessage("Status must be between 1 and 3.");
             }
         }
 

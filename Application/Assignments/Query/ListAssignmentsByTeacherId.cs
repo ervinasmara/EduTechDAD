@@ -8,7 +8,7 @@ using Persistence;
 
 namespace Application.Assignments.Query
 {
-    public class ListAssignmentByTeacherId
+    public class ListAssignmentsByTeacherId
     {
         public class Query : IRequest<Result<List<AssignmentGetByTeacherIdDto>>>
         {

@@ -29,7 +29,7 @@ namespace API.Controllers.Assignment
         [HttpGet("getAssignmentByTeacherId")]
         public async Task<IActionResult> GetAssignmentstByTeacherId(CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new ListAssignmentByTeacherId.Query(), ct));
+            return HandleResult(await Mediator.Send(new ListAssignmentsByTeacherId.Query(), ct));
         }
 
         /** Get Assignment By ClassRoomId **/

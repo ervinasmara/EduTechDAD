@@ -30,6 +30,8 @@ namespace Application.User.Students
             public async Task<Result<List<StudentGetAllDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var students = await _context.Students
+                    .Where(s => s.Status != 0) // Filter status tidak sama dengan 0
+                    .OrderBy(s => s.Nis) // Urutkan berdasarkan NIS secara naik
                     .ProjectTo<StudentGetAllDto>(_mapper.ConfigurationProvider)
                     .ToListAsync(cancellationToken);
 

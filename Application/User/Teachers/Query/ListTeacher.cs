@@ -25,8 +25,10 @@ namespace Application.User.Teachers.Query
             public async Task<Result<List<TeacherGetAllAndByIdDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var teachers = await _context.Teachers
+                    .Where(s => s.Status != 0) // Filter status tidak sama dengan 0
                     .Include(t => t.TeacherLessons)
                         .ThenInclude(tl => tl.Lesson)
+                    .OrderBy(a => a.NameTeacher)
                     .ToListAsync();
 
                 if (teachers == null || !teachers.Any())

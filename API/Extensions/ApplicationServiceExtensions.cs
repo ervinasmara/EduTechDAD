@@ -13,6 +13,14 @@ using Infrastructure.User;
 using Application.User.Students;
 using Application.Learn.Courses.Query;
 using Application.Learn.Courses.Command;
+using Application.Learn.Lessons.Query;
+using Application.Learn.Lessons.Command;
+using Application.Assignments.Query;
+using Application.Assignments.Command;
+using Application.Submission.Query;
+using Application.Submission.Command;
+using Application.Attendances.Query;
+using Application.Attendances.Command;
 
 namespace API.Extensions
 {
@@ -71,23 +79,83 @@ namespace API.Extensions
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListStudent.Handler).Assembly));
 
-            /** COURSE **/
+            /** ASSIGNMENT Query **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListAssignments.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DetailsAssignment.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DownloadAssignment.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListAssignmentsByClassRoomId.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListAssignmentsByTeacherId.Handler).Assembly));
+            /** ASSIGNMENT Command **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateAssignment.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditAssignment.Handler).Assembly));
+
+            /** ASSIGNMENTSUBMISSION Query **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetListSubmissionForSuperAdmin.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetListSubmissionForTeacherGrades.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetSubmissionForStudentByAssignmentId.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetSubmissionForTeacherBySubmissionId.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DownloadSubmission.Handler).Assembly));
+            /** ASSIGNMENTSUBMISSION Command **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateSubmissionByStudentId.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditSubmissionByTeacherId.Handler).Assembly));
+
+            /** ATTENDANCE Query **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListAttendance.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DetailsAttendance.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllByStudentId.Handler).Assembly));
+            /** ATTENDANCE Command **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateAttendance.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditAttendance.Handler).Assembly));
+
+            /** COURSE Query **/
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListCourse.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DetailsCourse.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListCourseByClassRoomId.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListCourseByTeacherId.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DownloadCourse.Handler).Assembly));
+            /** COURSE Command **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateCourse.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditCourse.Handler).Assembly));
+
+            /** LESSON Query **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListLesson.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DetailsLesson.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LessonByClassRoomId.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LessonByTeacherId.Handler).Assembly));
+            /** LESSON Command **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateLesson.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditLesson.Handler).Assembly));
 
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddFluentValidationAutoValidation();
 
-            /**  COURSE **/
+            /** ASSIGNMENT Validation **/
+            services.AddValidatorsFromAssemblyContaining<CreateAssignment>();
+            services.AddValidatorsFromAssemblyContaining<DeactivateAssignment>();
+            services.AddValidatorsFromAssemblyContaining<EditAssignment>();
+
+            /** ASSIGNMENTSUBMISSION Validation **/
+            services.AddValidatorsFromAssemblyContaining<CreateSubmissionByStudentId>();
+            services.AddValidatorsFromAssemblyContaining<EditSubmissionByTeacherId>();
+
+            /** ATTENDANCE Validation **/
+            services.AddValidatorsFromAssemblyContaining<CreateAttendance>();
+            services.AddValidatorsFromAssemblyContaining<EditAttendance>();
+
+            /** COURSE Validation **/
             services.AddValidatorsFromAssemblyContaining<CreateCourse>();
             services.AddValidatorsFromAssemblyContaining<DeactivateCourse>();
             services.AddValidatorsFromAssemblyContaining<EditCourse>();
 
+            /** LESSON Validation **/
+            services.AddValidatorsFromAssemblyContaining<CreateLesson>();
+            services.AddValidatorsFromAssemblyContaining<DeactivateLesson>();
+            services.AddValidatorsFromAssemblyContaining<EditLesson>();
+
             services.AddValidatorsFromAssemblyContaining<CreateStudent>();
             services.AddHttpContextAccessor();
+
+            /** INTERFACE **/
             services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IUserTeacher, UserTeacher>();

@@ -11,7 +11,7 @@ namespace Application.Attendances.Query
     {
         public class Query : IRequest<Result<AttendanceGetByIdDto>>
         {
-            public Guid Id { get; set; }
+            public Guid AttendanceId { get; set; }
         }
 
         public class Handler : IRequestHandler<Query, Result<AttendanceGetByIdDto>>
@@ -29,7 +29,7 @@ namespace Application.Attendances.Query
             {
                 /** Langkah 1: Mengambil kehadiran berdasarkan ID **/
                 var attendanceDto = await _context.Attendances
-                    .Where(a => a.Id == request.Id)
+                    .Where(a => a.Id == request.AttendanceId)
                     .ProjectTo<AttendanceGetByIdDto>(_mapper.ConfigurationProvider)
                     .SingleOrDefaultAsync(cancellationToken);
 
