@@ -38,7 +38,7 @@ namespace Application.Attendances.Query
                     .ProjectTo<AttendanceGetDto>(_mapper.ConfigurationProvider)
                     .ToListAsync(cancellationToken);
 
-                // Langkah 3: Menyaring siswa yang tidak memiliki kehadiran
+                /** Langkah 3: Menyaring siswa yang tidak memiliki kehadiran **/
                 attendanceDtos.ForEach(dto =>
                 {
                     if (dto.AttendanceStudent != null && dto.AttendanceStudent.Count == 0)
