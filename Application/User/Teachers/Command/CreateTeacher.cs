@@ -8,9 +8,6 @@ using Application.User.DTOs.Registration;
 using FluentValidation;
 using Application.User.Validation;
 using Domain.Many_to_Many;
-using Application.Interface;
-using Application.Submission;
-using Application.Interface.User;
 using AutoMapper;
 
 namespace Application.User.Teachers.Command
