@@ -1,6 +1,5 @@
 ﻿using Application.Core;
 using Application.User.DTOs;
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -17,12 +16,10 @@ namespace Application.User.Admins
         public class ActiveCountQueryHandler : IRequestHandler<ActiveCountQuery, Result<ActiveCountDto>>
         {
             private readonly DataContext _context;
-            private readonly IMapper _mapper;
 
-            public ActiveCountQueryHandler(DataContext context, IMapper mapper)
+            public ActiveCountQueryHandler(DataContext context)
             {
                 _context = context;
-                _mapper = mapper;
             }
 
             public async Task<Result<ActiveCountDto>> Handle(ActiveCountQuery request, CancellationToken cancellationToken)

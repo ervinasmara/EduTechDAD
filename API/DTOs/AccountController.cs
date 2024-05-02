@@ -106,7 +106,7 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new CreateStudent.RegisterStudentCommand { StudentDto = studentDto }, ct));
         }
 
-        /** Create Teacher **/
+        /** Create StudentExcel **/
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("EXCEL2")]
         public async Task<IActionResult> EXCELCIK(IFormFile file, CancellationToken ct)

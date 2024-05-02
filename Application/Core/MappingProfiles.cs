@@ -17,7 +17,6 @@ using Domain.User;
 using Application.Learn.GetFileName;
 using Application.Attendances;
 using Application.User.DTOs.Registration;
-using OfficeOpenXml;
 
 namespace Application.Core
 {
@@ -26,6 +25,11 @@ namespace Application.Core
         public MappingProfiles()
         {
             CreateMap<Teacher, TeacherGetAllAndByIdDto>();
+
+            /// ===================================== ADMIN ============================================== //
+            /// ===================================== ADMIN ============================================== //
+            CreateMap<Admin, RegisterAdminDto>();
+            CreateMap<RegisterAdminDto, Admin>();
 
             /// ===================================== ASSIGNMENT ============================================== //
             /// ===================================== ASSIGNMENT ============================================== //
@@ -279,13 +283,6 @@ namespace Application.Core
                 .ForMember(dest => dest.ActiveTeacherCount, opt => opt.MapFrom(src => src.Status == 1 ? 1 : 0))
                 .ForMember(dest => dest.ActiveStudentCount, opt => opt.Ignore());
 
-            /// ===================================== SUPERADMIN ============================================== //
-            /// ===================================== SUPERADMIN ============================================== //
-            CreateMap<SuperAdmin, RegisterSuperAdminDto>();
-            CreateMap<RegisterSuperAdminDto, SuperAdmin>();
-
-            /// ===================================== TEACHER ============================================== //
-            /// ===================================== TEACHER ============================================== //
             /** Create Student **/
             CreateMap<Student, RegisterStudentExcelDto>();
             CreateMap<RegisterStudentExcelDto, AppUser>();
@@ -295,6 +292,11 @@ namespace Application.Core
                 .ForMember(dest => dest.UniqueNumberOfClassRoom, opt => opt.MapFrom(src =>
                     src.ClassRoom != null ? src.ClassRoom.UniqueNumberOfClassRoom : null));
             CreateMap<RegisterStudentDto, Student>();
+
+            /// ===================================== SUPERADMIN ============================================== //
+            /// ===================================== SUPERADMIN ============================================== //
+            CreateMap<SuperAdmin, RegisterSuperAdminDto>();
+            CreateMap<RegisterSuperAdminDto, SuperAdmin>();
 
             /// ===================================== TEACHER ============================================== //
             /// ===================================== TEACHER ============================================== //
