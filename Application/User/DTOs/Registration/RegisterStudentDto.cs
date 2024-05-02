@@ -37,14 +37,6 @@ namespace Application.User.DTOs.Registration
 
         [Required]
         public string ParentName { get; set; }
-
-        public enum GenderEnum
-        {
-            Male = 1,
-            Female = 2
-        }
-        [Required(ErrorMessage = "Gender is required")]
-        [EnumDataType(typeof(GenderEnum), ErrorMessage = "Invalid Gender value. Use 1 for Male, 2 for Female")]
         public int Gender { get; set; }
 
         [Required]

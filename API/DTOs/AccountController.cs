@@ -41,27 +41,15 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new ListStudent.Query(), ct));
         }
 
-        [Authorize(Policy = "RequireRole1,2,4")]
-        [HttpGet("calculateTeacherStudent")]
-        public async Task<IActionResult> GetUsersCalculate(CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new ActiveCountUser.ActiveCountQuery(), ct));
-        }
-
+        /** Get Student By StudentId **/
         [Authorize(Policy = "RequireRole1,2,3,4")]
         [HttpGet("student/{id}")]
         public async Task<ActionResult> GetStudentById(Guid id, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new DetailsStudentById.Query { Id = id }, ct));
+            return HandleResult(await Mediator.Send(new DetailsStudent.Query { StudentId = id }, ct));
         }
 
-        [Authorize(Policy = "RequireRole1,2,4")]
-        [HttpGet("studentparam")]
-        public async Task<ActionResult> GetStudentParam([FromQuery] string nis, [FromQuery] string name, [FromQuery] string className, CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new DetailsStudent.Query { Nis = nis, Name = name, ClassName = className }, ct));
-        }
-
+        /** Get All Teachers **/
         [Authorize(Policy = "RequireRole1,2,4")]
         [HttpGet("teachers")]
         public async Task<IActionResult> GetTeachers(CancellationToken ct)
@@ -69,6 +57,7 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new ListTeacher.Query(), ct));
         }
 
+        /** Get Teacher By TeacherId **/
         [Authorize(Policy = "RequireRole1,2,3,4")]
         [HttpGet("teacher/{id}")]
         public async Task<ActionResult> GetTeacherByTeacherId(Guid id, CancellationToken ct)
@@ -76,93 +65,16 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new DetailsTeacher.Query { TeacherId = id }, ct));
         }
 
-        [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpPut("teacher/{id}")]
-        public async Task<IActionResult> EditTeacherByTeacherId(Guid id, EditTeacherDto editTeacherDto, CancellationToken ct)
+        /** Get Calculate Teachers and Students **/
+        [Authorize(Policy = "RequireRole1,2,4")]
+        [HttpGet("calculateTeacherStudent")]
+        public async Task<IActionResult> GetUsersCalculate(CancellationToken ct)
         {
-            var result = await Mediator.Send(new EditTeacher.EditTeacherCommand { TeacherId = id, TeacherDto = editTeacherDto }, ct);
-
-            return HandleResult(result);
-        }
-
-        [Authorize(Policy = "RequireRole4")]
-        [HttpPut("admin/delete/{adminId}")]
-        public async Task<IActionResult> DeleteAdmin(Guid adminId, CancellationToken ct)
-        {
-            var result = await Mediator.Send(new DeactivateAdmin.Command { AdminId = adminId}, ct);
-
-            return HandleResult(result);
-        }
-
-        [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpPut("teacher/delete/{teacherId}")]
-        public async Task<IActionResult> DeleteTeacher(Guid teacherId, CancellationToken ct)
-        {
-            var result = await Mediator.Send(new DeactivateTeacher.Command { TeacherId = teacherId}, ct);
-
-            return HandleResult(result);
-        }
-
-        [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpPut("student/delete/{studentId}")]
-        public async Task<IActionResult> DeleteStudent(Guid studentId, CancellationToken ct)
-        {
-            var result = await Mediator.Send(new DeactivateStudent.Command { StudentId = studentId }, ct);
-
-            return HandleResult(result);
-        }
-
-        // =========================== LOGIN =========================== //
-        [AllowAnonymous]
-        [HttpPost("login")]
-        public async Task<ActionResult<object>> Login(LoginDto loginDto)
-        {
-            var user = await _userManager.FindByNameAsync(loginDto.Username);
-
-            if (user == null)
-                return Unauthorized();
-
-            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-
-            if (result)
-            {
-                try
-                {
-                    switch (user.Role)
-                    {
-                        case 1: // Admin
-                            var admin = await _context.Admins.FirstOrDefaultAsync(a => a.AppUserId == user.Id);
-                            if (admin != null && admin.Status == 0)
-                                return Unauthorized();
-                            return await CreateUserObjectAdmin(user);
-                        case 2: // Teacher
-                            var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.AppUserId == user.Id);
-                            if (teacher != null && teacher.Status == 0)
-                                return Unauthorized();
-                            return await CreateUserObjectTeacher(user);
-                        case 3: // Student
-                            var student = await _context.Students.FirstOrDefaultAsync(s => s.AppUserId == user.Id);
-                            if (student != null && student.Status == 0)
-                                return Unauthorized();
-                            return await CreateUserObjectStudent(user);
-                        case 4: // Super Admin
-                            var superAdmin = await _context.SuperAdmins.FirstOrDefaultAsync(sa => sa.AppUserId == user.Id);
-                            if (superAdmin != null && superAdmin.Status == 0)
-                                return Unauthorized();
-                            return await CreateUserObjectSuperAdmin(user);
-                        default:
-                            return BadRequest("Invalid role");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
-            }
-            return Unauthorized();
+            return HandleResult(await Mediator.Send(new ActiveCountUser.ActiveCountQuery(), ct));
         }
 
         // =========================== REGISTER =========================== //
+        /** Create SuperAdmin **/
         [Authorize(Policy = "RequireRole4")]
         [HttpPost("register/superAdmin")]
         public async Task<IActionResult> RegisterSuperAdminCQRS(RegisterSuperAdminDto superAdminDto, CancellationToken ct)
@@ -170,6 +82,7 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new CreateSuperAdmin.RegisterSuperAdminCommand { SuperAdminDto = superAdminDto }, ct));
         }
 
+        /** Create Admin **/
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("register/admin")]
         public async Task<IActionResult> RegisterAdminCQRS(RegisterAdminDto adminDto, CancellationToken ct)
@@ -177,6 +90,7 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new CreateAdmin.RegisterAdminCommand { AdminDto = adminDto }, ct));
         }
 
+        /** Create Teacher **/
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("register/teacher")]
         public async Task<IActionResult> RegisterTeacherCQRS(RegisterTeacherDto teacherDto, CancellationToken ct)
@@ -184,13 +98,22 @@ namespace API.DTOs
             return HandleResult(await Mediator.Send(new CreateTeacher.RegisterTeacherCommand { TeacherDto = teacherDto }, ct));
         }
 
+        /** Create Student **/
         [Authorize(Policy = "RequireRole1OrRole4")]
-        [HttpPost("register/student")]
-        public async Task<IActionResult> RegisterStudentCQRS(RegisterStudentDto studentDto, CancellationToken ct)
+        [HttpPost("register/student2")]
+        public async Task<IActionResult> RegisterStudentCQRS2(RegisterStudentDto studentDto, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new CreateStudent.RegisterStudentCommand { StudentDto = studentDto }, ct));
         }
 
+        /** Create Teacher **/
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPost("EXCEL2")]
+        public async Task<IActionResult> EXCELCIK(IFormFile file, CancellationToken ct)
+        {
+            return HandleResult(await Mediator.Send(new CreateStudentWithExcel.UploadStudentExcelCommand { File = file }, ct));
+        }
+        /** Create Student By Excel **/
         [Authorize(Policy = "RequireRole1OrRole4")]
         [HttpPost("seedexcel")]
         public async Task<IActionResult> UploadExcel4(IFormFile file)
@@ -369,7 +292,96 @@ namespace API.DTOs
             return Ok(updatedStudentDto);
         }
 
+        /** Edit Teacher **/
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPut("teacher/{id}")]
+        public async Task<IActionResult> EditTeacherByTeacherId(Guid id, EditTeacherDto editTeacherDto, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new EditTeacher.EditTeacherCommand { TeacherId = id, TeacherDto = editTeacherDto }, ct);
+            return HandleResult(result);
+        }
+
+        // =========================== DEACTIVATE USER =========================== //
+        [Authorize(Policy = "RequireRole4")]
+        [HttpPut("admin/delete/{adminId}")]
+        public async Task<IActionResult> DeleteAdmin(Guid adminId, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeactivateAdmin.Command { AdminId = adminId }, ct);
+
+            return HandleResult(result);
+        }
+
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPut("teacher/delete/{teacherId}")]
+        public async Task<IActionResult> DeleteTeacher(Guid teacherId, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeactivateTeacher.Command { TeacherId = teacherId }, ct);
+
+            return HandleResult(result);
+        }
+
+        [Authorize(Policy = "RequireRole1OrRole4")]
+        [HttpPut("student/delete/{studentId}")]
+        public async Task<IActionResult> DeleteStudent(Guid studentId, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeactivateStudent.Command { StudentId = studentId }, ct);
+
+            return HandleResult(result);
+        }
+
+        // =========================== LOGIN =========================== //
+        /** LOGIN USER **/
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<ActionResult<object>> Login(LoginDto loginDto)
+        {
+            var user = await _userManager.FindByNameAsync(loginDto.Username);
+
+            if (user == null)
+                return Unauthorized();
+
+            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+
+            if (result)
+            {
+                try
+                {
+                    switch (user.Role)
+                    {
+                        case 1: // Admin
+                            var admin = await _context.Admins.FirstOrDefaultAsync(a => a.AppUserId == user.Id);
+                            if (admin != null && admin.Status == 0)
+                                return Unauthorized();
+                            return await CreateUserObjectAdmin(user);
+                        case 2: // Teacher
+                            var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.AppUserId == user.Id);
+                            if (teacher != null && teacher.Status == 0)
+                                return Unauthorized();
+                            return await CreateUserObjectTeacher(user);
+                        case 3: // Student
+                            var student = await _context.Students.FirstOrDefaultAsync(s => s.AppUserId == user.Id);
+                            if (student != null && student.Status == 0)
+                                return Unauthorized();
+                            return await CreateUserObjectStudent(user);
+                        case 4: // Super Admin
+                            var superAdmin = await _context.SuperAdmins.FirstOrDefaultAsync(sa => sa.AppUserId == user.Id);
+                            if (superAdmin != null && superAdmin.Status == 0)
+                                return Unauthorized();
+                            return await CreateUserObjectSuperAdmin(user);
+                        default:
+                            return BadRequest("Invalid role");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Unauthorized();
+        }
+
         // =========================== GET USER LOGIN =========================== //
+        /** Get Info Who User Login **/
         [Authorize]
         [HttpGet("userinfo")]
         public async Task<ActionResult<object>> GetUserInfo()
@@ -406,7 +418,6 @@ namespace API.DTOs
         }
 
         // =========================== SHORT CODE =========================== //
-
         private async Task<SuperAdminDto> CreateUserObjectSuperAdmin(AppUser user)
         {
             // Ambil data admin terkait dari database

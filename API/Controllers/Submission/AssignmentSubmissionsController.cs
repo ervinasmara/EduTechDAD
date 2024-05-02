@@ -28,9 +28,9 @@ namespace API.Controllers.Submission
         /** Get List Submission For Teacher Grades By LessonId And AssignmentId **/
         [Authorize(Policy = "RequireRole2")]
         [HttpGet("GetListSubmissionForTeacherGrades")]
-        public async Task<ActionResult> GetListSubmissionForTeacherGrades(Guid LessonId, Guid AssignmentId, CancellationToken ct)
+        public async Task<ActionResult> GetListSubmissionForTeacherGrades(Guid LessonId, Guid id, CancellationToken ct)
         {
-            return HandleResult(await Mediator.Send(new GetListSubmissionForTeacherGrades.Query { LessonId = LessonId, AssignmentId = AssignmentId }, ct));
+            return HandleResult(await Mediator.Send(new GetListSubmissionForTeacherGrades.Query { LessonId = LessonId, AssignmentId = id }, ct));
         }
 
         /** Get Submission For Teacher By SubmissionId **/

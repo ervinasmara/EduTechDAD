@@ -25,6 +25,7 @@ using Application.Learn.Schedules.Query;
 using Application.Learn.Schedules.Command;
 using Application.ClassRooms.Query;
 using Application.ClassRooms.Command;
+using Application.User.Superadmin;
 
 namespace API.Extensions
 {
@@ -179,6 +180,11 @@ namespace API.Extensions
             /** SCHEDULE Validation **/
             services.AddValidatorsFromAssemblyContaining<CreateSchedule>();
             services.AddValidatorsFromAssemblyContaining<EditSchedule>();
+
+            /** SUPERADMIN Validation **/
+            services.AddValidatorsFromAssemblyContaining<CreateSuperAdmin>();
+
+            services.AddValidatorsFromAssemblyContaining<CreateStudentWithExcel>();
 
             services.AddValidatorsFromAssemblyContaining<CreateStudent>();
             services.AddHttpContextAccessor();

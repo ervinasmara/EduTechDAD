@@ -12,7 +12,7 @@
 
     public class LessonGetByTeacherIdOrClassRoomIdDto
     {
-        public Guid Id { get; set; }
+        public Guid LessonId { get; set; }
         public string LessonName { get; set; }
         public string UniqueNumberOfLesson { get; set; }
     }

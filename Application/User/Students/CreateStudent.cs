@@ -2,19 +2,19 @@
 using MediatR;
 using Persistence;
 using Microsoft.EntityFrameworkCore;
-using Application.User.DTOs;
 using Domain.User;
 using Microsoft.AspNetCore.Identity;
 using Application.User.DTOs.Registration;
 using FluentValidation;
 using Application.User.Validation;
 using System.Text.RegularExpressions;
+using AutoMapper;
 
 namespace Application.User.Students
 {
     public class CreateStudent
     {
-        public class RegisterStudentCommand : IRequest<Result<StudentGetDto>>
+        public class RegisterStudentCommand : IRequest<Result<RegisterStudentDto>>
         {
             public RegisterStudentDto StudentDto { get; set; }
         }
@@ -27,24 +27,26 @@ namespace Application.User.Students
             }
         }
 
-        public class RegisterStudentCommandHandler : IRequestHandler<RegisterStudentCommand, Result<StudentGetDto>>
+        public class RegisterStudentCommandHandler : IRequestHandler<RegisterStudentCommand, Result<RegisterStudentDto>>
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            public RegisterStudentCommandHandler(UserManager<AppUser> userManager, DataContext context)
+            public RegisterStudentCommandHandler(UserManager<AppUser> userManager, DataContext context, IMapper mapper)
             {
                 _userManager = userManager;
                 _context = context;
+                _mapper = mapper;
             }
 
-            public async Task<Result<StudentGetDto>> Handle(RegisterStudentCommand request, CancellationToken cancellationToken)
+            public async Task<Result<RegisterStudentDto>> Handle(RegisterStudentCommand request, CancellationToken cancellationToken)
             {
                 RegisterStudentDto studentDto = request.StudentDto;
 
                 if (studentDto.BirthDate == DateOnly.MinValue)
                 {
-                    return Result<StudentGetDto>.Failure("Date of birth required");
+                    return Result<RegisterStudentDto>.Failure("Date of birth required");
                 }
 
                 var lastNis = await _context.Students.MaxAsync(s => s.Nis);
@@ -59,14 +61,14 @@ namespace Application.User.Students
                 var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == studentDto.UniqueNumberOfClassRoom);
                 if (selectedClass == null)
                 {
-                    return Result<StudentGetDto>.Failure("Selected UniqueNumberOfClass not found");
+                    return Result<RegisterStudentDto>.Failure("Selected UniqueNumberOfClass not found");
                 }
 
                 var username = newNis;
 
                 if (await _userManager.Users.AnyAsync(x => x.UserName == username))
                 {
-                    return Result<StudentGetDto>.Failure("Username already in use");
+                    return Result<RegisterStudentDto>.Failure("Username already in use");
                 }
 
                 var user = new AppUser
@@ -75,68 +77,27 @@ namespace Application.User.Students
                     Role = 3,
                 };
 
-                var student = new Student
-                {
-                    NameStudent = studentDto.NameStudent,
-                    BirthDate = studentDto.BirthDate,
-                    BirthPlace = studentDto.BirthPlace,
-                    Address = studentDto.Address,
-                    PhoneNumber = studentDto.PhoneNumber,
-                    Nis = newNis,
-                    ParentName = studentDto.ParentName,
-                    Gender = studentDto.Gender,
-                    AppUserId = user.Id,
-                    ClassRoomId = selectedClass.Id
-                };
+                await _userManager.CreateAsync(user);
+
+                var student = _mapper.Map<Student>(studentDto);
+                student.Nis = newNis;
+                student.AppUserId = user.Id;
+                student.ClassRoomId = selectedClass.Id;
 
                 var password = $"{newNis}Edu#";
 
                 if (!Regex.IsMatch(password, "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{8,16}"))
                 {
-                    return Result<StudentGetDto>.Failure("Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one digit.");
+                    return Result<RegisterStudentDto>.Failure("Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one digit.");
                 }
 
-                var result = await _userManager.CreateAsync(user, password);
+                _context.Students.Add(student);
+                await _context.SaveChangesAsync(cancellationToken);
 
-                if (result.Succeeded)
-                {
-                    _context.Students.Add(student);
-                    await _context.SaveChangesAsync();
+                var studentDtoResult = _mapper.Map<RegisterStudentDto>(student);
 
-                    var studentDtoResult = await CreateUserObjectStudentGet(user);
-                    return Result<StudentGetDto>.Success(studentDtoResult);
-                }
-
-                return Result<StudentGetDto>.Failure(string.Join(",", result.Errors));
-            }
-
-            private async Task<StudentGetDto> CreateUserObjectStudentGet(AppUser user)
-            {
-                var student = await _context.Students.AsNoTracking()
-                    .Include(s => s.ClassRoom)
-                    .FirstOrDefaultAsync(g => g.AppUserId == user.Id);
-
-                if (student == null)
-                {
-                    throw new Exception("Student data not found");
-                }
-
-                var className = student.ClassRoom != null ? student.ClassRoom.ClassName : "Unknown";
-
-                return new StudentGetDto
-                {
-                    Role = user.Role,
-                    Username = user.UserName,
-                    NameStudent = student.NameStudent,
-                    BirthDate = student.BirthDate,
-                    BirthPlace = student.BirthPlace,
-                    Address = student.Address,
-                    PhoneNumber = student.PhoneNumber,
-                    Nis = student.Nis,
-                    ParentName = student.ParentName,
-                    Gender = student.Gender,
-                    ClassName = className,
-                };
+                /** Langkah 10: Kembalikan hasil yang berhasil **/
+                return Result<RegisterStudentDto>.Success(studentDtoResult);
             }
         }
     }

@@ -37,13 +37,14 @@ namespace Application.Assignments
 
     public class AssignmentGetByTeacherIdDto
     {
-        public Guid Id { get; set; }
+        public Guid AssignmentId { get; set; }
         public string AssignmentName { get; set; }
         public string AssignmentFileName { get; set; }
         public DateOnly AssignmentDate { get; set; }
         public DateTime AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }
         public string AssignmentLink { get; set; }
+        public Guid LessonId { get; set; }
         public string LessonName { get; set; }
         public string ClassName { get; set; }
         public string AssignmentFilePath { get; set; }

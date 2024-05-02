@@ -43,7 +43,7 @@ namespace Application.Assignments.Query
                 {
                     /** Langkah 3: Membuat query untuk menemukan tugas untuk Teacher **/
                     var assignments = await _context.Assignments
-                        .Where(ta => ta.Course.Lesson.TeacherLessons.Any(tl => tl.TeacherId == Guid.Parse(teacherId))) // Menyaring tugas berdasarkan asosiasi Teacher
+                        .Where(ta => ta.Course.Lesson.TeacherLessons.Any(tl => tl.TeacherId == Guid.Parse(teacherId)) && ta.Status != 0)                        // Menyaring tugas berdasarkan asosiasi Teacher
                         .OrderByDescending(a => a.CreatedAt) // Urutkan berdasarkan tanggal pembuatan (menurun)
                         .ProjectTo<AssignmentGetByTeacherIdDto>(_mapper.ConfigurationProvider) // Memetakan hasil secara efisien ke DTO menggunakan AutoMapper
                         .ToListAsync(cancellationToken);

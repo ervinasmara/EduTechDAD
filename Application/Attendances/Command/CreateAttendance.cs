@@ -12,6 +12,7 @@ namespace Application.Attendances.Command
     {
         public class Command : IRequest<Result<AttendanceCreateDto>>
         {
+            public Guid ClassRoomId { get; set; }
             public AttendanceCreateDto AttendanceCreateDto { get; set; }
         }
 
@@ -48,6 +49,28 @@ namespace Application.Attendances.Command
 
             public async Task<Result<AttendanceCreateDto>> Handle(Command request, CancellationToken cancellationToken)
             {
+                // Validasi ClassRoomId
+                var classroom = await _context.ClassRooms.FindAsync(request.ClassRoomId);
+                if (classroom == null)
+                    return Result<AttendanceCreateDto>.Failure($"Invalid ClassRoomId: {request.ClassRoomId}");
+
+                // Dapatkan daftar siswa dalam kelas
+                var studentsInClassroom = await _context.Students
+                    .Where(s => s.ClassRoomId == request.ClassRoomId && s.Status != 0)
+                    .ToListAsync(cancellationToken);
+
+                // Periksa apakah semua siswa diabsen
+                var studentsNotYetAttendance = studentsInClassroom
+                    .Where(s => !request.AttendanceCreateDto.AttendanceStudentCreate
+                        .Any(a => a.StudentId == s.Id))
+                    .ToList();
+
+                if (studentsNotYetAttendance.Any())
+                {
+                    var studentNames = string.Join(", ", studentsNotYetAttendance.Select(s => s.NameStudent));
+                    return Result<AttendanceCreateDto>.Failure($"Students not yet attended: {studentNames}");
+                }
+
                 /** Langkah 1: Validasi duplikasi siswa **/
                 var duplicateStudentIds = request.AttendanceCreateDto.AttendanceStudentCreate
                     .GroupBy(s => s.StudentId)

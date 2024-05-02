@@ -2,18 +2,17 @@
 using MediatR;
 using Persistence;
 using Microsoft.EntityFrameworkCore;
-using Application.User.DTOs;
 using Domain.User;
 using Microsoft.AspNetCore.Identity;
 using Application.User.DTOs.Registration;
 using FluentValidation;
-using Application.User.Validation;
+using AutoMapper;
 
 namespace Application.User.Superadmin
 {
     public class CreateSuperAdmin
     {
-        public class RegisterSuperAdminCommand : IRequest<Result<SuperAdminGetDto>>
+        public class RegisterSuperAdminCommand : IRequest<Result<RegisterSuperAdminDto>>
         {
             public RegisterSuperAdminDto SuperAdminDto { get; set; }
         }
@@ -22,83 +21,66 @@ namespace Application.User.Superadmin
         {
             public RegisterSuperAdminCommandValidator()
             {
-                RuleFor(x => x.SuperAdminDto).SetValidator(new RegisterSuperadminValidator());
+                RuleFor(x => x.SuperAdminDto.NameSuperAdmin).NotEmpty();
+                RuleFor(x => x.SuperAdminDto.Username).NotEmpty().Length(5, 20).WithMessage("Username length must be between 5 and 20 characters");
+                RuleFor(x => x.SuperAdminDto.Password)
+                    .NotEmpty()
+                    .Matches("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{8,16}")
+                    .WithMessage("Password must be complex");
             }
         }
 
-        public class RegisterSuperAdminCommandHandler : IRequestHandler<RegisterSuperAdminCommand, Result<SuperAdminGetDto>>
+        public class RegisterSuperAdminCommandHandler : IRequestHandler<RegisterSuperAdminCommand, Result<RegisterSuperAdminDto>>
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            public RegisterSuperAdminCommandHandler(UserManager<AppUser> userManager, DataContext context)
+            public RegisterSuperAdminCommandHandler(UserManager<AppUser> userManager, DataContext context, IMapper mapper)
             {
                 _userManager = userManager;
                 _context = context;
+                _mapper = mapper;
             }
 
-            public async Task<Result<SuperAdminGetDto>> Handle(RegisterSuperAdminCommand request, CancellationToken cancellationToken)
+            public async Task<Result<RegisterSuperAdminDto>> Handle(RegisterSuperAdminCommand request, CancellationToken cancellationToken)
             {
-                RegisterSuperAdminDto superAdminDto = request.SuperAdminDto;
+                var superAdminDto = request.SuperAdminDto;
 
-                // Validasi menggunakan FluentValidation
-                var validationResult = new RegisterSuperAdminCommandValidator().Validate(request);
-                if (!validationResult.IsValid)
-                {
-                    return Result<SuperAdminGetDto>.Failure("Validation failed");
-                }
-
-                // Pemeriksaan username supaya berbeda dengan yang lain
+                /** Langkah 1: Pemeriksaan username untuk memastikan tidak ada yang sama dengan yang lain **/
                 if (await _userManager.Users.AnyAsync(x => x.UserName == superAdminDto.Username))
                 {
-                    return Result<SuperAdminGetDto>.Failure("Username already exists.");
+                    return Result<RegisterSuperAdminDto>.Failure("Username already exists.");
                 }
 
+                /** Langkah 2: Membuat instance AppUser baru untuk Super Admin **/
                 var user = new AppUser
                 {
                     UserName = superAdminDto.Username,
-                    Role = 4,
+                    Role = 4, // Menetapkan peran (role) Super Admin
                 };
 
-                var superAdmin = new SuperAdmin
+                /** Langkah 3: Membuat pengguna baru di sistem **/
+                var createUserResult = await _userManager.CreateAsync(user, superAdminDto.Password);
+                if (!createUserResult.Succeeded)
                 {
-                    NameSuperAdmin = superAdminDto.NameSuperAdmin,
-                    AppUserId = user.Id
-                };
-
-                var result = await _userManager.CreateAsync(user, superAdminDto.Password);
-
-                if (result.Succeeded)
-                {
-                    // Simpan superAdmin ke dalam konteks database Anda
-                    _context.SuperAdmins.Add(superAdmin);
-                    await _context.SaveChangesAsync();
-
-                    // Gunakan metode CreateUserObjectSuperAdmin untuk membuat objek SuperAdminDto
-                    var superAdminDtoResult = await CreateUserObjectAdminGet(user);
-                    return Result<SuperAdminGetDto>.Success(superAdminDtoResult); // Mengembalikan hasil sukses dengan DTO super admin
+                    // Jika gagal membuat pengguna baru, kembalikan pesan kesalahan
+                    return Result<RegisterSuperAdminDto>.Failure(string.Join(",", createUserResult.Errors));
                 }
 
-                return Result<SuperAdminGetDto>.Failure(string.Join(",", result.Errors));
-            }
+                /** Langkah 4: Memetakan data Super Admin DTO ke entitas SuperAdmin **/
+                var superAdmin = _mapper.Map<SuperAdmin>(superAdminDto);
+                superAdmin.AppUserId = user.Id;
 
-            private async Task<SuperAdminGetDto> CreateUserObjectAdminGet(AppUser user)
-            {
-                // Ambil data admin terkait dari database
-                var superAdmin = await _context.SuperAdmins.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
+                /** Langkah 5: Menambahkan entitas Super Admin ke konteks database **/
+                _context.SuperAdmins.Add(superAdmin);
 
-                if (superAdmin == null)
-                {
-                    // Handle jika data super admin tidak ditemukan
-                    throw new Exception("Super admin data not found");
-                }
+                /** Langkah 6: Simpan semua entitas yang terkait dalam satu panggilan SaveChangesAsync **/
+                await _context.SaveChangesAsync(cancellationToken);
 
-                return new SuperAdminGetDto
-                {
-                    Role = user.Role,
-                    Username = user.UserName,
-                    NameSuperAdmin = superAdmin.NameSuperAdmin,
-                };
+                /** Langkah 7: Memetakan kembali hasil ke DTO dan mengembalikannya **/
+                var result = _mapper.Map<RegisterSuperAdminDto>(superAdmin);
+                return Result<RegisterSuperAdminDto>.Success(result);
             }
         }
     }

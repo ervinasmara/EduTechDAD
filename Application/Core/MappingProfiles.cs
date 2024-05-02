@@ -17,6 +17,7 @@ using Domain.User;
 using Application.Learn.GetFileName;
 using Application.Attendances;
 using Application.User.DTOs.Registration;
+using OfficeOpenXml;
 
 namespace Application.Core
 {
@@ -24,9 +25,6 @@ namespace Application.Core
     {
         public MappingProfiles()
         {
-            CreateMap<Schedule, ScheduleCreateAndEditDto>();
-            CreateMap<ScheduleCreateAndEditDto, Schedule>();
-
             CreateMap<Teacher, TeacherGetAllAndByIdDto>();
 
             /// ===================================== ASSIGNMENT ============================================== //
@@ -47,6 +45,8 @@ namespace Application.Core
 
             /** Get Assignment By TeacherId **/
             CreateMap<Assignment, AssignmentGetByTeacherIdDto>()
+                .ForMember(dest => dest.AssignmentId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.LessonId, opt => opt.MapFrom(src => src.Course.Lesson.Id))
                 .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Course.Lesson.LessonName))
                 .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Course.Lesson.ClassRoom.ClassName))
                 .ForMember(dest => dest.AssignmentFilePath, opt => opt.MapFrom(src => src.FilePath))
@@ -54,8 +54,7 @@ namespace Application.Core
                 .ForMember(dest => dest.AssignmentFileName, opt => opt.MapFrom(src =>
                     !string.IsNullOrEmpty(src.AssignmentName) && src.FilePath != null
                         ? $"{src.AssignmentName}{Path.GetExtension(src.FilePath)}"
-                        : "No File"))
-                .ForAllMembers(opts => opts.Condition((src, dest, member) => src.Status != 0));
+                        : "No File"));
 
             /** Get Assignment By ClassRoomId **/
             CreateMap<Assignment, AssignmentGetByClassRoomIdDto>()
@@ -231,7 +230,8 @@ namespace Application.Core
                 .ForMember(dest => dest.LessonStatus, opt => opt.MapFrom(src => src.Status == 1 ? "Aktif" : "Tidak Aktif"));
 
             /** Get Lesson By ClassRoomId **/
-            CreateMap<Lesson, LessonGetByTeacherIdOrClassRoomIdDto>();
+            CreateMap<Lesson, LessonGetByTeacherIdOrClassRoomIdDto>()
+                .ForMember(dest => dest.LessonId, opt => opt.MapFrom(src => src.Id));
 
             /** Create Lesson **/
             CreateMap<Lesson, LessonCreateAndEditDto>();
@@ -259,6 +259,7 @@ namespace Application.Core
             /** Create And Edit Schedule **/
             CreateMap<Schedule, ScheduleCreateAndEditDto>()
                 .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.LessonName));
+            CreateMap<ScheduleCreateAndEditDto, Schedule>();
 
             /// ===================================== STUDENT ============================================== //
             /// ===================================== STUDENT ============================================== //
@@ -278,10 +279,31 @@ namespace Application.Core
                 .ForMember(dest => dest.ActiveTeacherCount, opt => opt.MapFrom(src => src.Status == 1 ? 1 : 0))
                 .ForMember(dest => dest.ActiveStudentCount, opt => opt.Ignore());
 
+            /// ===================================== SUPERADMIN ============================================== //
+            /// ===================================== SUPERADMIN ============================================== //
+            CreateMap<SuperAdmin, RegisterSuperAdminDto>();
+            CreateMap<RegisterSuperAdminDto, SuperAdmin>();
 
+            /// ===================================== TEACHER ============================================== //
+            /// ===================================== TEACHER ============================================== //
+            /** Create Student **/
+            CreateMap<Student, RegisterStudentExcelDto>();
+            CreateMap<RegisterStudentExcelDto, AppUser>();
+            CreateMap<RegisterStudentExcelDto, Student>();
+
+            CreateMap<Student, RegisterStudentDto>()
+                .ForMember(dest => dest.UniqueNumberOfClassRoom, opt => opt.MapFrom(src =>
+                    src.ClassRoom != null ? src.ClassRoom.UniqueNumberOfClassRoom : null));
+            CreateMap<RegisterStudentDto, Student>();
+
+            /// ===================================== TEACHER ============================================== //
+            /// ===================================== TEACHER ============================================== //
             /** Create Teacher **/
             CreateMap<Teacher, RegisterTeacherDto>();
             CreateMap<RegisterTeacherDto, Teacher>();
+
+
+
         }
     }
 }
