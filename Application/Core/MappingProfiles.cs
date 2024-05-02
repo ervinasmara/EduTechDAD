@@ -24,11 +24,6 @@ namespace Application.Core
     {
         public MappingProfiles()
         {
-            CreateMap<ClassRoom, ClassRoomCreateAndEditDto>();
-            CreateMap<ClassRoom, ClassRoomGetDto>();
-            CreateMap<ClassRoomCreateAndEditDto, ClassRoom>();
-
-
             CreateMap<Schedule, ScheduleCreateAndEditDto>();
             CreateMap<ScheduleCreateAndEditDto, Schedule>();
 
@@ -162,6 +157,18 @@ namespace Application.Core
             /** Edit Attendance **/
             CreateMap<Attendance, AttendanceEditDto>();
             CreateMap<AttendanceEditDto, Attendance>();
+
+            /// ===================================== COURSE ============================================== //
+            /// ===================================== COURSE ============================================== //
+            /** Get ClassRoom All and By ClassRoomId **/
+            CreateMap<ClassRoom, ClassRoomGetDto>();
+
+            /** Get ClassRoom For Teacher By TeacherId From Token **/
+            CreateMap<ClassRoom, ClassRoomDto>();
+
+            /** Create and Edit ClassRoom **/
+            CreateMap<ClassRoom, ClassRoomCreateAndEditDto>();
+            CreateMap<ClassRoomCreateAndEditDto, ClassRoom>();
 
             /// ===================================== COURSE ============================================== //
             /// ===================================== COURSE ============================================== //

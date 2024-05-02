@@ -10,7 +10,7 @@ namespace Application.ClassRooms.Command
     {
         public class Command : IRequest<Result<ClassRoomCreateAndEditDto>>
         {
-            public Guid Id { get; set; }
+            public Guid ClassRoomId { get; set; }
             public ClassRoomCreateAndEditDto ClassRoomCreateAndEditDto { get; set; }
         }
 
@@ -18,7 +18,7 @@ namespace Application.ClassRooms.Command
         {
             public CommandValidatorDto()
             {
-                RuleFor(x => x.ClassRoomCreateAndEditDto).SetValidator(new ClassRoomValidator());
+                RuleFor(x => x.ClassRoomCreateAndEditDto).SetValidator(new ClassRoomCreateAndEditValidator());
             }
         }
 
@@ -35,7 +35,7 @@ namespace Application.ClassRooms.Command
 
             public async Task<Result<ClassRoomCreateAndEditDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var classRoom = await _context.ClassRooms.FindAsync(request.Id);
+                var classRoom = await _context.ClassRooms.FindAsync(request.ClassRoomId);
 
                 // Periksa apakah classRoom ditemukan
                 if (classRoom == null)

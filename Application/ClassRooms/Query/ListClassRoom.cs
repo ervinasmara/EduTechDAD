@@ -6,7 +6,7 @@ using Persistence;
 
 namespace Application.ClassRooms.Query
 {
-    public class List
+    public class ListClassRoom
     {
         public class Query : IRequest<Result<List<ClassRoomGetDto>>>
         {
@@ -29,9 +29,9 @@ namespace Application.ClassRooms.Query
                 var classRoom = await _context.ClassRooms
                     .ToListAsync(cancellationToken);
 
-                var attendanceDtos = _mapper.Map<List<ClassRoomGetDto>>(classRoom);
+                var classRoomDtos = _mapper.Map<List<ClassRoomGetDto>>(classRoom);
 
-                return Result<List<ClassRoomGetDto>>.Success(attendanceDtos);
+                return Result<List<ClassRoomGetDto>>.Success(classRoomDtos);
             }
         }
     }

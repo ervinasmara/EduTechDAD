@@ -8,7 +8,7 @@ namespace Application.ClassRooms.Command
     {
         public class Command : IRequest<Result<Unit>>
         {
-            public Guid Id { get; set; }
+            public Guid ClassRoomId { get; set; }
         }
 
         public class Handler : IRequestHandler<Command, Result<Unit>>
@@ -22,7 +22,7 @@ namespace Application.ClassRooms.Command
 
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var classRoom = await _context.ClassRooms.FindAsync(request.Id);
+                var classRoom = await _context.ClassRooms.FindAsync(request.ClassRoomId);
 
                 if (classRoom == null) return null;
 

@@ -23,6 +23,8 @@ using Application.Attendances.Query;
 using Application.Attendances.Command;
 using Application.Learn.Schedules.Query;
 using Application.Learn.Schedules.Command;
+using Application.ClassRooms.Query;
+using Application.ClassRooms.Command;
 
 namespace API.Extensions
 {
@@ -109,6 +111,14 @@ namespace API.Extensions
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateAttendance.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditAttendance.Handler).Assembly));
 
+            /** CLASSROOM Query **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListClassRoom.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DetailsClassRoom.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ClassRoomTeacher.Handler).Assembly));
+            /** CLASSROOM Command **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateClassRoom.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditClassRoom.Handler).Assembly));
+
             /** COURSE Query **/
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListCourse.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DetailsCourse.Handler).Assembly));
@@ -151,6 +161,10 @@ namespace API.Extensions
             /** ATTENDANCE Validation **/
             services.AddValidatorsFromAssemblyContaining<CreateAttendance>();
             services.AddValidatorsFromAssemblyContaining<EditAttendance>();
+
+            /** CLASSROOM Validation **/
+            services.AddValidatorsFromAssemblyContaining<CreateClassRoom>();
+            services.AddValidatorsFromAssemblyContaining<EditClassRoom>();
 
             /** COURSE Validation **/
             services.AddValidatorsFromAssemblyContaining<CreateCourse>();

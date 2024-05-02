@@ -1,5 +1,7 @@
 ﻿using Application.Core;
 using Application.Interface;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -8,29 +10,31 @@ namespace Application.ClassRooms.Query
 {
     public class ClassRoomTeacher
     {
-        public class Query : IRequest<Result<object>>
+        public class Query : IRequest<Result<ClassRoomTeacherDto>>
         {
             // Tidak memerlukan properti karena hanya mengambil informasi dari token
         }
 
-        public class QueryHandler : IRequestHandler<Query, Result<object>>
+        public class Handler : IRequestHandler<Query, Result<ClassRoomTeacherDto>>
         {
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
             private readonly IUserAccessor _userAccessor;
 
-            public QueryHandler(DataContext context, IUserAccessor userAccessor)
+            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
             {
                 _context = context;
+                _mapper = mapper;
                 _userAccessor = userAccessor;
             }
 
-            public async Task<Result<object>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<ClassRoomTeacherDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var teacherId = _userAccessor.GetTeacherIdFromToken();
 
                 if (teacherId == null)
                 {
-                    return Result<object>.Failure("Teacher ID not found in token");
+                    return Result<ClassRoomTeacherDto>.Failure("Teacher ID not found in token");
                 }
 
                 var teacherLessons = await _context.TeacherLessons
@@ -40,19 +44,16 @@ namespace Application.ClassRooms.Query
 
                 var classRooms = await _context.ClassRooms
                     .Where(classRoom => classRoom.Lessons.Any(lesson => teacherLessons.Contains(lesson.Id)))
-                    .Select(classRoom => new
-                    {
-                        classRoom.ClassName,
-                        classRoom.LongClassName,
-                        classRoom.UniqueNumberOfClassRoom,
-                    })
+                    .ProjectTo<ClassRoomDto>(_mapper.ConfigurationProvider) // Gunakan ProjectTo untuk memetakan ke DTO
                     .ToListAsync();
 
-                return Result<object>.Success(new
+                var classRoomTeacherDto = new ClassRoomTeacherDto
                 {
-                    teacherId,
-                    classrooms = classRooms
-                });
+                    TeacherId = teacherId,
+                    ClassRooms = classRooms
+                };
+
+                return Result<ClassRoomTeacherDto>.Success(classRoomTeacherDto);
             }
         }
     }

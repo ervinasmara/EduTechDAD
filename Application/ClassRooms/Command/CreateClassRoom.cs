@@ -19,7 +19,7 @@ namespace Application.ClassRooms.Command
         {
             public CommandValidator()
             {
-                RuleFor(x => x.ClassRoomCreateAndEditDto).SetValidator(new ClassRoomValidator());
+                RuleFor(x => x.ClassRoomCreateAndEditDto).SetValidator(new ClassRoomCreateAndEditValidator());
             }
         }
 
@@ -64,13 +64,9 @@ namespace Application.ClassRooms.Command
                     // Format nomor unik baru sebagai string dengan panjang 3 digit (contoh: 001, 002, dst.)
                     string newUniqueNumberString = newUniqueNumber.ToString("000");
 
-                    var classRoom = new ClassRoom
-                    {
-                        ClassName = request.ClassRoomCreateAndEditDto.ClassName,
-                        LongClassName = request.ClassRoomCreateAndEditDto.LongClassName,
-                        Status = 1,
-                        UniqueNumberOfClassRoom = newUniqueNumberString,
-                    };
+                    var classRoom = _mapper.Map<ClassRoom>(request.ClassRoomCreateAndEditDto);
+                    classRoom.Status = 1;
+                    classRoom.UniqueNumberOfClassRoom = newUniqueNumberString;
 
                     _context.ClassRooms.Add(classRoom);
 
