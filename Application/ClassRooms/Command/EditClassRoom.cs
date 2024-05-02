@@ -35,26 +35,32 @@ namespace Application.ClassRooms.Command
 
             public async Task<Result<ClassRoomCreateAndEditDto>> Handle(Command request, CancellationToken cancellationToken)
             {
+                /** Langkah 1: Mencari Ruang Kelas Berdasarkan ID **/
                 var classRoom = await _context.ClassRooms.FindAsync(request.ClassRoomId);
 
                 // Periksa apakah classRoom ditemukan
+                /** Langkah 2: Memeriksa Ketersediaan Ruang Kelas **/
                 if (classRoom == null)
                 {
                     return Result<ClassRoomCreateAndEditDto>.Failure("ClassRoom Not Found");
                 }
 
+                /** Langkah 3: Memetakan Data yang Diperbarui dari DTO ke Entitas ClassRoom Menggunakan AutoMapper **/
                 _mapper.Map(request.ClassRoomCreateAndEditDto, classRoom);
 
+                /** Langkah 4: Menyimpan Perubahan ke Database **/
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
+                /** Langkah 5: Memeriksa Hasil Simpan **/
                 if (!result)
                 {
                     return Result<ClassRoomCreateAndEditDto>.Failure("Failed to edit ClassRoom");
                 }
 
-                // Buat instance ClassRoomCreateAndEditDto yang mewakili hasil edit
+                /** Langkah 6: Membuat Instance ClassRoomCreateAndEditDto yang Mewakili Hasil Edit **/
                 var editedClassRoomCreateAndEditDto = _mapper.Map<ClassRoomCreateAndEditDto>(classRoom);
 
+                /** Langkah 7: Mengembalikan Hasil dalam Bentuk Success Result **/
                 return Result<ClassRoomCreateAndEditDto>.Success(editedClassRoomCreateAndEditDto);
             }
         }

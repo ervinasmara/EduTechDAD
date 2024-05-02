@@ -38,15 +38,16 @@ namespace Application.ClassRooms.Command
             {
                 try
                 {
-                    // Ambil nomor unik terakhir dari database
+                    /** Langkah 1: Ambil nomor unik terakhir dari database **/
                     var lastUniqueNumber = await _context.ClassRooms
                         .OrderByDescending(c => c.UniqueNumberOfClassRoom)
                         .Select(c => c.UniqueNumberOfClassRoom)
                         .FirstOrDefaultAsync(cancellationToken);
 
-                    // Jika tidak ada nomor unik sebelumnya, mulai dengan 1
+                    /** Langkah 2: Inisialisasi nomor unik baru **/
                     int newUniqueNumber = 1;
 
+                    /** Langkah 3: Tentukan nomor unik baru berdasarkan nomor unik terakhir **/
                     if (!string.IsNullOrEmpty(lastUniqueNumber))
                     {
                         // Ambil angka terakhir dari nomor unik terakhir dan tambahkan satu
@@ -61,26 +62,33 @@ namespace Application.ClassRooms.Command
                         }
                     }
 
-                    // Format nomor unik baru sebagai string dengan panjang 3 digit (contoh: 001, 002, dst.)
+                    /** Langkah 4: Format nomor unik baru sebagai string dengan panjang 3 digit **/
                     string newUniqueNumberString = newUniqueNumber.ToString("000");
 
+                    /** Langkah 5: Memetakan data dari DTO ke entitas ClassRoom menggunakan AutoMapper **/
                     var classRoom = _mapper.Map<ClassRoom>(request.ClassRoomCreateAndEditDto);
                     classRoom.Status = 1;
                     classRoom.UniqueNumberOfClassRoom = newUniqueNumberString;
 
+                    /** Langkah 6: Menambahkan entitas ClassRoom ke database **/
                     _context.ClassRooms.Add(classRoom);
 
+                    /** Langkah 7: Menyimpan perubahan ke database **/
                     var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
+                    /** Langkah 8: Memeriksa hasil penyimpanan **/
                     if (!result)
                         return Result<ClassRoomCreateAndEditDto>.Failure("Failed to Create ClassRoom");
 
+                    /** Langkah 9: Memetakan kembali entitas ClassRoom ke DTO **/
                     var classRoomDto = _mapper.Map<ClassRoomCreateAndEditDto>(classRoom);
 
+                    /** Langkah 10: Mengembalikan hasil dalam bentuk Success Result **/
                     return Result<ClassRoomCreateAndEditDto>.Success(classRoomDto);
                 }
                 catch (Exception ex)
                 {
+                    /** Langkah 11: Menangani kesalahan jika terjadi **/
                     return Result<ClassRoomCreateAndEditDto>.Failure($"Failed to create ClassRoom: {ex.Message}");
                 }
             }

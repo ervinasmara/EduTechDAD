@@ -25,13 +25,17 @@ namespace Application.ClassRooms.Query
 
             public async Task<Result<ClassRoomGetDto>> Handle(Query request, CancellationToken cancellationToken)
             {
+                /** Langkah 1: Mencari Ruang Kelas Berdasarkan ID **/
                 var classRoom = await _context.ClassRooms.FindAsync(request.ClassRoomId);
 
+                /** Langkah 2: Memeriksa Ketersediaan Ruang Kelas **/
                 if (classRoom == null)
                     return Result<ClassRoomGetDto>.Failure("ClassRoom not found.");
 
+                /** Langkah 3: Memetakan Data Ruang Kelas ke ClassRoomGetDto Menggunakan AutoMapper **/
                 var classRoomDtos = _mapper.Map<ClassRoomGetDto>(classRoom);
 
+                /** Langkah 4: Mengembalikan Hasil dalam Bentuk Success Result **/
                 return Result<ClassRoomGetDto>.Success(classRoomDtos);
             }
         }

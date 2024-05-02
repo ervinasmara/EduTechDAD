@@ -30,23 +30,28 @@ namespace Application.ClassRooms.Query
 
             public async Task<Result<ClassRoomTeacherDto>> Handle(Query request, CancellationToken cancellationToken)
             {
+                /** Langkah 1: Mendapatkan ID Guru dari Token **/
                 var teacherId = _userAccessor.GetTeacherIdFromToken();
 
+                /** Langkah 2: Memeriksa Ketersediaan ID Guru **/
                 if (teacherId == null)
                 {
                     return Result<ClassRoomTeacherDto>.Failure("Teacher ID not found in token");
                 }
 
+                /** Langkah 3: Mendapatkan ID Pelajaran yang Diajar oleh Guru **/
                 var teacherLessons = await _context.TeacherLessons
                     .Where(tl => tl.TeacherId == Guid.Parse(teacherId))
                     .Select(tl => tl.LessonId)
                     .ToListAsync();
 
+                /** Langkah 4: Mendapatkan Ruang Kelas yang Berhubungan dengan Pelajaran yang Diajarkan oleh Guru **/
                 var classRooms = await _context.ClassRooms
                     .Where(classRoom => classRoom.Lessons.Any(lesson => teacherLessons.Contains(lesson.Id)))
                     .ProjectTo<ClassRoomDto>(_mapper.ConfigurationProvider) // Gunakan ProjectTo untuk memetakan ke DTO
                     .ToListAsync();
 
+                /** Langkah 5: Membuat DTO Guru dan Ruang Kelas dan Mengembalikannya **/
                 var classRoomTeacherDto = new ClassRoomTeacherDto
                 {
                     TeacherId = teacherId,

@@ -26,11 +26,14 @@ namespace Application.ClassRooms.Query
 
             public async Task<Result<List<ClassRoomGetDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
+                /** Langkah 1: Mengambil Semua Data Ruang Kelas dari Database **/
                 var classRoom = await _context.ClassRooms
                     .ToListAsync(cancellationToken);
 
+                /** Langkah 2: Memetakan Data Ruang Kelas ke ClassRoomGetDto Menggunakan AutoMapper **/
                 var classRoomDtos = _mapper.Map<List<ClassRoomGetDto>>(classRoom);
 
+                /** Langkah 3: Mengembalikan Hasil dalam Bentuk Success Result **/
                 return Result<List<ClassRoomGetDto>>.Success(classRoomDtos);
             }
         }
