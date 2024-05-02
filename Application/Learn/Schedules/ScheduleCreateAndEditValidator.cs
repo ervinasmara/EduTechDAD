@@ -2,9 +2,9 @@
 
 namespace Application.Learn.Schedules
 {
-    public class ScheduleValidator : AbstractValidator<ScheduleCreateAndEditDto>
+    public class ScheduleCreateAndEditValidator : AbstractValidator<ScheduleCreateAndEditDto>
     {
-        public ScheduleValidator()
+        public ScheduleCreateAndEditValidator()
         {
             RuleFor(x => x.Day)
                .NotEmpty()

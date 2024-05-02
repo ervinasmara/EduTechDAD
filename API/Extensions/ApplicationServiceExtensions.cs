@@ -21,6 +21,8 @@ using Application.Submission.Query;
 using Application.Submission.Command;
 using Application.Attendances.Query;
 using Application.Attendances.Command;
+using Application.Learn.Schedules.Query;
+using Application.Learn.Schedules.Command;
 
 namespace API.Extensions
 {
@@ -126,6 +128,14 @@ namespace API.Extensions
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateLesson.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditLesson.Handler).Assembly));
 
+            /** SCHEDULE Query **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListSchedule.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListScheduleById.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListSchedulesByClassRoomId.Handler).Assembly));
+            /** SCHEDULE Command **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateSchedule.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditSchedule.Handler).Assembly));
+
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddFluentValidationAutoValidation();
 
@@ -151,6 +161,10 @@ namespace API.Extensions
             services.AddValidatorsFromAssemblyContaining<CreateLesson>();
             services.AddValidatorsFromAssemblyContaining<DeactivateLesson>();
             services.AddValidatorsFromAssemblyContaining<EditLesson>();
+
+            /** SCHEDULE Validation **/
+            services.AddValidatorsFromAssemblyContaining<CreateSchedule>();
+            services.AddValidatorsFromAssemblyContaining<EditSchedule>();
 
             services.AddValidatorsFromAssemblyContaining<CreateStudent>();
             services.AddHttpContextAccessor();

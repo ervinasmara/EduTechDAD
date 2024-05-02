@@ -249,7 +249,7 @@ namespace Application.Core
                 .ForMember(dest => dest.NameTeacher, opt => opt.MapFrom(src =>
                     src.Lesson.TeacherLessons.Select(tl => tl.Teacher.NameTeacher).FirstOrDefault() ?? "Belum Ada Guru"));
 
-            /** Create Schedule **/
+            /** Create And Edit Schedule **/
             CreateMap<Schedule, ScheduleCreateAndEditDto>()
                 .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.LessonName));
 

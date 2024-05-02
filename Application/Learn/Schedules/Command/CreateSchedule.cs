@@ -19,7 +19,7 @@ namespace Application.Learn.Schedules.Command
         {
             public CommandValidator()
             {
-                RuleFor(x => x.ScheduleCreateAndEditDto).SetValidator(new ScheduleValidator());
+                RuleFor(x => x.ScheduleCreateAndEditDto).SetValidator(new ScheduleCreateAndEditValidator());
             }
         }
 
