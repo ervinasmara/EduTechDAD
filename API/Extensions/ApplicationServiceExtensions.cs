@@ -25,7 +25,6 @@ using Application.Learn.Schedules.Query;
 using Application.Learn.Schedules.Command;
 using Application.ClassRooms.Query;
 using Application.ClassRooms.Command;
-using Application.User.Superadmin;
 
 namespace API.Extensions
 {
@@ -85,7 +84,6 @@ namespace API.Extensions
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListStudent.Handler).Assembly));
 
             /** ASSIGNMENT Query **/
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListAssignments.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DetailsAssignment.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DownloadAssignment.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListAssignmentsByClassRoomId.Handler).Assembly));
@@ -95,7 +93,6 @@ namespace API.Extensions
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditAssignment.Handler).Assembly));
 
             /** ASSIGNMENTSUBMISSION Query **/
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetListSubmissionForSuperAdmin.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetListSubmissionForTeacherGrades.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetSubmissionForStudentByAssignmentId.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetSubmissionForTeacherBySubmissionId.Handler).Assembly));
@@ -121,7 +118,6 @@ namespace API.Extensions
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditClassRoom.Handler).Assembly));
 
             /** COURSE Query **/
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListCourse.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DetailsCourse.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListCourseByClassRoomId.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListCourseByTeacherId.Handler).Assembly));
@@ -180,9 +176,6 @@ namespace API.Extensions
             /** SCHEDULE Validation **/
             services.AddValidatorsFromAssemblyContaining<CreateSchedule>();
             services.AddValidatorsFromAssemblyContaining<EditSchedule>();
-
-            /** SUPERADMIN Validation **/
-            services.AddValidatorsFromAssemblyContaining<CreateSuperAdmin>();
 
             services.AddValidatorsFromAssemblyContaining<CreateStudentWithExcel>();
 

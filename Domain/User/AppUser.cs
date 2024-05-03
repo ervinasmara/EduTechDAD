@@ -9,10 +9,8 @@ namespace Domain.User
          * 1 = Admin
          * 2 = Teacher
          * 3 = Student
-         * 4 = Superadmin
         */
 
-        public SuperAdmin SuperAdmin { get; set; }
         public Admin Admin { get; set; }
         public Teacher Teacher { get; set; }
         public Student Student { get; set; }

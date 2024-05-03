@@ -312,11 +312,6 @@ namespace Application.Core
                     src.ClassRoom != null ? src.ClassRoom.UniqueNumberOfClassRoom : null));
             CreateMap<RegisterStudentDto, Student>();
 
-            /// ===================================== SUPERADMIN ============================================== //
-            /// ===================================== SUPERADMIN ============================================== //
-            CreateMap<SuperAdmin, RegisterSuperAdminDto>();
-            CreateMap<RegisterSuperAdminDto, SuperAdmin>();
-
             /// ===================================== TEACHER ============================================== //
             /// ===================================== TEACHER ============================================== //
             /** Login Teacher **/

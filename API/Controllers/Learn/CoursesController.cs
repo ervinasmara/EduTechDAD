@@ -8,16 +8,8 @@ namespace API.Controllers.Learn
 {
     public class CoursesController : BaseApiController
     {
-        /** Get All Course By SuperAdmin **/
-        [Authorize(Policy = "RequireRole4")]
-        [HttpGet]
-        public async Task<IActionResult> GetCourses(CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new ListCourse.Query(), ct));
-        }
-
         /** Get Course By CourseId **/
-        [Authorize(Policy = "RequireRole2,3,4")]
+        [Authorize(Policy = "RequireRole2OrRole3")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetCourse(Guid id, CancellationToken ct)
         {
@@ -41,7 +33,7 @@ namespace API.Controllers.Learn
         }
 
         /** Download Course By CourseId **/
-        [Authorize(Policy = "RequireRole2,3,4")]
+        [Authorize(Policy = "RequireRole2OrRole3")]
         [HttpGet("download/{id}")]
         public async Task<IActionResult> DownloadCourse(Guid id)
         {
@@ -85,14 +77,6 @@ namespace API.Controllers.Learn
         {
             var result = await Mediator.Send(new DeactivateCourse.Command { CourseId = id }, ct);
             return HandleResult(result);
-        }
-
-        /** Delete Course By SuperAdmin **/
-        [Authorize(Policy = "RequireRole4")]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteClassRoom(Guid id, CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new DeleteCourse.Command { CourseId = id }, ct));
         }
     }
 }

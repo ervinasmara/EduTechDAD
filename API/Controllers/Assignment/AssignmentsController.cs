@@ -8,16 +8,8 @@ namespace API.Controllers.Assignment
 {
     public class AssignmentsController : BaseApiController
     {
-        /** Get All Assignment By SuperAdmin **/
-        [Authorize(Policy = "RequireRole4")]
-        [HttpGet]
-        public async Task<IActionResult> GetAssignments(CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new ListAssignments.Query(), ct));
-        }
-
         /** Get Assignment By AssignmentId **/
-        [Authorize(Policy = "RequireRole2,3,4")]
+        [Authorize(Policy = "RequireRole2OrRole3")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAssignmentById(Guid id, CancellationToken ct)
         {
@@ -41,7 +33,7 @@ namespace API.Controllers.Assignment
         }
 
         /** Download Assignment By AssignmentId **/
-        [Authorize(Policy = "RequireRole2,3,4")]
+        [Authorize(Policy = "RequireRole2OrRole3")]
         [HttpGet("download/{id}")]
         public async Task<IActionResult> DownloadAssignment(Guid id)
         {
@@ -85,14 +77,6 @@ namespace API.Controllers.Assignment
         {
             var result = await Mediator.Send(new DeactivateAssignment.Command { AssignmentId = id }, ct);
             return HandleResult(result);
-        }
-
-        /** Delete Assignment By SuperAdmin **/
-        [Authorize(Policy = "RequireRole4")]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAssignment(Guid id, CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new DeleteTask.Command { AssignmentId = id }, ct));
         }
     }
 }

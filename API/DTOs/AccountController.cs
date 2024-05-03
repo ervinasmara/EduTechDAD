@@ -9,7 +9,6 @@ using Persistence;
 using Application.User.Students;
 using Application.User.DTOs;
 using Application.User.DTOs.Registration;
-using Application.User.Superadmin;
 using Application.User.Admins;
 using Application.User.DTOs.Edit;
 using Application.User.Teachers.Command;
@@ -37,7 +36,7 @@ namespace API.DTOs
 
         // =========================== GET DATA =========================== //
         /** Get All Students **/
-        [Authorize(Policy = "RequireRole1,2,4")]
+        [Authorize(Policy = "RequireRole1OrRole2")]
         [HttpGet("students")]
         public async Task<IActionResult> GetStudents(CancellationToken ct)
         {
@@ -45,7 +44,7 @@ namespace API.DTOs
         }
 
         /** Get Student By StudentId **/
-        [Authorize(Policy = "RequireRole1,2,3,4")]
+        [Authorize(Policy = "RequireRole1Or2Or3")]
         [HttpGet("student/{id}")]
         public async Task<ActionResult> GetStudentById(Guid id, CancellationToken ct)
         {
@@ -53,7 +52,7 @@ namespace API.DTOs
         }
 
         /** Get All Teachers **/
-        [Authorize(Policy = "RequireRole1,2,4")]
+        [Authorize(Policy = "RequireRole1OrRole2")]
         [HttpGet("teachers")]
         public async Task<IActionResult> GetTeachers(CancellationToken ct)
         {
@@ -61,7 +60,7 @@ namespace API.DTOs
         }
 
         /** Get Teacher By TeacherId **/
-        [Authorize(Policy = "RequireRole1,2,3,4")]
+        [Authorize(Policy = "RequireRole1Or2Or3")]
         [HttpGet("teacher/{id}")]
         public async Task<ActionResult> GetTeacherByTeacherId(Guid id, CancellationToken ct)
         {
@@ -69,7 +68,7 @@ namespace API.DTOs
         }
 
         /** Get Calculate Teachers and Students **/
-        [Authorize(Policy = "RequireRole1,2,4")]
+        [Authorize(Policy = "RequireRole1OrRole2")]
         [HttpGet("calculateTeacherStudent")]
         public async Task<IActionResult> GetUsersCalculate(CancellationToken ct)
         {
@@ -77,16 +76,8 @@ namespace API.DTOs
         }
 
         // =========================== REGISTER =========================== //
-        /** Create SuperAdmin **/
-        [Authorize(Policy = "RequireRole4")]
-        [HttpPost("register/superAdmin")]
-        public async Task<IActionResult> RegisterSuperAdminCQRS(RegisterSuperAdminDto superAdminDto, CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new CreateSuperAdmin.RegisterSuperAdminCommand { SuperAdminDto = superAdminDto }, ct));
-        }
-
         /** Create Admin **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPost("register/admin")]
         public async Task<IActionResult> RegisterAdminCQRS(RegisterAdminDto adminDto, CancellationToken ct)
         {
@@ -94,7 +85,7 @@ namespace API.DTOs
         }
 
         /** Create Teacher **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPost("register/teacher")]
         public async Task<IActionResult> RegisterTeacherCQRS(RegisterTeacherDto teacherDto, CancellationToken ct)
         {
@@ -102,7 +93,7 @@ namespace API.DTOs
         }
 
         /** Create Student **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPost("register/student2")]
         public async Task<IActionResult> RegisterStudentCQRS2(RegisterStudentDto studentDto, CancellationToken ct)
         {
@@ -110,14 +101,14 @@ namespace API.DTOs
         }
 
         /** Create StudentExcel **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPost("EXCEL2")]
         public async Task<IActionResult> EXCELCIK(IFormFile file, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new CreateStudentWithExcel.UploadStudentExcelCommand { File = file }, ct));
         }
         /** Create Student By Excel **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPost("seedexcel")]
         public async Task<IActionResult> UploadExcel4(IFormFile file)
         {
@@ -246,7 +237,7 @@ namespace API.DTOs
         }
 
         // =========================== EDIT USER =========================== //
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPut("edit/student/{id}")]
         public async Task<IActionResult> UpdateStudent(Guid id, EditStudentDto studentEditDto)
         {
@@ -296,7 +287,7 @@ namespace API.DTOs
         }
 
         /** Edit Teacher **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPut("teacher/{id}")]
         public async Task<IActionResult> EditTeacherByTeacherId(Guid id, EditTeacherDto editTeacherDto, CancellationToken ct)
         {
@@ -314,7 +305,7 @@ namespace API.DTOs
             return HandleResult(result);
         }
 
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPut("teacher/delete/{teacherId}")]
         public async Task<IActionResult> DeleteTeacher(Guid teacherId, CancellationToken ct)
         {
@@ -323,7 +314,7 @@ namespace API.DTOs
             return HandleResult(result);
         }
 
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPut("student/delete/{studentId}")]
         public async Task<IActionResult> DeleteStudent(Guid studentId, CancellationToken ct)
         {
@@ -366,11 +357,6 @@ namespace API.DTOs
                             if (student != null && student.Status == 0)
                                 return Unauthorized();
                             return await CreateUserObjectStudent(user);
-                        case 4: // Super Admin
-                            var superAdmin = await _context.SuperAdmins.FirstOrDefaultAsync(sa => sa.AppUserId == user.Id);
-                            if (superAdmin != null && superAdmin.Status == 0)
-                                return Unauthorized();
-                            return await CreateUserObjectSuperAdmin(user);
                         default:
                             return BadRequest("Invalid role");
                     }
@@ -410,9 +396,6 @@ namespace API.DTOs
                 case 3:
                     userDto = await CreateUserObjectStudentGet(user);
                     break;
-                case 4:
-                    userDto = await CreateUserObjectSuperAdminGet(user);
-                    break;
                 default:
                     return BadRequest("Role not valid"); // Kembalikan 400 Bad Request jika peran tidak valid
             }
@@ -421,45 +404,6 @@ namespace API.DTOs
         }
 
         // =========================== SHORT CODE =========================== //
-        private async Task<SuperAdminDto> CreateUserObjectSuperAdmin(AppUser user)
-        {
-            // Ambil data admin terkait dari database
-            var superAdmin = await _context.SuperAdmins.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
-
-            if (superAdmin == null)
-            {
-                // Handle jika data superAdmin tidak ditemukan
-                throw new Exception("SuperAdmin data not found");
-            }
-
-            return new SuperAdminDto
-            {
-                Role = user.Role,
-                Username = user.UserName,
-                Token = _tokenService.CreateTokenSuperAdmin(user, superAdmin),
-                NameSuperAdmin = superAdmin.NameSuperAdmin,
-            };
-        }
-
-        private async Task<SuperAdminGetDto> CreateUserObjectSuperAdminGet(AppUser user)
-        {
-            // Ambil data admin terkait dari database
-            var superAdmin = await _context.SuperAdmins.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
-
-            if (superAdmin == null)
-            {
-                // Handle jika data superAdmin tidak ditemukan
-                throw new Exception("SuperAdmin data not found");
-            }
-
-            return new SuperAdminGetDto
-            {
-                Role = user.Role,
-                Username = user.UserName,
-                NameSuperAdmin = superAdmin.NameSuperAdmin,
-            };
-        }
-
         /** LOGIN ADMIN **/
         private async Task<AdminDto> CreateUserObjectAdmin(AppUser user)
         {

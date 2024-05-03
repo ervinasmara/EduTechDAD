@@ -8,8 +8,8 @@ namespace API.Controllers.Learn
 {
     public class LessonsController : BaseApiController
     {
-        /** Get All Lesson By Admin And SuperAdmin **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        /** Get All Lesson By Admin **/
+        [Authorize(Policy = "RequireRole1")]
         [HttpGet]
         public async Task<IActionResult> GetLessons(CancellationToken ct)
         {
@@ -17,7 +17,7 @@ namespace API.Controllers.Learn
         }
 
         /** Get Lesson By LessonId **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetLesson(Guid id, CancellationToken ct)
         {
@@ -40,16 +40,16 @@ namespace API.Controllers.Learn
             return HandleResult(await Mediator.Send(new LessonByTeacherId.Query(), ct));
         }
 
-        /** Create Lesson By Admin And SuperAdmin **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        /** Create Lesson By Admin **/
+        [Authorize(Policy = "RequireRole1")]
         [HttpPost]
         public async Task<IActionResult> CreateLessonDto(LessonCreateAndEditDto lessonDto, CancellationToken ct)
         {
             return HandleResult(await Mediator.Send(new CreateLesson.Command { LessonCreateAndEditDto = lessonDto }, ct));
         }
 
-        /** Update Lesson By Admin And SuperAdmin **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        /** Update Lesson By Admin **/
+        [Authorize(Policy = "RequireRole1")]
         [HttpPut("{id}")]
         public async Task<IActionResult> EditLessonDto(Guid id, LessonCreateAndEditDto lessonDto, CancellationToken ct)
         {
@@ -57,8 +57,8 @@ namespace API.Controllers.Learn
             return HandleResult(result);
         }
 
-        /** Deactivate Lesson By Admin And SuperAdmin **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        /** Deactivate Lesson By Admin **/
+        [Authorize(Policy = "RequireRole1")]
         [HttpPut("deactivate/{id}")]
         public async Task<IActionResult> DeactivateLessonDto(Guid id, CancellationToken ct)
         {
@@ -66,8 +66,8 @@ namespace API.Controllers.Learn
             return HandleResult(result);
         }
 
-        /** Delete Lesson By Admin And SuperAdmin **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        /** Delete Lesson By Admin **/
+        [Authorize(Policy = "RequireRole1")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLesson(Guid id, CancellationToken ct)
         {

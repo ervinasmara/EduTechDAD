@@ -9,14 +9,6 @@ namespace API.Controllers.Submission
 {
     public class AssignmentSubmissionsController : BaseApiController
     {
-        /** Get All Submission By SuperAdmin **/
-        [Authorize(Policy = "RequireRole4")]
-        [HttpGet]
-        public async Task<IActionResult> GetAssignmentSubmissionsForSuperAdmin(CancellationToken ct)
-        {
-            return HandleResult(await Mediator.Send(new GetListSubmissionForSuperAdmin.Query(), ct));
-        }
-
         /** Get Submission For Student By AssignmentId **/
         [Authorize(Policy = "RequireRole3")]
         [HttpGet("getSubmissionForStudentByAssignmentId/{id}")]
@@ -42,7 +34,7 @@ namespace API.Controllers.Submission
         }
 
         /** Download Submission By SubmissionId **/
-        [Authorize(Policy = "RequireRole2OrRole4")]
+        [Authorize(Policy = "RequireRole2")]
         [HttpGet("download/{id}")]
         public async Task<IActionResult> DownloadSubmission(Guid id)
         {
@@ -71,7 +63,7 @@ namespace API.Controllers.Submission
         }
 
         /** Edit Submission By TeacherId **/
-        [Authorize(Policy = "RequireRole2OrRole4")]
+        [Authorize(Policy = "RequireRole2")]
         [HttpPut("teacher/{id}")]
         public async Task<IActionResult> EditSubmissionByTeacherId(Guid id, AssignmentSubmissionTeacherDto announcementSubmissionTeacherDto, CancellationToken ct)
         {

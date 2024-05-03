@@ -9,7 +9,7 @@ namespace API.Controllers.ClassRoom
     public class ClassRoomsController : BaseApiController
     {
         /** Get All ClassRoom **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpGet]
         public async Task<IActionResult> GetClassRooms(CancellationToken ct)
         {
@@ -25,7 +25,7 @@ namespace API.Controllers.ClassRoom
         }
 
         /** Get ClassRoom By ClassRoomId **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetClassRoom(Guid id, CancellationToken ct)
         {
@@ -33,7 +33,7 @@ namespace API.Controllers.ClassRoom
         }
 
         /** Create ClassRoom **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPost]
         public async Task<IActionResult> CreateClassRoomDto(ClassRoomCreateAndEditDto classRoomDto, CancellationToken ct)
         {
@@ -41,7 +41,7 @@ namespace API.Controllers.ClassRoom
         }
 
         /** Edit ClassRoom **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPut("{id}")]
         public async Task<IActionResult> EditClassRoomDto(Guid id, ClassRoomCreateAndEditDto classRoomDto, CancellationToken ct)
         {
@@ -51,7 +51,7 @@ namespace API.Controllers.ClassRoom
         }
 
         /** Deactivate ClassRoom By ClassRoomId **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPut("deactive/{id}")]
         public async Task<IActionResult> DeactiveClassRoomDto(Guid id, CancellationToken ct)
         {

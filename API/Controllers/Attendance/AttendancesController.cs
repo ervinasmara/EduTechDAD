@@ -9,7 +9,7 @@ namespace API.Controllers.Attendance
     public class AttendancesController : BaseApiController
     {
         /** Get All Attendance **/
-        [Authorize(Policy = "RequireRole1,3,4")]
+        [Authorize(Policy = "RequireRole1OrRole3")]
         [HttpGet]
         public async Task<IActionResult> GetAttendances(CancellationToken ct)
         {
@@ -17,7 +17,7 @@ namespace API.Controllers.Attendance
         }
 
         /** Get Attendance By AttendanceId **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAttendance(Guid id, CancellationToken ct)
         {
@@ -25,7 +25,7 @@ namespace API.Controllers.Attendance
         }
 
         /** Calculate Attendance **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpGet("calculate")]
         public async Task<ActionResult> GetCalculateAttendance([FromQuery] Guid? classRoomId, [FromQuery] string year, [FromQuery] string month, CancellationToken ct)
         {
@@ -33,7 +33,7 @@ namespace API.Controllers.Attendance
         }
 
         /** Get Details Attendance By StudentId **/
-        [Authorize(Policy = "RequireRole1,3,4")]
+        [Authorize(Policy = "RequireRole1OrRole3")]
         [HttpGet("student/{studentId}")]
         public async Task<ActionResult> GetAttendanceByStudentId(Guid studentId, CancellationToken ct)
         {
@@ -41,7 +41,7 @@ namespace API.Controllers.Attendance
         }
 
         /** Create Attendance **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPost]
         public async Task<IActionResult> CreateAttendanceDto([FromQuery] Guid classRoomId, [FromBody] AttendanceCreateDto announcementDto, CancellationToken ct)
         {
@@ -49,7 +49,7 @@ namespace API.Controllers.Attendance
         }
 
         /** Edit Attendance **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPut("{id}")]
         public async Task<IActionResult> EditAttendanceDto(Guid id, AttendanceEditDto announcementEditDto, CancellationToken ct)
         {

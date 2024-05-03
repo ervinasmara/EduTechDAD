@@ -9,7 +9,7 @@ namespace API.Controllers.Learn
     public class SchedulesController : BaseApiController
     {
         /** Get All Schedule **/
-        [Authorize(Policy = "RequireRole1,3,4")]
+        [Authorize(Policy = "RequireRole1OrRole3")]
         [HttpGet]
         public async Task<IActionResult> GetSchedules(CancellationToken ct)
         {
@@ -17,7 +17,7 @@ namespace API.Controllers.Learn
         }
 
         /** Get Schedule By ScheduleId **/
-        [Authorize(Policy = "RequireRole1,3,4")]
+        [Authorize(Policy = "RequireRole1OrRole3")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetScheduleById(Guid id, CancellationToken ct)
         {
@@ -33,7 +33,7 @@ namespace API.Controllers.Learn
         }
 
         /** Create Schedule **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPost]
         public async Task<IActionResult> CreateScheduleDto(ScheduleCreateAndEditDto scheduleDto, CancellationToken ct)
         {
@@ -41,7 +41,7 @@ namespace API.Controllers.Learn
         }
 
         /** Edit Schedule **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpPut("{id}")]
         public async Task<IActionResult> EditScheduleDto(Guid id, ScheduleCreateAndEditDto scheduleDto, CancellationToken ct)
         {
@@ -51,7 +51,7 @@ namespace API.Controllers.Learn
         }
 
         /** Delete Schedule **/
-        [Authorize(Policy = "RequireRole1OrRole4")]
+        [Authorize(Policy = "RequireRole1")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSchedule(Guid id, CancellationToken ct)
         {

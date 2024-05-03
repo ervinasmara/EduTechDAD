@@ -27,55 +27,31 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim(ClaimTypes.Role, "2"));
     options.AddPolicy("RequireRole3", policy =>
         policy.RequireClaim(ClaimTypes.Role, "3"));
-    options.AddPolicy("RequireRole4", policy =>
-        policy.RequireClaim(ClaimTypes.Role, "4"));
 
-    // Penggabungan role 1 & 4
-    options.AddPolicy("RequireRole1OrRole4", policy =>
+    // Penggabungan role 1 & 2
+    options.AddPolicy("RequireRole1OrRole2", policy =>
     policy.RequireAssertion(context =>
         context.User.HasClaim(ClaimTypes.Role, "1") ||
-        context.User.HasClaim(ClaimTypes.Role, "4")));
+        context.User.HasClaim(ClaimTypes.Role, "2")));
 
-    // Penggabungan role 2 & 4
-    options.AddPolicy("RequireRole2OrRole4", policy =>
+    // Penggabungan role 1 & 3
+    options.AddPolicy("RequireRole1OrRole3", policy =>
+    policy.RequireAssertion(context =>
+        context.User.HasClaim(ClaimTypes.Role, "1") ||
+        context.User.HasClaim(ClaimTypes.Role, "3")));
+
+    // Penggabungan role 2 & 3
+    options.AddPolicy("RequireRole2OrRole3", policy =>
     policy.RequireAssertion(context =>
         context.User.HasClaim(ClaimTypes.Role, "2") ||
-        context.User.HasClaim(ClaimTypes.Role, "4")));
+        context.User.HasClaim(ClaimTypes.Role, "3")));
 
-    // Penggabungan role 3 & 4
-    options.AddPolicy("RequireRole3OrRole4", policy =>
-    policy.RequireAssertion(context =>
-        context.User.HasClaim(ClaimTypes.Role, "3") ||
-        context.User.HasClaim(ClaimTypes.Role, "4")));
-
-    // Penggabungan role 1, 2, & 4
-    options.AddPolicy("RequireRole1,2,4", policy =>
+    // Penggabungan role 1, 2, and 3
+    options.AddPolicy("RequireRole1Or2Or3", policy =>
     policy.RequireAssertion(context =>
         context.User.HasClaim(ClaimTypes.Role, "1") ||
         context.User.HasClaim(ClaimTypes.Role, "2") ||
-        context.User.HasClaim(ClaimTypes.Role, "4")));
-
-    // Penggabungan role 1, 3, & 4
-    options.AddPolicy("RequireRole1,3,4", policy =>
-    policy.RequireAssertion(context =>
-        context.User.HasClaim(ClaimTypes.Role, "1") ||
-        context.User.HasClaim(ClaimTypes.Role, "3") ||
-        context.User.HasClaim(ClaimTypes.Role, "4")));
-
-    // Penggabungan role 2, 3, & 4
-    options.AddPolicy("RequireRole2,3,4", policy =>
-    policy.RequireAssertion(context =>
-        context.User.HasClaim(ClaimTypes.Role, "2") ||
-        context.User.HasClaim(ClaimTypes.Role, "3") ||
-        context.User.HasClaim(ClaimTypes.Role, "4")));
-
-    // Penggabungan role 1, 2, 3 & 4
-    options.AddPolicy("RequireRole1,2,3,4", policy =>
-    policy.RequireAssertion(context =>
-        context.User.HasClaim(ClaimTypes.Role, "1") ||
-        context.User.HasClaim(ClaimTypes.Role, "2") ||
-        context.User.HasClaim(ClaimTypes.Role, "3") ||
-        context.User.HasClaim(ClaimTypes.Role, "4")));
+        context.User.HasClaim(ClaimTypes.Role, "3")));
 });
 
 var app = builder.Build();

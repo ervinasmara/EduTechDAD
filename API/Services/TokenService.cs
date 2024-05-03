@@ -15,35 +15,6 @@ namespace API.Services
             _config = config;
         }
 
-        public string CreateTokenSuperAdmin(AppUser user, SuperAdmin superAdmin)
-        {
-            // Kita akan membuat daftar klaim yang akan masuk ke dalam dan dikembalikan dengan token kita
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Role, user.Role.ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim("NameSuperAdmin", superAdmin.NameSuperAdmin),
-            };
-
-            // Dan kita perlu menggunakan kunci keamanan simetris
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["TokenKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature); // ini akan digunakan untuk menandatangani key
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(2),
-                SigningCredentials = creds
-            };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            return tokenHandler.WriteToken(token);
-        }
-
         public string CreateTokenAdmin(AppUser user, Admin admin)
         {
             // Kita akan membuat daftar klaim yang akan masuk ke dalam dan dikembalikan dengan token kita
