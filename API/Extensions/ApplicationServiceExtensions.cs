@@ -10,7 +10,6 @@ using Infrastructure.PathFile;
 using Infrastructure.Validation_Submission;
 using Application.Interface.User;
 using Infrastructure.User;
-using Application.User.Students;
 using Application.Learn.Courses.Query;
 using Application.Learn.Courses.Command;
 using Application.Learn.Lessons.Query;
@@ -25,6 +24,8 @@ using Application.Learn.Schedules.Query;
 using Application.Learn.Schedules.Command;
 using Application.ClassRooms.Query;
 using Application.ClassRooms.Command;
+using Application.User.Students.Query;
+using Application.User.Students.Command;
 
 namespace API.Extensions
 {
@@ -142,6 +143,13 @@ namespace API.Extensions
             /** SCHEDULE Command **/
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateSchedule.Handler).Assembly));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditSchedule.Handler).Assembly));
+
+            /** STUDENT Query **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ListStudent.Handler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DetailsStudent.Handler).Assembly));
+            /** STUDENT Command **/
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateStudent.RegisterStudentCommandHandler).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(EditStudent.UpdateStudentCommandHandler).Assembly));
 
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddFluentValidationAutoValidation();

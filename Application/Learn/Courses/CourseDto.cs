@@ -17,6 +17,7 @@ namespace Application.Learn.Courses
     public class CourseGetDto
     {
         public Guid Id { get; set; }
+        public Guid CourseId { get; set; }
         public string NameTeacher { get; set; }
         public string LessonName { get; set; }
         public string CourseName { get; set; }

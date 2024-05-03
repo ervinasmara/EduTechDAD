@@ -17,6 +17,8 @@ using Domain.User;
 using Application.Learn.GetFileName;
 using Application.Attendances;
 using Application.User.DTOs.Registration;
+using static Application.User.Teachers.Command.EditTeacher;
+using Application.User.DTOs.Edit;
 
 namespace Application.Core
 {
@@ -24,8 +26,6 @@ namespace Application.Core
     {
         public MappingProfiles()
         {
-            CreateMap<Teacher, TeacherGetAllAndByIdDto>();
-
             /// ===================================== ADMIN ============================================== //
             /// ===================================== ADMIN ============================================== //
             /** Login Admin **/
@@ -42,11 +42,12 @@ namespace Application.Core
 
             /// ===================================== ASSIGNMENT ============================================== //
             /// ===================================== ASSIGNMENT ============================================== //
-            /** Get Assignment All & By Id **/
-            CreateMap<Assignment, AssignmentGetAllAndByIdDto>()
+            /** Get Assignment By Id **/
+            CreateMap<Assignment, AssignmentGetByIdDto>()
                 .ForMember(dest => dest.NameTeacher, opt => opt.MapFrom(src =>
                     src.Course.Lesson.TeacherLessons.Select(tl => tl.Teacher.NameTeacher).FirstOrDefault()))
                 .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Course.Lesson.LessonName))
+                .ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.Course.CourseName))
                 .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Course.Lesson.ClassRoom.ClassName))
                 .ForMember(dest => dest.LongClassName, opt => opt.MapFrom(src => src.Course.Lesson.ClassRoom.LongClassName))
                 .ForMember(dest => dest.AssignmentStatus, opt => opt.MapFrom(src => src.Status == 1 ? "IsActive" : "NonActive"))
@@ -98,14 +99,14 @@ namespace Application.Core
             CreateMap<AssignmentSubmission, AssignmentSubmissionGetByAssignmentIdAndStudentId>()
                 .ForMember(dest => dest.FileData, opt => opt.MapFrom(src => src.FilePath))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status == 1 ? "Sudah Dikerjakan" : "Sudah Dinilai"))
-                .ForMember(dest => dest.SubmissionTimeStatus, opt => opt.MapFrom(src => src.SubmissionTime <= src.Assignment.AssignmentDeadline ? "Tepat Waktu" : "Pengumpulan Terlambat"));
+                .ForMember(dest => dest.SubmissionTimeStatus, opt => opt.MapFrom(src => src.SubmissionTime <= src.Assignment.AssignmentDeadline ? "Tepat Waktu" : "Terlambat"));
 
             /** Get Grade For Teacher AssignmentSubmission By LessonId And AssignmentId **/
             CreateMap<AssignmentSubmission, AssignmentSubmissionListGradeDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.SubmissionTime, opt => opt.MapFrom(src => src.SubmissionTime))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status == 1 ? "Sudah Dikerjakan" : "Sudah Dinilai"))
-                .ForMember(dest => dest.SubmissionTimeStatus, opt => opt.MapFrom(src => src.SubmissionTime <= src.Assignment.AssignmentDeadline ? "Tepat Waktu" : "Pengumpulan Terlambat"))
+                .ForMember(dest => dest.SubmissionTimeStatus, opt => opt.MapFrom(src => src.SubmissionTime <= src.Assignment.AssignmentDeadline ? "Tepat Waktu" : "Terlambat"))
                 .ForMember(dest => dest.Link, opt => opt.MapFrom(src => src.Link))
                 .ForMember(dest => dest.Grade, opt => opt.MapFrom(src => src.Grade))
                 .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
@@ -186,6 +187,7 @@ namespace Application.Core
             /// ===================================== COURSE ============================================== //
             /** Get Course All & By {...}Id **/
             CreateMap<Course, CourseGetDto>()
+                .ForMember(dest => dest.CourseId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Lesson.ClassRoom.ClassName))
                 .ForMember(dest => dest.LongClassName, opt => opt.MapFrom(src => src.Lesson.ClassRoom.LongClassName))
                 .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.LessonName))
@@ -284,6 +286,13 @@ namespace Application.Core
                 .ForMember(dest => dest.UniqueNumberOfClassRoom, opt => opt.MapFrom(src => src.ClassRoom.UniqueNumberOfClassRoom))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status == 1 ? "Aktif" : "Tidak Aktif"));
 
+            /** Get Student By Id **/
+            CreateMap<Student, StudentGetByIdDto>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.UserName))
+                .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.ClassRoom.ClassName))
+                .ForMember(dest => dest.UniqueNumberOfClassRoom, opt => opt.MapFrom(src => src.ClassRoom.UniqueNumberOfClassRoom))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status == 1 ? "Aktif" : "Tidak Aktif"));
+
             /** Get Count From Student And Teacher **/
             CreateMap<Student, ActiveCountDto>()
                 .ForMember(dest => dest.ActiveStudentCount, opt => opt.MapFrom(src => src.Status == 1 ? 1 : 0))
@@ -302,18 +311,33 @@ namespace Application.Core
             CreateMap<Student, StudentGetDto>()
                 .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.ClassRoom.ClassName));
 
-            /** Create Student **/
+            /** Create Student Excel **/
             CreateMap<Student, RegisterStudentExcelDto>();
             CreateMap<RegisterStudentExcelDto, AppUser>();
             CreateMap<RegisterStudentExcelDto, Student>();
 
+            /** Create Student **/
             CreateMap<Student, RegisterStudentDto>()
                 .ForMember(dest => dest.UniqueNumberOfClassRoom, opt => opt.MapFrom(src =>
                     src.ClassRoom != null ? src.ClassRoom.UniqueNumberOfClassRoom : null));
             CreateMap<RegisterStudentDto, Student>();
 
+            /** Edit Student **/
+            CreateMap<Student, EditStudentDto>();
+            CreateMap<EditStudentDto, Student>()
+                .ForMember(s => s.Address, opt => opt.MapFrom(dto => dto.Address))
+                .ForMember(s => s.PhoneNumber, opt => opt.MapFrom(dto => dto.PhoneNumber));
+
             /// ===================================== TEACHER ============================================== //
             /// ===================================== TEACHER ============================================== //
+            /** Get All and By Id **/
+            CreateMap<Teacher, TeacherGetAllAndByIdDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status == 1 ? "IsActive" : "NotActive"))
+                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender == 1 ? "Laki - Laki" : "Perempuan"))
+                .ForMember(dest => dest.LessonNames, opt => opt.MapFrom(src => src.TeacherLessons.Select(tl => tl.Lesson.LessonName)))
+                .ForMember(dest => dest.ClassNames, opt => opt.MapFrom(src => src.TeacherLessons.SelectMany(tl =>
+                    tl.Lesson.ClassRoom.Lessons.Select(lcr => lcr.ClassRoom.ClassName)).Distinct()));
+
             /** Login Teacher **/
             CreateMap<AppUser, TeacherDto>();
             CreateMap<Teacher, TeacherDto>();
@@ -326,8 +350,16 @@ namespace Application.Core
             CreateMap<Teacher, RegisterTeacherDto>();
             CreateMap<RegisterTeacherDto, Teacher>();
 
-
-
+            /** Edit Teacher **/
+            CreateMap<Teacher, EditTeacherCommand>();
+            CreateMap<EditTeacherCommand, Teacher>()
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.TeacherDto.Address))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.TeacherDto.PhoneNumber))
+                .ForMember(dest => dest.TeacherLessons, opt => opt.Ignore());
+            CreateMap<Teacher, EditTeacherDto>()
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
+                .ForMember(dest => dest.LessonNames, opt => opt.MapFrom(src => src.TeacherLessons.Select(tl => tl.Lesson.LessonName)));
         }
     }
 }

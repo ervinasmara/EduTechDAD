@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using Application.User.Students;
 using Application.User.DTOs;
 using Application.User.DTOs.Registration;
 using Application.User.Admins;
@@ -14,6 +13,8 @@ using Application.User.DTOs.Edit;
 using Application.User.Teachers.Command;
 using Application.User.Teachers.Query;
 using AutoMapper;
+using Application.User.Students.Query;
+using Application.User.Students.Command;
 
 namespace API.DTOs
 {
@@ -237,53 +238,13 @@ namespace API.DTOs
         }
 
         // =========================== EDIT USER =========================== //
+        /** Edit Student **/
         [Authorize(Policy = "RequireRole1")]
         [HttpPut("edit/student/{id}")]
-        public async Task<IActionResult> UpdateStudent(Guid id, EditStudentDto studentEditDto)
+        public async Task<IActionResult> EditStudentByStudentId(Guid id, EditStudentDto editStudentDto, CancellationToken ct)
         {
-            // Mencari siswa berdasarkan ID
-            var student = await _context.Students
-                .Include(s => s.User)
-                .Include(s => s.ClassRoom)
-                .FirstOrDefaultAsync(s => s.Id == id);
-
-            // Jika siswa tidak ditemukan, kembalikan response 404 Not Found
-            if (student == null)
-                return NotFound();
-
-            // Update properti Address dan PhoneNumber
-            student.Address = studentEditDto.Address;
-            student.PhoneNumber = studentEditDto.PhoneNumber;
-
-            // Jika UniqueNumberOfClassRoom berubah, cari ClassRoom baru berdasarkan UniqueNumberOfClassRoom
-            if (student.ClassRoom?.UniqueNumberOfClassRoom != studentEditDto.UniqueNumberOfClassRoom)
-            {
-                var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == studentEditDto.UniqueNumberOfClassRoom);
-                if (classRoom == null)
-                {
-                    return BadRequest("Invalid UniqueNumberOfClassRoom");
-                }
-
-                // Update ClassRoom untuk siswa
-                student.ClassRoom = classRoom;
-            }
-
-            // Simpan perubahan ke database
-            _context.Students.Update(student);
-            await _context.SaveChangesAsync();
-
-            // Dapatkan AppUser terkait dengan siswa
-            var user = await _userManager.FindByIdAsync(student.AppUserId.ToString());
-
-            // Kembalikan response 200 OK bersama dengan data siswa yang telah diperbarui
-            var updatedStudentDto = new EditStudentDto
-            {
-                Address = student.Address,
-                PhoneNumber = student.PhoneNumber,
-                UniqueNumberOfClassRoom = student.ClassRoom?.UniqueNumberOfClassRoom ?? string.Empty,
-            };
-
-            return Ok(updatedStudentDto);
+            var result = await Mediator.Send(new EditStudent.UpdateStudentCommand { StudentId = id, StudentEditDto = editStudentDto }, ct);
+            return HandleResult(result);
         }
 
         /** Edit Teacher **/

@@ -1,5 +1,7 @@
 ﻿using Application.Core;
 using Application.User.DTOs;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -16,53 +18,33 @@ namespace Application.User.Teachers.Query
         public class Handler : IRequestHandler<Query, Result<List<TeacherGetAllAndByIdDto>>>
         {
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            public Handler(DataContext context)
+            public Handler(DataContext context, IMapper mapper)
             {
                 _context = context;
+                _mapper = mapper;
             }
 
             public async Task<Result<List<TeacherGetAllAndByIdDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var teachers = await _context.Teachers
-                    .Where(s => s.Status != 0) // Filter status tidak sama dengan 0
-                    .Include(t => t.TeacherLessons)
-                        .ThenInclude(tl => tl.Lesson)
-                    .OrderBy(a => a.NameTeacher)
-                    .ToListAsync();
+                /** Langkah 1: Membuat query untuk mendapatkan semua guru yang aktif **/
+                var teacherQuery = _context.Teachers
+                    .Where(s => s.Status != 0) // Hanya guru dengan status aktif (tidak dinonaktifkan)
+                    .OrderBy(a => a.NameTeacher) // Urutkan berdasarkan nama guru
+                    .ProjectTo<TeacherGetAllAndByIdDto>(_mapper.ConfigurationProvider); // Menggunakan ProjectTo untuk memetakan ke DTO
 
-                if (teachers == null || !teachers.Any())
+                /** Langkah 2: Eksekusi query dan ambil hasil **/
+                var teacherDtos = await teacherQuery.ToListAsync(cancellationToken);
+
+                /** Langkah 3: Memeriksa apakah ada guru yang ditemukan **/
+                if (!teacherDtos.Any())
                 {
                     return Result<List<TeacherGetAllAndByIdDto>>.Failure("No teachers found.");
                 }
 
-                var teacherDtos = teachers.Select(teacher => new TeacherGetAllAndByIdDto
-                {
-                    Id = teacher.Id,
-                    Status = teacher.Status == 1 ? "IsActive" : "NotActive",
-                    NameTeacher = teacher.NameTeacher,
-                    BirthDate = teacher.BirthDate,
-                    BirthPlace = teacher.BirthPlace,
-                    Address = teacher.Address,
-                    PhoneNumber = teacher.PhoneNumber,
-                    Nip = teacher.Nip,
-                    Gender = teacher.Gender == 1 ? "Laki - Laki" : "Perempuan",
-                    LessonNames = teacher.TeacherLessons.Select(tl => tl.Lesson.LessonName).ToList(),
-                    ClassNames = GetClassNamesForTeacher(teacher.Id)
-                }).ToList();
-
+                /** Langkah 4: Mengembalikan hasil dalam bentuk Success Result dengan daftar guru yang ditemukan **/
                 return Result<List<TeacherGetAllAndByIdDto>>.Success(teacherDtos);
-            }
-
-            private ICollection<string> GetClassNamesForTeacher(Guid teacherId)
-            {
-                var classRooms = _context.TeacherLessons
-                    .Where(tl => tl.TeacherId == teacherId)
-                    .SelectMany(tl => tl.Lesson.ClassRoom.Lessons.Select(lcr => lcr.ClassRoom.ClassName))
-                    .Distinct() // Hapus duplikat kelas
-                    .ToList();
-
-                return classRooms;
             }
         }
     }

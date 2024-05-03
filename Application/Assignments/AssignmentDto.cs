@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Assignments
 {
-    public class AssignmentGetAllAndByIdDto
+    public class AssignmentGetByIdDto
     {
         public Guid Id { get; set; }
         public string AssignmentName { get; set; }
@@ -14,6 +14,7 @@ namespace Application.Assignments
         public string AssignmentLink { get; set; }
         public string NameTeacher { get; set; }
         public string LessonName { get; set; }
+        public string CourseName { get; set; }
         public string ClassName { get; set; }
         public string LongClassName { get; set; }
         public string AssignmentStatus { get; set; }
@@ -60,6 +61,12 @@ namespace Application.Assignments
         public IFormFile AssignmentFileData { get; set; }
         public string AssignmentLink { get; set; }
         public Guid CourseId { get; set; }
+    }
+
+    public class AssignmentLessonGradeDto
+    {
+        public Guid AssignmentId { get; set; }
+        public string AssignmentName { get; set; }
     }
 
     public class DownloadFileDto

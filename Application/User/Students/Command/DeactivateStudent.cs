@@ -3,7 +3,7 @@ using FluentValidation;
 using MediatR;
 using Persistence;
 
-namespace Application.User.Students
+namespace Application.User.Students.Command
 {
     public class DeactivateStudent
     {
@@ -31,16 +31,21 @@ namespace Application.User.Students
 
             public async Task<Result<object>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var admin = await _context.Students.FindAsync(request.StudentId);
+                /** Langkah 1: Mencari siswa berdasarkan ID **/
+                var student = await _context.Students.FindAsync(request.StudentId);
 
-                if (admin == null)
+                /** Langkah 2: Memeriksa apakah siswa ditemukan **/
+                if (student == null)
                     return Result<object>.Failure("Student not found");
 
                 // Mengubah status Student menjadi 0
-                admin.Status = 0;
+                /** Langkah 3: Mengubah status siswa menjadi nonaktif **/
+                student.Status = 0;
 
+                /** Langkah 4: Menyimpan perubahan ke database **/
                 await _context.SaveChangesAsync(cancellationToken);
 
+                /** Langkah 5: Mengembalikan hasil dalam bentuk Success Result dengan pesan **/
                 return Result<object>.Success(new { Message = "Student status updated successfully" });
             }
         }

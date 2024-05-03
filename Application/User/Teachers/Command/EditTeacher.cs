@@ -1,6 +1,6 @@
 ﻿using Application.Core;
 using Application.User.DTOs.Edit;
-using Application.User.Validation;
+using AutoMapper;
 using Domain.Many_to_Many;
 using FluentValidation;
 using MediatR;
@@ -21,38 +21,55 @@ namespace Application.User.Teachers.Command
         {
             public EditTeacherCommandValidator()
             {
-                RuleFor(x => x.TeacherDto).SetValidator(new EditTeacherValidator());
+                RuleFor(x => x.TeacherDto.Address).NotEmpty().WithMessage("Address is required.");
+                RuleFor(x => x.TeacherDto.PhoneNumber).NotEmpty().WithMessage("Phone number is required.")
+                                              .Matches("^[0-9]{8,13}$").WithMessage("Phone number must be between 8 and 13 digits and contain only numbers.");
+                RuleFor(x => x.TeacherDto.LessonNames).NotEmpty().WithMessage("LessonNames is required.");
             }
         }
 
         public class EditTeacherCommandHandler : IRequestHandler<EditTeacherCommand, Result<EditTeacherDto>>
         {
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            public EditTeacherCommandHandler(DataContext context)
+            public EditTeacherCommandHandler(DataContext context, IMapper mapper)
             {
                 _context = context;
+                _mapper = mapper;
             }
 
             public async Task<Result<EditTeacherDto>> Handle(EditTeacherCommand request, CancellationToken cancellationToken)
             {
+                /** Langkah 1: Mencari guru berdasarkan ID **/
                 var teacher = await _context.Teachers
-                    .Include(t => t.TeacherLessons)
-                    .ThenInclude(tl => tl.Lesson)
+                    .Include(t => t.TeacherLessons) // Memuat relasi TeacherLessons
+                    .ThenInclude(tl => tl.Lesson) // Memuat relasi Lesson untuk setiap TeacherLesson
                     .FirstOrDefaultAsync(t => t.Id == request.TeacherId);
 
+                /** Langkah 2: Memeriksa apakah guru ditemukan **/
                 if (teacher == null)
                 {
                     return Result<EditTeacherDto>.Failure("Teacher not found");
                 }
 
-                teacher.Address = request.TeacherDto.Address;
-                teacher.PhoneNumber = request.TeacherDto.PhoneNumber;
+                /** Langkah 3: Memetakan data dari EditTeacherCommand ke entitas Teacher menggunakan AutoMapper **/
+                _mapper.Map(request, teacher);
 
-                // Hapus semua relasi pelajaran yang ada
+                /** Langkah 4: Melakukan validasi terhadap nama-nama pelajaran yang dipilih **/
+                foreach (var lessonName in request.TeacherDto.LessonNames)
+                {
+                    var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.LessonName == lessonName);
+                    if (lesson == null)
+                    {
+                        return Result<EditTeacherDto>.Failure($"LessonName '{lessonName}' you choose doesn't exist");
+                    }
+                }
+
+                /** Langkah 5: Menghapus semua relasi pelajaran yang ada **/
                 _context.TeacherLessons.RemoveRange(teacher.TeacherLessons);
 
-                // Tambahkan kembali relasi pelajaran yang baru
+                /** Langkah 6: Menambahkan kembali relasi pelajaran yang baru **/
                 foreach (var lessonName in request.TeacherDto.LessonNames)
                 {
                     var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.LessonName == lessonName);
@@ -62,20 +79,20 @@ namespace Application.User.Teachers.Command
                     }
                 }
 
+                /** Langkah 7: Menyimpan perubahan ke database **/
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
+                /** Langkah 8: Memeriksa hasil penyimpanan **/
                 if (!result)
                 {
                     return Result<EditTeacherDto>.Failure("Failed to update teacher");
                 }
 
-                var editedTeacherDto = new EditTeacherDto
-                {
-                    Address = teacher.Address,
-                    PhoneNumber = teacher.PhoneNumber,
-                    LessonNames = teacher.TeacherLessons.Select(tl => tl.Lesson.LessonName).ToList()
-                };
+                /** Langkah 9: Memetakan kembali entitas Teacher ke DTO **/
+                var editedTeacherDto = _mapper.Map<EditTeacherDto>(teacher);
+                editedTeacherDto.LessonNames = teacher.TeacherLessons.Select(tl => tl.Lesson.LessonName).ToList();
 
+                /** Langkah 10: Mengembalikan hasil dalam bentuk Success Result dengan data guru yang diperbarui **/
                 return Result<EditTeacherDto>.Success(editedTeacherDto);
             }
         }

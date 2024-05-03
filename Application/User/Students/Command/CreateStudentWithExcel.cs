@@ -8,37 +8,36 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
-using System.Text.RegularExpressions;
 
-namespace Application.User.Students
+namespace Application.User.Students.Command
 {
     public class CreateStudentWithExcel
     {
         public class UploadStudentExcelCommand : IRequest<Result<List<RegisterStudentExcelDto>>>
         {
             public IFormFile File { get; set; }
-            public RegisterStudentExcelDto ExcelDto { get; set; }
+            //public RegisterStudentExcelDto ExcelDto { get; set; }
         }
 
-        public class RegisterStudentCommandValidator : AbstractValidator<UploadStudentExcelCommand>
+        public class RegisterStudentCommandValidator : AbstractValidator<RegisterStudentExcelDto>
         {
             public RegisterStudentCommandValidator()
             {
-                RuleFor(x => x.ExcelDto.NameStudent).NotEmpty();
-                RuleFor(x => x.ExcelDto.BirthDate).NotEmpty().WithMessage("BirthDate is required");
-                RuleFor(x => x.ExcelDto.BirthPlace).NotEmpty();
-                RuleFor(x => x.ExcelDto.Address).NotEmpty();
-                RuleFor(x => x.ExcelDto.PhoneNumber).NotEmpty().Matches("^[0-9]{8,13}$").WithMessage("Phone number must be between 8 and 13 digits and contain only numbers.");
-                RuleFor(x => x.ExcelDto.Nis).NotEmpty();
-                RuleFor(x => x.ExcelDto.ParentName).NotEmpty();
-                RuleFor(x => x.ExcelDto.Gender)
+                RuleFor(x => x.NameStudent).NotEmpty();
+                RuleFor(x => x.BirthDate).NotEmpty().WithMessage("BirthDate is required");
+                RuleFor(x => x.BirthPlace).NotEmpty();
+                RuleFor(x => x.Address).NotEmpty();
+                RuleFor(x => x.PhoneNumber).NotEmpty().Matches("^[0-9]{8,13}$").WithMessage("Phone number must be between 8 and 13 digits and contain only numbers.");
+                RuleFor(x => x.Nis).NotEmpty();
+                RuleFor(x => x.ParentName).NotEmpty();
+                RuleFor(x => x.Gender)
                     .NotEmpty().WithMessage("Gender is required")
                     .Must(gender => gender >= 1 && gender <= 2)
                     .WithMessage("Invalid Gender value. Use 1 for Male, 2 for Female");
-                RuleFor(x => x.ExcelDto.Username).NotEmpty();
-                RuleFor(x => x.ExcelDto.Password).NotEmpty().Matches("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}$").WithMessage("Password Harus Rumit");
-                RuleFor(x => x.ExcelDto.Role).NotEmpty().Equal(3).WithMessage("Role must be 3");
-                RuleFor(x => x.ExcelDto.UniqueNumberOfClassRoom).NotEmpty();
+                RuleFor(x => x.Username).NotEmpty();
+                RuleFor(x => x.Password).NotEmpty().Matches("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}$").WithMessage("Password Harus Rumit");
+                RuleFor(x => x.Role).NotEmpty().Equal(3).WithMessage("Role must be 3");
+                RuleFor(x => x.UniqueNumberOfClassRoom).NotEmpty();
             }
         }
 
@@ -64,6 +63,8 @@ namespace Application.User.Students
                 }
 
                 var students = new List<RegisterStudentExcelDto>();
+                var validator = new RegisterStudentCommandValidator();
+                var errors = new List<string>();
 
                 using (var stream = new MemoryStream())
                 {
@@ -93,54 +94,11 @@ namespace Application.User.Students
                                 Role = 3 // Tentukan peran default atau sesuaikan dengan kebutuhan Anda
                             };
 
-                            // Validasi Manual
-                            if (string.IsNullOrEmpty(studentDto.NameStudent))
+                            var validationResult = validator.Validate(studentDto);
+                            if (!validationResult.IsValid)
                             {
-                                return Result<List<RegisterStudentExcelDto>>.Failure("NameStudent is required");
-                            }
-                            //if (studentDto.BirthDate == DateOnly.MinValue)
-                            //{
-                            //    return Result<List<RegisterStudentExcelDto>>.Failure("BirthDate is required");
-                            //}
-                            if (string.IsNullOrEmpty(studentDto.BirthPlace))
-                            {
-                                return Result<List<RegisterStudentExcelDto>>.Failure("BirthPlace is required");
-                            }
-                            if (string.IsNullOrEmpty(studentDto.Address))
-                            {
-                                return Result<List<RegisterStudentExcelDto>>.Failure("Address is required");
-                            }
-                            if (string.IsNullOrEmpty(studentDto.PhoneNumber) || !Regex.IsMatch(studentDto.PhoneNumber, "^[0-9]{8,13}$"))
-                            {
-                                return Result<List<RegisterStudentExcelDto>>.Failure("Phone number must be between 8 and 13 digits and contain only numbers.");
-                            }
-                            if (string.IsNullOrEmpty(studentDto.Nis))
-                            {
-                                return Result<List<RegisterStudentExcelDto>>.Failure("Nis is required");
-                            }
-                            if (string.IsNullOrEmpty(studentDto.ParentName))
-                            {
-                                return Result<List<RegisterStudentExcelDto>>.Failure("ParentName is required");
-                            }
-                            if (studentDto.Gender != 1 && studentDto.Gender != 2)
-                            {
-                                return Result<List<RegisterStudentExcelDto>>.Failure("Invalid Gender value. Use 1 for Male, 2 for Female");
-                            }
-                            if (string.IsNullOrEmpty(studentDto.Username))
-                            {
-                                return Result<List<RegisterStudentExcelDto>>.Failure("Username is required");
-                            }
-                            if (!Regex.IsMatch(studentDto.Password, "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}$"))
-                            {
-                                return Result<List<RegisterStudentExcelDto>>.Failure("Password must be 8-16 characters long and contain at least one digit, one lowercase letter, and one uppercase letter");
-                            }
-                            if (studentDto.Role != 3)
-                            {
-                                return Result<List<RegisterStudentExcelDto>>.Failure("Role must be 3");
-                            }
-                            if (string.IsNullOrEmpty(studentDto.UniqueNumberOfClassRoom))
-                            {
-                                return Result<List<RegisterStudentExcelDto>>.Failure("UniqueNumberOfClassRoom is required");
+                                errors.AddRange(validationResult.Errors.Select(e => e.ErrorMessage));
+                                continue; // Skip the current iteration if validation fails
                             }
 
                             // Gunakan AutoMapper untuk memetakan RegisterStudentExcelDto ke AppUser
@@ -151,8 +109,6 @@ namespace Application.User.Students
                             {
                                 return Result<List<RegisterStudentExcelDto>>.Failure($"Username {user.UserName} already in use");
                             }
-
-                            // Validasi lainnya ...
 
                             // Gunakan AutoMapper untuk memetakan RegisterStudentExcelDto ke Student
                             var student = _mapper.Map<Student>(studentDto);
@@ -178,6 +134,14 @@ namespace Application.User.Students
                             // Buat pengguna dan siswa
                             var createUserResult = await _userManager.CreateAsync(user, studentDto.Password);
 
+                            // Alur kontrol untuk validasi
+                            if (!validationResult.IsValid)
+                            {
+                                errors.AddRange(validationResult.Errors.Select(e => e.ErrorMessage));
+                                continue; // Skip the current iteration if validation fails
+                            }
+
+                            // Alur kontrol untuk pembuatan pengguna dan siswa
                             if (createUserResult.Succeeded)
                             {
                                 // Simpan siswa ke dalam konteks database Anda
@@ -188,6 +152,12 @@ namespace Application.User.Students
                             {
                                 // Jika pembuatan pengguna gagal, kembalikan pesan kesalahan
                                 return Result<List<RegisterStudentExcelDto>>.Failure(string.Join(", ", createUserResult.Errors.Select(e => e.Description)));
+                            }
+
+                            // Alur kontrol untuk menangani kesalahan validasi
+                            if (errors.Any())
+                            {
+                                return Result<List<RegisterStudentExcelDto>>.Failure(string.Join(", ", errors));
                             }
                         }
                     }

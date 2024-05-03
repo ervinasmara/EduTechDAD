@@ -1,6 +1,7 @@
 ﻿using Application.Core;
 using Application.User.DTOs;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -27,47 +28,17 @@ namespace Application.User.Teachers.Query
 
             public async Task<Result<TeacherGetAllAndByIdDto>> Handle(Query request, CancellationToken cancellationToken)
             {
+                /** Langkah 1: Mencari guru berdasarkan ID **/
                 var teacher = await _context.Teachers
-                    .Include(t => t.TeacherLessons)
-                        .ThenInclude(tl => tl.Lesson)
-                    .FirstOrDefaultAsync(t => t.Id == request.TeacherId);
+                    .ProjectTo<TeacherGetAllAndByIdDto>(_mapper.ConfigurationProvider) // Memetakan hasil ke DTO menggunakan AutoMapper
+                    .FirstOrDefaultAsync(t => t.Id == request.TeacherId); // Ambil guru pertama dengan ID yang cocok dengan permintaan
 
+                /** Langkah 2: Memeriksa apakah guru ditemukan **/
                 if (teacher == null)
                     return Result<TeacherGetAllAndByIdDto>.Failure("Teacher not found.");
 
-                var teacherDto = _mapper.Map<TeacherGetAllAndByIdDto>(teacher);
-
-                teacherDto.Status = teacher.Status == 1 ? "IsActive" : "NotActive";
-
-                // Get all lesson names for the teacher
-                teacherDto.LessonNames = GetLessonNamesForTeacher(teacher.Id);
-
-                // Get all class names for the teacher
-                teacherDto.ClassNames = GetClassNamesForTeacher(teacher.Id);
-
-                return Result<TeacherGetAllAndByIdDto>.Success(teacherDto);
-            }
-
-            private ICollection<string> GetLessonNamesForTeacher(Guid teacherId)
-            {
-                var lessonNames = _context.TeacherLessons
-                    .Where(tl => tl.TeacherId == teacherId)
-                    .Select(tl => tl.Lesson.LessonName)
-                    .Distinct()
-                    .ToList();
-
-                return lessonNames;
-            }
-
-            private ICollection<string> GetClassNamesForTeacher(Guid teacherId)
-            {
-                var classRooms = _context.TeacherLessons
-                    .Where(tl => tl.TeacherId == teacherId)
-                    .SelectMany(tl => tl.Lesson.ClassRoom.Lessons.Select(lcr => lcr.ClassRoom.ClassName))
-                    .Distinct()
-                    .ToList();
-
-                return classRooms;
+                /** Langkah 3: Mengembalikan hasil dalam bentuk Success Result dengan data guru yang ditemukan **/
+                return Result<TeacherGetAllAndByIdDto>.Success(teacher);
             }
         }
     }

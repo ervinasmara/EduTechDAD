@@ -31,16 +31,20 @@ namespace Application.User.Teachers.Command
 
             public async Task<Result<object>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var admin = await _context.Teachers.FindAsync(request.TeacherId);
+                /** Langkah 1: Mencari guru berdasarkan ID **/
+                var teacher = await _context.Teachers.FindAsync(request.TeacherId);
 
-                if (admin == null)
+                /** Langkah 2: Memeriksa apakah guru ditemukan **/
+                if (teacher == null)
                     return Result<object>.Failure("Teacher not found");
 
-                // Mengubah status Teacher menjadi 0
-                admin.Status = 0;
+                /** Langkah 3: Mengubah status guru menjadi nonaktif **/
+                teacher.Status = 0;
 
+                /** Langkah 4: Menyimpan perubahan ke database **/
                 await _context.SaveChangesAsync(cancellationToken);
 
+                /** Langkah 5: Mengembalikan hasil dalam bentuk Success Result dengan pesan **/
                 return Result<object>.Success(new { Message = "Teacher status updated successfully" });
             }
         }

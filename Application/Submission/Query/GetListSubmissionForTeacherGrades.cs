@@ -62,6 +62,7 @@ namespace Application.Submission.Query
                     var submissions = await _context.AssignmentSubmissions
                         .Where(s => s.AssignmentId == request.AssignmentId)
                         .ProjectTo<AssignmentSubmissionListGradeDto>(_mapper.ConfigurationProvider)
+                        .OrderBy(a => a.SubmissionTime)
                         .ToListAsync(cancellationToken);
 
                     /** Langkah 7: Menghitung jumlah Pengajuan yang sudah dinilai, belum dinilai, dan belum dikumpulkan **/
