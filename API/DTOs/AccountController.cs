@@ -14,6 +14,7 @@ using Application.User.Admins;
 using Application.User.DTOs.Edit;
 using Application.User.Teachers.Command;
 using Application.User.Teachers.Query;
+using AutoMapper;
 
 namespace API.DTOs
 {
@@ -24,12 +25,14 @@ namespace API.DTOs
         private readonly UserManager<AppUser> _userManager;
         private readonly TokenService _tokenService;
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public AccountController(UserManager<AppUser> userManager, TokenService tokenService, DataContext context)
+        public AccountController(UserManager<AppUser> userManager, TokenService tokenService, DataContext context, IMapper mapper)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _context = context;
+            _mapper = mapper;
         }
 
         // =========================== GET DATA =========================== //
@@ -457,26 +460,27 @@ namespace API.DTOs
             };
         }
 
+        /** LOGIN ADMIN **/
         private async Task<AdminDto> CreateUserObjectAdmin(AppUser user)
         {
-            // Ambil data admin terkait dari database
             var admin = await _context.Admins.FirstOrDefaultAsync(g => g.AppUserId == user.Id);
 
             if (admin == null)
             {
-                // Handle jika data admin tidak ditemukan
                 throw new Exception("Admin data not found");
             }
 
-            return new AdminDto
-            {
-                Role = user.Role,
-                Username = user.UserName,
-                Token = _tokenService.CreateTokenAdmin(user, admin),
-                NameAdmin = admin.NameAdmin,
-            };
+            // Pemetaan menggunakan AutoMapper
+            var adminDto = _mapper.Map<AdminDto>(user);
+            _mapper.Map(admin, adminDto); // Pemetaan tambahan untuk properti dari Admin
+
+            // Atur token secara manual
+            adminDto.Token = _tokenService.CreateTokenAdmin(user, admin);
+
+            return adminDto;
         }
 
+        /** USERINFO ADMIN **/
         private async Task<AdminGetDto> CreateUserObjectAdminGet(AppUser user)
         {
             // Ambil data admin terkait dari database
@@ -488,14 +492,14 @@ namespace API.DTOs
                 throw new Exception("Admin data not found");
             }
 
-            return new AdminGetDto
-            {
-                Role = user.Role,
-                Username = user.UserName,
-                NameAdmin = admin.NameAdmin,
-            };
+            // Gunakan mapper untuk memetakan AppUser dan Admin ke AdminGetDto
+            var adminGetDto = _mapper.Map<AdminGetDto>(user);
+            _mapper.Map(admin, adminGetDto);
+
+            return adminGetDto;
         }
 
+        /** LOGIN TEACHER **/
         private async Task<TeacherDto> CreateUserObjectTeacher(AppUser user)
         {
             // Ambil data teacher terkait dari database
@@ -507,20 +511,17 @@ namespace API.DTOs
                 throw new Exception("Teacher data not found");
             }
 
-            return new TeacherDto
-            {
-                Role = user.Role,
-                Username = user.UserName,
-                Token = _tokenService.CreateTokenTeacher(user, teacher),
-                NameTeacher = teacher.NameTeacher,
-                BirthDate = teacher.BirthDate,
-                BirthPlace = teacher.BirthPlace,
-                Address = teacher.Address,
-                PhoneNumber = teacher.PhoneNumber,
-                Nip = teacher.Nip,
-            };
+            // Pemetaan menggunakan AutoMapper
+            var teacherDto = _mapper.Map<TeacherDto>(user);
+            _mapper.Map(teacher, teacherDto); // Pemetaan tambahan untuk properti dari Teacher
+
+            // Atur token secara manual
+            teacherDto.Token = _tokenService.CreateTokenTeacher(user, teacher);
+
+            return teacherDto;
         }
 
+        /** USERINFO TEACHER **/
         private async Task<TeacherRegisterDto> CreateUserObjectTeacherGet(AppUser user)
         {
             // Ambil data teacher terkait dari database
@@ -532,19 +533,14 @@ namespace API.DTOs
                 throw new Exception("Teacher data not found");
             }
 
-            return new TeacherRegisterDto
-            {
-                Role = user.Role,
-                Username = user.UserName,
-                NameTeacher = teacher.NameTeacher,
-                BirthDate = teacher.BirthDate,
-                BirthPlace = teacher.BirthPlace,
-                Address = teacher.Address,
-                PhoneNumber = teacher.PhoneNumber,
-                Nip = teacher.Nip,
-            };
+            // Gunakan mapper untuk memetakan AppUser dan Teacher ke TeacherGetDto
+            var teacherGetDto = _mapper.Map<TeacherRegisterDto>(user);
+            _mapper.Map(teacher, teacherGetDto);
+
+            return teacherGetDto;
         }
 
+        /** LOGIN STUDENT **/
         private async Task<StudentDto> CreateUserObjectStudent(AppUser user)
         {
             // Ambil data student terkait dari database
@@ -558,23 +554,17 @@ namespace API.DTOs
                 throw new Exception("Student data not found");
             }
 
-            return new StudentDto
-            {
-                Role = user.Role,
-                Username = user.UserName,
-                Token = _tokenService.CreateTokenStudent(user, student),
-                NameStudent = student.NameStudent,
-                BirthDate = student.BirthDate,
-                BirthPlace = student.BirthPlace,
-                Address = student.Address,
-                PhoneNumber = student.PhoneNumber,
-                Nis = student.Nis,
-                ParentName = student.ParentName,
-                Gender = student.Gender,
-                ClassName = student.ClassRoom.ClassName,
-            };
+            // Pemetaan menggunakan AutoMapper
+            var studentDto = _mapper.Map<StudentDto>(user);
+            _mapper.Map(student, studentDto); // Pemetaan tambahan untuk properti dari Student
+
+            // Atur token secara manual
+            studentDto.Token = _tokenService.CreateTokenStudent(user, student);
+
+            return studentDto;
         }
 
+        /** USERINFO STUDENT **/
         private async Task<StudentGetDto> CreateUserObjectStudentGet(AppUser user)
         {
             // Ambil data student terkait dari database
@@ -588,23 +578,11 @@ namespace API.DTOs
                 throw new Exception("Student data not found");
             }
 
-            // Ambil nama kelas jika ada, atau beri nilai default jika tidak ada
-            var className = student.ClassRoom != null ? student.ClassRoom.ClassName : "Unknown";
+            // Gunakan mapper untuk memetakan AppUser dan Student ke StudentGetDto
+            var studentGetDto = _mapper.Map<StudentGetDto>(user);
+            _mapper.Map(student, studentGetDto);
 
-            return new StudentGetDto
-            {
-                Role = user.Role,
-                Username = user.UserName,
-                NameStudent = student.NameStudent,
-                BirthDate = student.BirthDate,
-                BirthPlace = student.BirthPlace,
-                Address = student.Address,
-                PhoneNumber = student.PhoneNumber,
-                Nis = student.Nis,
-                ParentName = student.ParentName,
-                Gender = student.Gender,
-                ClassName = className, // Gunakan nilai className yang telah ditentukan
-            };
+            return studentGetDto;
         }
     }
 }

@@ -28,6 +28,15 @@ namespace Application.Core
 
             /// ===================================== ADMIN ============================================== //
             /// ===================================== ADMIN ============================================== //
+            /** Login Admin **/
+            CreateMap<AppUser, AdminDto>();
+            CreateMap<Admin, AdminDto>();
+
+            /** UserInfo Admin **/
+            CreateMap<AppUser, AdminGetDto>();
+            CreateMap<Admin, AdminGetDto>();
+
+            /** Create Admin **/
             CreateMap<Admin, RegisterAdminDto>();
             CreateMap<RegisterAdminDto, Admin>();
 
@@ -283,6 +292,16 @@ namespace Application.Core
                 .ForMember(dest => dest.ActiveTeacherCount, opt => opt.MapFrom(src => src.Status == 1 ? 1 : 0))
                 .ForMember(dest => dest.ActiveStudentCount, opt => opt.Ignore());
 
+            /** Login Student **/
+            CreateMap<AppUser, StudentDto>();
+            CreateMap<Student, StudentDto>()
+                .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.ClassRoom.ClassName));
+
+            /** UserInfo Student **/
+            CreateMap<AppUser, StudentGetDto>();
+            CreateMap<Student, StudentGetDto>()
+                .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.ClassRoom.ClassName));
+
             /** Create Student **/
             CreateMap<Student, RegisterStudentExcelDto>();
             CreateMap<RegisterStudentExcelDto, AppUser>();
@@ -300,6 +319,14 @@ namespace Application.Core
 
             /// ===================================== TEACHER ============================================== //
             /// ===================================== TEACHER ============================================== //
+            /** Login Teacher **/
+            CreateMap<AppUser, TeacherDto>();
+            CreateMap<Teacher, TeacherDto>();
+
+            /** UserInfo Teacher **/
+            CreateMap<AppUser, TeacherRegisterDto>();
+            CreateMap<Teacher, TeacherRegisterDto>();
+
             /** Create Teacher **/
             CreateMap<Teacher, RegisterTeacherDto>();
             CreateMap<RegisterTeacherDto, Teacher>();
