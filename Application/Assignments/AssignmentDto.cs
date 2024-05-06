@@ -14,6 +14,7 @@ namespace Application.Assignments
         public string AssignmentLink { get; set; }
         public string NameTeacher { get; set; }
         public string LessonName { get; set; }
+        public Guid CourseId { get; set; }
         public string CourseName { get; set; }
         public string ClassName { get; set; }
         public string LongClassName { get; set; }

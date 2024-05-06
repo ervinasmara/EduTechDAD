@@ -86,6 +86,7 @@ try
     await context.Database.MigrateAsync();
 
     await SeedClassRoom.SeedData(context);
+    await SeedToDoList.SeedData(context);
     //await SeedLesson.SeedData(context);
     //await SeedUser.SeedData(context, userManager);
 }

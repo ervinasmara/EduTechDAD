@@ -9,6 +9,7 @@ using Domain.Learn.Schedules;
 using Domain.Submission;
 using Domain.Many_to_Many;
 using Domain.Assignments;
+using Domain.ToDoList;
 
 namespace Persistence
 {
@@ -108,5 +109,6 @@ namespace Persistence
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
         public DbSet<TeacherLesson> TeacherLessons { get; set; }
+        public DbSet<ToDoList> ToDoLists { get; set; }
     }
 }
