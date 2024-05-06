@@ -26,6 +26,22 @@ namespace Application.Submission
         public string FileData { get; set; }
     }
 
+    /** Get Submission By SubmissionId For Teacher **/
+    public class AssignmentSubmissionGetBySubmissionIdAndTeacherId
+    {
+        public Guid Id { get; set; }
+        public string NameStudent { get; set; }
+        public string AssignmentName { get; set; }
+        public DateTime SubmissionTime { get; set; }
+        public string Status { get; set; }
+        public string SubmissionTimeStatus { get; set; }
+        public string Link { get; set; }
+        public float Grade { get; set; }
+        public string Comment { get; set; }
+        public string FileName { get; set; }
+        public string FileData { get; set; }
+    }
+
     /** //////////////// TEACHER //////////////////////// **/
     /** Get Not Submitted **/
     public class NotSubmittedDto

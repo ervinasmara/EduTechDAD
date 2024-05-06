@@ -67,7 +67,7 @@ namespace Application.Assignments.Query
 
                     /** Langkah 4.3: Mengatur status Assignment berdasarkan AssignmentDeadline dan AssignmentSubmission **/
                     dto.AssignmentSubmissionStatus = submission == null
-                        ? DateTime.UtcNow > dto.AssignmentDeadline ? "Kamu terlambat" : "Belum Mengerjakan"
+                        ? DateTime.UtcNow > dto.AssignmentDeadline ? "Terlambat Mengerjakan" : "Belum Mengerjakan"
                         : submission.Status switch
                         {
                             1 => "Sudah mengerjakan",

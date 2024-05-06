@@ -40,6 +40,7 @@ namespace Application.Submission.Query
 
                     /** Langkah 3: Mendapatkan pengajuan tugas dengan menyertakan informasi yang terkait **/
                     var assignmentSubmission = await _context.AssignmentSubmissions
+                        .Include(s => s.Student)
                         .Include(s => s.Assignment)
                             .ThenInclude(a => a.Course)
                                 .ThenInclude(c => c.Lesson)

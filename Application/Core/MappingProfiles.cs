@@ -99,14 +99,30 @@ namespace Application.Core
             CreateMap<AssignmentSubmission, AssignmentSubmissionGetByAssignmentIdAndStudentId>()
                 .ForMember(dest => dest.FileData, opt => opt.MapFrom(src => src.FilePath))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status == 1 ? "Sudah Dikerjakan" : "Sudah Dinilai"))
-                .ForMember(dest => dest.SubmissionTimeStatus, opt => opt.MapFrom(src => src.SubmissionTime <= src.Assignment.AssignmentDeadline ? "Tepat Waktu" : "Terlambat"));
+                .ForMember(dest => dest.SubmissionTimeStatus, opt => opt.MapFrom(src =>
+                    src.SubmissionTime <= src.Assignment.AssignmentDeadline ? "Tepat Waktu" : "Terlambat"));
+
+            /** Get Details AssignmentSubmission By SubmissionId And TeacherId **/
+            CreateMap<AssignmentSubmission, AssignmentSubmissionGetBySubmissionIdAndTeacherId>()
+                .ForMember(dest => dest.NameStudent, opt => opt.MapFrom(src => src.Student.NameStudent))
+                .ForMember(dest => dest.AssignmentName, opt => opt.MapFrom(src => src.Assignment.AssignmentName))
+                .ForMember(dest => dest.FileData, opt => opt.MapFrom(src => src.FilePath))
+                //.ForMember(dest => dest.FileName, opt => opt.MapFrom(src => $"{src.Student.NameStudent}-{src.Assignment.AssignmentName}{Path.GetExtension(src.FilePath)}"))
+                .ForMember(dest => dest.FileName, opt => opt.MapFrom((src =>
+                    !string.IsNullOrEmpty(src.Student.NameStudent) && src.FilePath != null
+                        ? $"{src.Assignment.AssignmentName}{Path.GetExtension(src.FilePath)}"
+                        : "No File")))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status == 1 ? "Sudah Dikerjakan" : "Sudah Dinilai"))
+                .ForMember(dest => dest.SubmissionTimeStatus, opt => opt.MapFrom(src =>
+                    src.SubmissionTime <= src.Assignment.AssignmentDeadline ? "Tepat Waktu" : "Terlambat"));
 
             /** Get Grade For Teacher AssignmentSubmission By LessonId And AssignmentId **/
             CreateMap<AssignmentSubmission, AssignmentSubmissionListGradeDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.SubmissionTime, opt => opt.MapFrom(src => src.SubmissionTime))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status == 1 ? "Sudah Dikerjakan" : "Sudah Dinilai"))
-                .ForMember(dest => dest.SubmissionTimeStatus, opt => opt.MapFrom(src => src.SubmissionTime <= src.Assignment.AssignmentDeadline ? "Tepat Waktu" : "Terlambat"))
+                .ForMember(dest => dest.SubmissionTimeStatus, opt => opt.MapFrom(src =>
+                    src.SubmissionTime <= src.Assignment.AssignmentDeadline ? "Tepat Waktu" : "Terlambat"))
                 .ForMember(dest => dest.Link, opt => opt.MapFrom(src => src.Link))
                 .ForMember(dest => dest.Grade, opt => opt.MapFrom(src => src.Grade))
                 .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
