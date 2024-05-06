@@ -19,6 +19,8 @@ using Application.Attendances;
 using Application.User.DTOs.Registration;
 using static Application.User.Teachers.Command.EditTeacher;
 using Application.User.DTOs.Edit;
+using Application.ToDo;
+using Domain.ToDoList;
 
 namespace Application.Core
 {
@@ -376,6 +378,13 @@ namespace Application.Core
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
                 .ForMember(dest => dest.LessonNames, opt => opt.MapFrom(src => src.TeacherLessons.Select(tl => tl.Lesson.LessonName)));
+
+            /// ===================================== TODOLIST ============================================== //
+            /// ===================================== TODOLIST ============================================== //
+            CreateMap<ToDoList, ToDoListDto>();
+            CreateMap<ToDoListDto, ToDoList>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => 1))  // Set status ke 1
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow.AddHours(7)));  // Set CreatedAt ke DateTime.UtcNow
         }
     }
 }

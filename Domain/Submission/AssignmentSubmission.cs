@@ -10,7 +10,7 @@ namespace Domain.Submission
         public DateTime SubmissionTime { get; set; }
         public string FilePath { get; set; }
         public string Link { get; set; }
-        public float Grade { get; set; }
+        public decimal Grade { get; set; }
         public string Comment { get; set; }
         public int Status { get; set; }
 

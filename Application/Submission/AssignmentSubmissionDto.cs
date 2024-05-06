@@ -21,7 +21,7 @@ namespace Application.Submission
         public string Status { get; set; }
         public string SubmissionTimeStatus { get; set; }
         public string Link { get; set; }
-        public float Grade { get; set; }
+        public decimal Grade { get; set; }
         public string Comment { get; set; }
         public string FileData { get; set; }
     }
@@ -36,7 +36,7 @@ namespace Application.Submission
         public string Status { get; set; }
         public string SubmissionTimeStatus { get; set; }
         public string Link { get; set; }
-        public float Grade { get; set; }
+        public decimal Grade { get; set; }
         public string Comment { get; set; }
         public string FileName { get; set; }
         public string FileData { get; set; }
@@ -55,7 +55,7 @@ namespace Application.Submission
     /** Edit Submission For Teacher Grades **/
     public class AssignmentSubmissionTeacherDto
     {
-        public float Grade { get; set; }
+        public decimal Grade { get; set; }
         public string Comment { get; set; }
     }
 
@@ -67,7 +67,7 @@ namespace Application.Submission
         public string Status { get; set; }
         public string SubmissionTimeStatus { get; set; }
         public string Link { get; set; }
-        public float Grade { get; set; }
+        public decimal Grade { get; set; }
         public string Comment { get; set; }
         public string AssignmentId { get; set; }
         public string AssignmentName { get; set; }
