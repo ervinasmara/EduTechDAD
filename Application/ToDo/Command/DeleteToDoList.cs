@@ -21,16 +21,22 @@ public class DeleteToDoList
 
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
+            /** Langkah 1: Mencari entitas ToDoList berdasarkan ID yang diberikan **/
             var toDoList = await _context.ToDoLists.FindAsync(request.ToDoListId);
 
+            /** Langkah 2: Memeriksa apakah ToDoList ditemukan **/
             if (toDoList == null) return null;
 
+            /** Langkah 3: Menghapus entitas ToDoList dari konteks database **/
             _context.Remove(toDoList);
 
+            /** Langkah 4: Menyimpan perubahan ke database **/
             var result = await _context.SaveChangesAsync() > 0;
 
+            /** Langkah 5: Memeriksa apakah penyimpanan berhasil **/
             if (!result) return Result<Unit>.Failure("Failed to delete ToDoList");
 
+            /** Langkah 6: Mengembalikan hasil berhasil tanpa data (Unit) **/
             return Result<Unit>.Success(Unit.Value);
         }
     }

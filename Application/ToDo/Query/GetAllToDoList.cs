@@ -22,7 +22,9 @@ public class GetAllToDoList
 
         public async Task<Result<List<ToDoList>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            return Result<List<ToDoList>>.Success(await _context.ToDoLists.ToListAsync(cancellationToken));
+            return Result<List<ToDoList>>.Success(await _context.ToDoLists
+                .OrderByDescending(a => a.CreatedAt)
+                .ToListAsync(cancellationToken));
         }
     }
 }
