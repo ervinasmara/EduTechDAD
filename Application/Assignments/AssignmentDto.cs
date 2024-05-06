@@ -12,6 +12,7 @@ namespace Application.Assignments
         public DateTime AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }
         public string AssignmentLink { get; set; }
+        public int TypeOfSubmission { get; set; }
         public string NameTeacher { get; set; }
         public string LessonName { get; set; }
         public Guid CourseId { get; set; }
@@ -31,6 +32,7 @@ namespace Application.Assignments
         public DateTime AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }
         public string AssignmentLink { get; set; }
+        public int TypeOfSubmission { get; set; }
         public string LessonName { get; set; }
         public string AssignmentStatus { get; set; }
         public string AssignmentSubmissionStatus { get; set; }
@@ -46,6 +48,7 @@ namespace Application.Assignments
         public DateTime AssignmentDeadline { get; set; }
         public string AssignmentDescription { get; set; }
         public string AssignmentLink { get; set; }
+        public int TypeOfSubmission { get; set; }
         public Guid LessonId { get; set; }
         public string LessonName { get; set; }
         public string ClassName { get; set; }
@@ -61,6 +64,7 @@ namespace Application.Assignments
         [AllowedExtensions(new string[] { ".pdf" })]
         public IFormFile AssignmentFileData { get; set; }
         public string AssignmentLink { get; set; }
+        public int TypeOfSubmission { get; set; }
         public Guid CourseId { get; set; }
     }
 

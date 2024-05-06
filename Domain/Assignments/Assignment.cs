@@ -13,6 +13,7 @@ namespace Domain.Assignments
         public string AssignmentDescription { get; set; }
         public string FilePath { get; set; } // Menyimpan PATH file
         public string AssignmentLink { get; set; }
+        public int TypeOfSubmission { get; set; }
         public DateTime CreatedAt { get; set; }
         public int Status { get; set; }
 

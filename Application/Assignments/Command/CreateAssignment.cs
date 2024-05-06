@@ -1,6 +1,5 @@
 ﻿using Application.Core;
 using Application.Interface;
-using Application.Learn.Courses;
 using AutoMapper;
 using Domain.Assignments;
 using FluentValidation;
