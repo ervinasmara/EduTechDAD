@@ -2,10 +2,8 @@
 using Application.Submission;
 using Domain.Submission;
 
-namespace Application.Interface
+namespace Application.Interface;
+public interface ISubmissionService
 {
-    public interface ISubmissionService
-    {
-        Task<Result<AssignmentSubmission>> CreateSubmissionAsync(SubmissionCreateByStudentIdDto submissionDto, CancellationToken cancellationToken);
-    }
+    Task<Result<AssignmentSubmission>> CreateSubmissionAsync(SubmissionCreateByStudentIdDto submissionDto, CancellationToken cancellationToken);
 }

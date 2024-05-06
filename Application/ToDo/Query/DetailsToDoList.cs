@@ -3,7 +3,7 @@ using Domain.ToDoList;
 using MediatR;
 using Persistence;
 
-namespace Application.ToDo.Command;
+namespace Application.ToDo.Query;
 public class DetailsToDoList
 {
     public class Query : IRequest<Result<ToDoList>>

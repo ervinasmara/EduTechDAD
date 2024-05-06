@@ -4,44 +4,42 @@ using MediatR;
 using Persistence;
 using AutoMapper;
 
-namespace Application.Learn.Courses.Query
+namespace Application.Learn.Courses.Query;
+public class DownloadCourse
 {
-    public class DownloadCourse
+    public class Query : IRequest<Result<DownloadFileDto>>
     {
-        public class Query : IRequest<Result<DownloadFileDto>>
+        public Guid CourseId { get; set; } // ID file yang akan diunduh
+    }
+
+    public class Handler : IRequestHandler<Query, Result<DownloadFileDto>>
+    {
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+
+        public Handler(DataContext context, IMapper mapper)
         {
-            public Guid CourseId { get; set; } // ID file yang akan diunduh
+            _context = context;
+            _mapper = mapper;
         }
 
-        public class Handler : IRequestHandler<Query, Result<DownloadFileDto>>
+        public async Task<Result<DownloadFileDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-
-            public Handler(DataContext context, IMapper mapper)
+            var course = await _context.Courses.FindAsync(request.CourseId);
+            if (course == null)
             {
-                _context = context;
-                _mapper = mapper;
+                return Result<DownloadFileDto>.Failure("File not found.");
             }
 
-            public async Task<Result<DownloadFileDto>> Handle(Query request, CancellationToken cancellationToken)
+            // AutoMapper akan menangani pembacaan file dan penentuan ContentType
+            var downloadFileDto = _mapper.Map<DownloadFileDto>(course);
+
+            if (downloadFileDto.FileData == null)
             {
-                var course = await _context.Courses.FindAsync(request.CourseId);
-                if (course == null)
-                {
-                    return Result<DownloadFileDto>.Failure("File not found.");
-                }
-
-                // AutoMapper akan menangani pembacaan file dan penentuan ContentType
-                var downloadFileDto = _mapper.Map<DownloadFileDto>(course);
-
-                if (downloadFileDto.FileData == null)
-                {
-                    return Result<DownloadFileDto>.Failure("File not found.");
-                }
-
-                return Result<DownloadFileDto>.Success(downloadFileDto);
+                return Result<DownloadFileDto>.Failure("File not found.");
             }
+
+            return Result<DownloadFileDto>.Success(downloadFileDto);
         }
     }
 }

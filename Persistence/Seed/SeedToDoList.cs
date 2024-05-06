@@ -1,37 +1,35 @@
 ﻿using Domain.ToDoList;
 
-namespace Persistence.Seed
+namespace Persistence.Seed;
+public class SeedToDoList
 {
-    public class SeedToDoList
+    public static async Task SeedData(DataContext context)
     {
-        public static async Task SeedData(DataContext context)
+        if (context.ToDoLists.Any()) return;
+
+        var toDoList = new List<ToDoList>
         {
-            if (context.ToDoLists.Any()) return;
-
-            var toDoList = new List<ToDoList>
+            new ToDoList
             {
-                new ToDoList
-                {
-                    Description = "Merekap Absensi TKJ",
-                    Status = 1,
-                    CreatedAt = DateTime.UtcNow.AddHours(7),
-                },
-                new ToDoList
-                {
-                    Description = "Merekap Absensi TKR",
-                    Status = 1,
-                    CreatedAt = DateTime.UtcNow.AddHours(7),
-                },
-                new ToDoList
-                {
-                    Description = "Merekap Absensi RPL",
-                    Status = 1,
-                    CreatedAt = DateTime.UtcNow.AddHours(7),
-                },
-            };
+                Description = "Merekap Absensi TKJ",
+                Status = 1,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+            },
+            new ToDoList
+            {
+                Description = "Merekap Absensi TKR",
+                Status = 1,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+            },
+            new ToDoList
+            {
+                Description = "Merekap Absensi RPL",
+                Status = 1,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+            },
+        };
 
-            await context.ToDoLists.AddRangeAsync(toDoList);
-            await context.SaveChangesAsync();
-        }
+        await context.ToDoLists.AddRangeAsync(toDoList);
+        await context.SaveChangesAsync();
     }
 }

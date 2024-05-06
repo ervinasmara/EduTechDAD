@@ -5,81 +5,79 @@ using FluentValidation;
 using Application.Core;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Learn.Lessons.Command
+namespace Application.Learn.Lessons.Command;
+public class EditLesson
 {
-    public class EditLesson
+    public class Command : IRequest<Result<LessonCreateAndEditDto>>
     {
-        public class Command : IRequest<Result<LessonCreateAndEditDto>>
+        public Guid LessonId { get; set; } // Id lesson yang akan diedit
+        public LessonCreateAndEditDto LessonCreateAndEditDto { get; set; } // Data baru untuk lesson
+    }
+
+    public class CommandLesson : AbstractValidator<Command>
+    {
+        public CommandLesson()
         {
-            public Guid LessonId { get; set; } // Id lesson yang akan diedit
-            public LessonCreateAndEditDto LessonCreateAndEditDto { get; set; } // Data baru untuk lesson
+            RuleFor(x => x.LessonCreateAndEditDto).SetValidator(new LessonCreateAndEditValidator());
+        }
+    }
+
+    public class Handler : IRequestHandler<Command, Result<LessonCreateAndEditDto>>
+    {
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+
+        public Handler(DataContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
         }
 
-        public class CommandLesson : AbstractValidator<Command>
+        public async Task<Result<LessonCreateAndEditDto>> Handle(Command request, CancellationToken cancellationToken)
         {
-            public CommandLesson()
+            try
             {
-                RuleFor(x => x.LessonCreateAndEditDto).SetValidator(new LessonCreateAndEditValidator());
-            }
-        }
+                /** Langkah 1: Temukan Lesson berdasarkan LessonId **/
+                var lesson = await _context.Lessons
+                    .FirstOrDefaultAsync(l => l.Id == request.LessonId, cancellationToken);
 
-        public class Handler : IRequestHandler<Command, Result<LessonCreateAndEditDto>>
-        {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-
-            public Handler(DataContext context, IMapper mapper)
-            {
-                _context = context;
-                _mapper = mapper;
-            }
-
-            public async Task<Result<LessonCreateAndEditDto>> Handle(Command request, CancellationToken cancellationToken)
-            {
-                try
+                if (lesson == null)
                 {
-                    /** Langkah 1: Temukan Lesson berdasarkan LessonId **/
-                    var lesson = await _context.Lessons
-                        .FirstOrDefaultAsync(l => l.Id == request.LessonId, cancellationToken);
-
-                    if (lesson == null)
-                    {
-                        return Result<LessonCreateAndEditDto>.Failure("Lesson not found");
-                    }
-
-                    /** Langkah 2: Temukan Classroom berdasarkan ClassName **/
-                    /** Langkah 2.1: Ambil ClassName dari DTO **/
-                    var requestedClassName = request.LessonCreateAndEditDto.ClassName;
-
-                    /** Langkah 2.2: Cari objek ClassRoom berdasarkan ClassName **/
-                    var classroom = await _context.ClassRooms
-                        .FirstOrDefaultAsync(c => c.ClassName == requestedClassName, cancellationToken);
-
-                    if (classroom == null)
-                    {
-                        return Result<LessonCreateAndEditDto>.Failure($"Classroom with name '{requestedClassName}' not found.");
-                    }
-
-                    /** Langkah 3: Update properti Lesson **/
-                    lesson.LessonName = request.LessonCreateAndEditDto.LessonName;
-                    lesson.ClassRoomId = classroom.Id;
-
-                    /** Langkah 4: Simpan perubahan ke database **/
-                    var result = await _context.SaveChangesAsync(cancellationToken) > 0;
-
-                    /** Langkah 5: Kirimkan DTO dalam Response **/
-                    /** Langkah 5.1: Map Lesson ke LessonDto **/
-                    var lessonDto = _mapper.Map<LessonCreateAndEditDto>(lesson);
-
-                    /** Langkah 5.2: Atur properti ClassName di LessonDto **/
-                    lessonDto.ClassName = classroom.ClassName;
-
-                    return Result<LessonCreateAndEditDto>.Success(lessonDto);
+                    return Result<LessonCreateAndEditDto>.Failure("Lesson not found");
                 }
-                catch (Exception ex)
+
+                /** Langkah 2: Temukan Classroom berdasarkan ClassName **/
+                /** Langkah 2.1: Ambil ClassName dari DTO **/
+                var requestedClassName = request.LessonCreateAndEditDto.ClassName;
+
+                /** Langkah 2.2: Cari objek ClassRoom berdasarkan ClassName **/
+                var classroom = await _context.ClassRooms
+                    .FirstOrDefaultAsync(c => c.ClassName == requestedClassName, cancellationToken);
+
+                if (classroom == null)
                 {
-                    return Result<LessonCreateAndEditDto>.Failure($"Failed to edit lesson: {ex.Message}");
+                    return Result<LessonCreateAndEditDto>.Failure($"Classroom with name '{requestedClassName}' not found.");
                 }
+
+                /** Langkah 3: Update properti Lesson **/
+                lesson.LessonName = request.LessonCreateAndEditDto.LessonName;
+                lesson.ClassRoomId = classroom.Id;
+
+                /** Langkah 4: Simpan perubahan ke database **/
+                var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+
+                /** Langkah 5: Kirimkan DTO dalam Response **/
+                /** Langkah 5.1: Map Lesson ke LessonDto **/
+                var lessonDto = _mapper.Map<LessonCreateAndEditDto>(lesson);
+
+                /** Langkah 5.2: Atur properti ClassName di LessonDto **/
+                lessonDto.ClassName = classroom.ClassName;
+
+                return Result<LessonCreateAndEditDto>.Success(lessonDto);
+            }
+            catch (Exception ex)
+            {
+                return Result<LessonCreateAndEditDto>.Failure($"Failed to edit lesson: {ex.Message}");
             }
         }
     }

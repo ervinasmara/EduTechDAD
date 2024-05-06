@@ -10,8 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using NPOI.XSSF.UserModel;
 
-namespace Application.User.Students.Command
-{
+namespace Application.User.Students.Command;
     public class CreateStudentWithExcel
     {
         public class UploadStudentExcelCommand : IRequest<Result<List<RegisterStudentExcelDto>>>
@@ -224,4 +223,3 @@ namespace Application.User.Students.Command
             }
         }
     }
-}

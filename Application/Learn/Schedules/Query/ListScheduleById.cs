@@ -5,49 +5,47 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Learn.Schedules.Query
+namespace Application.Learn.Schedules.Query;
+public class ListScheduleById
 {
-    public class ListScheduleById
+    public class Query : IRequest<Result<ScheduleGetDto>>
     {
-        public class Query : IRequest<Result<ScheduleGetDto>>
+        public Guid ScheduleId { get; set; }
+    }
+
+    public class Handler : IRequestHandler<Query, Result<ScheduleGetDto>>
+    {
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+
+        public Handler(DataContext context, IMapper mapper)
         {
-            public Guid ScheduleId { get; set; }
+            _context = context;
+            _mapper = mapper;
         }
 
-        public class Handler : IRequestHandler<Query, Result<ScheduleGetDto>>
+        public async Task<Result<ScheduleGetDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-
-            public Handler(DataContext context, IMapper mapper)
+            try
             {
-                _context = context;
-                _mapper = mapper;
+                /** Langkah 1: Mengambil Jadwal Berdasarkan ID **/
+                var schedule = await _context.Schedules
+                    .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync(s => s.Id == request.ScheduleId, cancellationToken);
+
+                /** Langkah 2: Memeriksa Ketersediaan Jadwal **/
+                if (schedule == null)
+                {
+                    return Result<ScheduleGetDto>.Failure("Schedule not found");
+                }
+
+                /** Langkah 3: Mengembalikan Hasil dalam Bentuk Success Result **/
+                return Result<ScheduleGetDto>.Success(schedule);
             }
-
-            public async Task<Result<ScheduleGetDto>> Handle(Query request, CancellationToken cancellationToken)
+            catch (Exception ex)
             {
-                try
-                {
-                    /** Langkah 1: Mengambil Jadwal Berdasarkan ID **/
-                    var schedule = await _context.Schedules
-                        .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
-                        .FirstOrDefaultAsync(s => s.Id == request.ScheduleId, cancellationToken);
-
-                    /** Langkah 2: Memeriksa Ketersediaan Jadwal **/
-                    if (schedule == null)
-                    {
-                        return Result<ScheduleGetDto>.Failure("Schedule not found");
-                    }
-
-                    /** Langkah 3: Mengembalikan Hasil dalam Bentuk Success Result **/
-                    return Result<ScheduleGetDto>.Success(schedule);
-                }
-                catch (Exception ex)
-                {
-                    /** Langkah 4: Menangani Kesalahan Jika Terjadi **/
-                    return Result<ScheduleGetDto>.Failure($"Failed to retrieve schedule: {ex.Message}");
-                }
+                /** Langkah 4: Menangani Kesalahan Jika Terjadi **/
+                return Result<ScheduleGetDto>.Failure($"Failed to retrieve schedule: {ex.Message}");
             }
         }
     }

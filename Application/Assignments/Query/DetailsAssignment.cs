@@ -5,42 +5,40 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Assignments.Query
+namespace Application.Assignments.Query;
+public class DetailsAssignment
 {
-    public class DetailsAssignment
+    public class Query : IRequest<Result<AssignmentGetByIdDto>>
     {
-        public class Query : IRequest<Result<AssignmentGetByIdDto>>
+        public Guid AssignmentId { get; set; }
+    }
+
+    public class Handler : IRequestHandler<Query, Result<AssignmentGetByIdDto>>
+    {
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+
+        public Handler(DataContext context, IMapper mapper)
         {
-            public Guid AssignmentId { get; set; }
+            _context = context;
+            _mapper = mapper;
         }
 
-        public class Handler : IRequestHandler<Query, Result<AssignmentGetByIdDto>>
+        public async Task<Result<AssignmentGetByIdDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
+            // Gunakan ProjectTo untuk memproyeksikan entitas ke DTO
+            var assignmentDto = await _context.Assignments
+                .Where(a => a.Id == request.AssignmentId && a.Status != 0)
+                .ProjectTo<AssignmentGetByIdDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(cancellationToken);
 
-            public Handler(DataContext context, IMapper mapper)
+            // Periksa apakah assignment ditemukan
+            if (assignmentDto == null)
             {
-                _context = context;
-                _mapper = mapper;
+                return Result<AssignmentGetByIdDto>.Failure("Assignment not found.");
             }
 
-            public async Task<Result<AssignmentGetByIdDto>> Handle(Query request, CancellationToken cancellationToken)
-            {
-                // Gunakan ProjectTo untuk memproyeksikan entitas ke DTO
-                var assignmentDto = await _context.Assignments
-                    .Where(a => a.Id == request.AssignmentId && a.Status != 0)
-                    .ProjectTo<AssignmentGetByIdDto>(_mapper.ConfigurationProvider)
-                    .FirstOrDefaultAsync(cancellationToken);
-
-                // Periksa apakah assignment ditemukan
-                if (assignmentDto == null)
-                {
-                    return Result<AssignmentGetByIdDto>.Failure("Assignment not found.");
-                }
-
-                return Result<AssignmentGetByIdDto>.Success(assignmentDto);
-            }
+            return Result<AssignmentGetByIdDto>.Success(assignmentDto);
         }
     }
 }

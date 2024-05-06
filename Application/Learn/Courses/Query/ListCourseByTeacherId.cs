@@ -6,59 +6,57 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Learn.Courses.Query
+namespace Application.Learn.Courses.Query;
+public class ListCourseByTeacherId
 {
-    public class ListCourseByTeacherId
+    public class Query : IRequest<Result<List<CourseGetDto>>>
     {
-        public class Query : IRequest<Result<List<CourseGetDto>>>
+    }
+
+    public class Handler : IRequestHandler<Query, Result<List<CourseGetDto>>>
+    {
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+        private readonly IUserAccessor _userAccessor;
+
+        public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
         {
+            _context = context;
+            _mapper = mapper;
+            _userAccessor = userAccessor;
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<CourseGetDto>>>
+        public async Task<Result<List<CourseGetDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-            private readonly IUserAccessor _userAccessor;
+            /** Langkah 1: Dapatkan TeacherId dari token **/
+            var teacherIdString = _userAccessor.GetTeacherIdFromToken();
 
-            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
+            /** Langkah 2: Periksa jika TeacherId ada di token **/
+            if (string.IsNullOrEmpty(teacherIdString))
             {
-                _context = context;
-                _mapper = mapper;
-                _userAccessor = userAccessor;
+                return Result<List<CourseGetDto>>.Failure("TeacherId not found in token");
             }
 
-            public async Task<Result<List<CourseGetDto>>> Handle(Query request, CancellationToken cancellationToken)
+            if (!Guid.TryParse(teacherIdString, out var teacherId))
             {
-                /** Langkah 1: Dapatkan TeacherId dari token **/
-                var teacherIdString = _userAccessor.GetTeacherIdFromToken();
-
-                /** Langkah 2: Periksa jika TeacherId ada di token **/
-                if (string.IsNullOrEmpty(teacherIdString))
-                {
-                    return Result<List<CourseGetDto>>.Failure("TeacherId not found in token");
-                }
-
-                if (!Guid.TryParse(teacherIdString, out var teacherId))
-                {
-                    return Result<List<CourseGetDto>>.Failure("TeacherId not valid.");
-                }
-
-                /** Langkah 3: Gunakan ProjectTo untuk langsung memproyeksikan ke DTO **/
-                var courses = await _context.Courses
-                    .Where(c => c.Lesson.TeacherLessons.Any(tl => tl.TeacherId == teacherId)) // Memfilter course berdasarkan TeacherId
-                    .OrderByDescending(c => c.CreatedAt) // Urutkan course berdasarkan tanggal pembuatan secara menurun
-                    .ProjectTo<CourseGetDto>(_mapper.ConfigurationProvider) // Proyeksikan ke DTO menggunakan AutoMapper
-                    .ToListAsync(cancellationToken); // Ambil hasilnya dalam bentuk daftar
-
-                /** Langkah 4: Periksa jika tidak ada course yang ditemukan untuk guru **/
-                if (!courses.Any())
-                {
-                    return Result<List<CourseGetDto>>.Failure("No courses found for the teacher");
-                }
-
-                /** Langkah 5: Kembalikan hasil yang berhasil bersama dengan daftar course DTO **/
-                return Result<List<CourseGetDto>>.Success(courses);
+                return Result<List<CourseGetDto>>.Failure("TeacherId not valid.");
             }
+
+            /** Langkah 3: Gunakan ProjectTo untuk langsung memproyeksikan ke DTO **/
+            var courses = await _context.Courses
+                .Where(c => c.Lesson.TeacherLessons.Any(tl => tl.TeacherId == teacherId)) // Memfilter course berdasarkan TeacherId
+                .OrderByDescending(c => c.CreatedAt) // Urutkan course berdasarkan tanggal pembuatan secara menurun
+                .ProjectTo<CourseGetDto>(_mapper.ConfigurationProvider) // Proyeksikan ke DTO menggunakan AutoMapper
+                .ToListAsync(cancellationToken); // Ambil hasilnya dalam bentuk daftar
+
+            /** Langkah 4: Periksa jika tidak ada course yang ditemukan untuk guru **/
+            if (!courses.Any())
+            {
+                return Result<List<CourseGetDto>>.Failure("No courses found for the teacher");
+            }
+
+            /** Langkah 5: Kembalikan hasil yang berhasil bersama dengan daftar course DTO **/
+            return Result<List<CourseGetDto>>.Success(courses);
         }
     }
 }

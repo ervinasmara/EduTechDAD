@@ -3,50 +3,48 @@ using FluentValidation;
 using MediatR;
 using Persistence;
 
-namespace Application.User.Admins
+namespace Application.User.Admins;
+public class DeactivateAdmin
 {
-    public class DeactivateAdmin
+    public class Command : IRequest<Result<object>>
     {
-        public class Command : IRequest<Result<object>>
+        public Guid AdminId { get; set; }
+    }
+
+    public class Validator : AbstractValidator<Command>
+    {
+        public Validator()
         {
-            public Guid AdminId { get; set; }
+            RuleFor(x => x.AdminId).NotEmpty();
+        }
+    }
+
+    public class EditAdminStatusHandler : IRequestHandler<Command, Result<object>>
+    {
+        private readonly DataContext _context;
+
+        public EditAdminStatusHandler(DataContext context)
+        {
+            _context = context;
         }
 
-        public class Validator : AbstractValidator<Command>
+        public async Task<Result<object>> Handle(Command request, CancellationToken cancellationToken)
         {
-            public Validator()
-            {
-                RuleFor(x => x.AdminId).NotEmpty();
-            }
-        }
+            /** Langkah 1: Mencari Admin Berdasarkan ID **/
+            var admin = await _context.Admins.FindAsync(request.AdminId);
 
-        public class EditAdminStatusHandler : IRequestHandler<Command, Result<object>>
-        {
-            private readonly DataContext _context;
+            /** Langkah 2: Memeriksa Ketersediaan Admin **/
+            if (admin == null)
+                return Result<object>.Failure("Admin not found");
 
-            public EditAdminStatusHandler(DataContext context)
-            {
-                _context = context;
-            }
+            /** Langkah 3: Mengubah Status Admin Menjadi Nonaktif **/
+            admin.Status = 0;
 
-            public async Task<Result<object>> Handle(Command request, CancellationToken cancellationToken)
-            {
-                /** Langkah 1: Mencari Admin Berdasarkan ID **/
-                var admin = await _context.Admins.FindAsync(request.AdminId);
+            /** Langkah 4: Menyimpan Perubahan ke Database **/
+            await _context.SaveChangesAsync(cancellationToken);
 
-                /** Langkah 2: Memeriksa Ketersediaan Admin **/
-                if (admin == null)
-                    return Result<object>.Failure("Admin not found");
-
-                /** Langkah 3: Mengubah Status Admin Menjadi Nonaktif **/
-                admin.Status = 0;
-
-                /** Langkah 4: Menyimpan Perubahan ke Database **/
-                await _context.SaveChangesAsync(cancellationToken);
-
-                /** Langkah 5: Mengembalikan Hasil dalam Bentuk Success Result dengan Pesan **/
-                return Result<object>.Success(new { Message = "Admin status updated successfully" });
-            }
+            /** Langkah 5: Mengembalikan Hasil dalam Bentuk Success Result dengan Pesan **/
+            return Result<object>.Success(new { Message = "Admin status updated successfully" });
         }
     }
 }

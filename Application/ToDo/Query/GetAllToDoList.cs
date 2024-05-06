@@ -3,29 +3,26 @@ using Domain.ToDoList;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using System.Diagnostics;
 
-namespace Application.ToDo.Query
+namespace Application.ToDo.Query;
+public class GetAllToDoList
 {
-    public class GetAllToDoList
+    public class Query : IRequest<Result<List<ToDoList>>>
     {
-        public class Query : IRequest<Result<List<ToDoList>>>
+        // Tidak memerlukan parameter tambahan untuk meneruskan ke query
+    }
+
+    public class Handler : IRequestHandler<Query, Result<List<ToDoList>>>
+    {
+        private readonly DataContext _context;
+        public Handler(DataContext context)
         {
-            // Tidak memerlukan parameter tambahan untuk meneruskan ke query
+            _context = context;
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<ToDoList>>>
+        public async Task<Result<List<ToDoList>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
-            public Handler(DataContext context)
-            {
-                _context = context;
-            }
-
-            public async Task<Result<List<ToDoList>>> Handle(Query request, CancellationToken cancellationToken)
-            {
-                return Result<List<ToDoList>>.Success(await _context.ToDoLists.ToListAsync(cancellationToken));
-            }
+            return Result<List<ToDoList>>.Success(await _context.ToDoLists.ToListAsync(cancellationToken));
         }
     }
 }

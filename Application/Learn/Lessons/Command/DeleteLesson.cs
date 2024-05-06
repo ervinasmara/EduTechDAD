@@ -2,38 +2,36 @@
 using MediatR;
 using Persistence;
 
-namespace Application.Learn.Lessons.Command
+namespace Application.Learn.Lessons.Command;
+public class DeleteLesson
 {
-    public class DeleteLesson
+    public class Command : IRequest<Result<Unit>>
     {
-        public class Command : IRequest<Result<Unit>>
+        public Guid Id { get; set; }
+    }
+
+    public class Handler : IRequestHandler<Command, Result<Unit>>
+    {
+        private readonly DataContext _context;
+
+        public Handler(DataContext context)
         {
-            public Guid Id { get; set; }
+            _context = context;
         }
 
-        public class Handler : IRequestHandler<Command, Result<Unit>>
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
+            var lesson = await _context.Lessons.FindAsync(request.Id);
 
-            public Handler(DataContext context)
-            {
-                _context = context;
-            }
+            if (lesson == null) return null;
 
-            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
-            {
-                var lesson = await _context.Lessons.FindAsync(request.Id);
+            _context.Remove(lesson);
 
-                if (lesson == null) return null;
+            var result = await _context.SaveChangesAsync() > 0;
 
-                _context.Remove(lesson);
+            if (!result) return Result<Unit>.Failure("Failed to delete Lesson");
 
-                var result = await _context.SaveChangesAsync() > 0;
-
-                if (!result) return Result<Unit>.Failure("Failed to delete Lesson");
-
-                return Result<Unit>.Success(Unit.Value);
-            }
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }

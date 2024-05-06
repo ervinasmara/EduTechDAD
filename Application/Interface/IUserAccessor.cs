@@ -1,9 +1,7 @@
-﻿namespace Application.Interface
+﻿namespace Application.Interface;
+public interface IUserAccessor
 {
-    public interface IUserAccessor
-    {
-        string GetTeacherIdFromToken();
-        string GetClassRoomIdFromToken();
-        string GetStudentIdFromToken();
-    }
+    string GetTeacherIdFromToken();
+    string GetClassRoomIdFromToken();
+    string GetStudentIdFromToken();
 }

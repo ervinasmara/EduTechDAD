@@ -55,9 +55,9 @@ public class EditSubmissionByTeacherId
     }
 }
 
-public class CommandValidator : AbstractValidator<AssignmentSubmissionTeacherDto>
+public class EditSubmissionByTeacherIdValidator : AbstractValidator<AssignmentSubmissionTeacherDto>
 {
-    public CommandValidator()
+    public EditSubmissionByTeacherIdValidator()
     {
         RuleFor(x => x.Comment).NotEmpty();
         RuleFor(x => x.Grade)

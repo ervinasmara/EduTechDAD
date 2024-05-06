@@ -1,10 +1,8 @@
 ﻿using Application.Core;
 using Application.User.DTOs.Registration;
 
-namespace Application.Interface.User
+namespace Application.Interface.User;
+public interface IUserTeacher
 {
-    public interface IUserTeacher
-    {
-        Task<Result<RegisterTeacherDto>> CreateTeacherAsync(RegisterTeacherDto teacherDto, CancellationToken cancellationToken);
-    }
+    Task<Result<RegisterTeacherDto>> CreateTeacherAsync(RegisterTeacherDto teacherDto, CancellationToken cancellationToken);
 }

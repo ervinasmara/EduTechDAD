@@ -1,9 +1,5 @@
-﻿using Application.ClassRooms;
-using Application.Core;
-using Application.Learn.Lessons;
+﻿using Application.Core;
 using AutoMapper;
-using Domain.Class;
-using Domain.Learn.Lessons;
 using Domain.ToDoList;
 using FluentValidation;
 using MediatR;

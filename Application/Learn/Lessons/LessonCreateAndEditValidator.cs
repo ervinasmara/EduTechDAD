@@ -1,13 +1,11 @@
 ﻿using FluentValidation;
 
-namespace Application.Learn.Lessons
+namespace Application.Learn.Lessons;
+public class LessonCreateAndEditValidator : AbstractValidator<LessonCreateAndEditDto>
 {
-    public class LessonCreateAndEditValidator : AbstractValidator<LessonCreateAndEditDto>
+    public LessonCreateAndEditValidator()
     {
-        public LessonCreateAndEditValidator()
-        {
-            RuleFor(x => x.LessonName).NotEmpty();
-            RuleFor(x => x.ClassName).NotEmpty();
-        }
+        RuleFor(x => x.LessonName).NotEmpty();
+        RuleFor(x => x.ClassName).NotEmpty();
     }
 }

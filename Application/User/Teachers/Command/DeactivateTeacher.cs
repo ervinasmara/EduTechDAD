@@ -12,14 +12,6 @@ namespace Application.User.Teachers.Command
             public Guid TeacherId { get; set; }
         }
 
-        public class Validator : AbstractValidator<Command>
-        {
-            public Validator()
-            {
-                RuleFor(x => x.TeacherId).NotEmpty();
-            }
-        }
-
         public class EditTeacherStatusHandler : IRequestHandler<Command, Result<object>>
         {
             private readonly DataContext _context;

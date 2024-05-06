@@ -1,16 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.User.DTOs.Edit
+namespace Application.User.DTOs.Edit;
+public class EditStudentDto
 {
-    public class EditStudentDto
-    {
-        [Required]
-        public string Address { get; set; }
+    [Required]
+    public string Address { get; set; }
 
-        [Required]
-        public string PhoneNumber { get; set; }
+    [Required]
+    public string PhoneNumber { get; set; }
 
-        [Required]
-        public string UniqueNumberOfClassRoom { get; set; }
-    }
+    [Required]
+    public string UniqueNumberOfClassRoom { get; set; }
 }

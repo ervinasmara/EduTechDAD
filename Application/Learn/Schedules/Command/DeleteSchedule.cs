@@ -2,44 +2,42 @@
 using MediatR;
 using Persistence;
 
-namespace Application.Learn.Schedules.Command
+namespace Application.Learn.Schedules.Command;
+public class DeleteSchedule
 {
-    public class DeleteSchedule
+    public class Command : IRequest<Result<Unit>>
     {
-        public class Command : IRequest<Result<Unit>>
+        public Guid ScheduleId { get; set; }
+    }
+
+    public class Handler : IRequestHandler<Command, Result<Unit>>
+    {
+        private readonly DataContext _context;
+
+        public Handler(DataContext context)
         {
-            public Guid ScheduleId { get; set; }
+            _context = context;
         }
 
-        public class Handler : IRequestHandler<Command, Result<Unit>>
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
+            /** Langkah 1: Mencari Jadwal Berdasarkan ID **/
+            var schedule = await _context.Schedules.FindAsync(request.ScheduleId);
 
-            public Handler(DataContext context)
-            {
-                _context = context;
-            }
+            /** Langkah 2: Memeriksa Ketersediaan Jadwal **/
+            if (schedule == null) return null; // Jika tidak ada jadwal, tidak ada yang perlu dihapus
 
-            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
-            {
-                /** Langkah 1: Mencari Jadwal Berdasarkan ID **/
-                var schedule = await _context.Schedules.FindAsync(request.ScheduleId);
+            /** Langkah 3: Menghapus Jadwal dari Database **/
+            _context.Remove(schedule);
 
-                /** Langkah 2: Memeriksa Ketersediaan Jadwal **/
-                if (schedule == null) return null; // Jika tidak ada jadwal, tidak ada yang perlu dihapus
+            /** Langkah 4: Menyimpan Perubahan ke Database **/
+            var result = await _context.SaveChangesAsync() > 0;
 
-                /** Langkah 3: Menghapus Jadwal dari Database **/
-                _context.Remove(schedule);
+            /** Langkah 5: Memeriksa Hasil Penghapusan **/
+            if (!result) return Result<Unit>.Failure("Failed to delete Schedule");
 
-                /** Langkah 4: Menyimpan Perubahan ke Database **/
-                var result = await _context.SaveChangesAsync() > 0;
-
-                /** Langkah 5: Memeriksa Hasil Penghapusan **/
-                if (!result) return Result<Unit>.Failure("Failed to delete Schedule");
-
-                /** Langkah 6: Mengembalikan Hasil dalam Bentuk Success Result **/
-                return Result<Unit>.Success(Unit.Value);
-            }
+            /** Langkah 6: Mengembalikan Hasil dalam Bentuk Success Result **/
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }

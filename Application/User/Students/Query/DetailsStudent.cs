@@ -6,45 +6,43 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.User.Students.Query
+namespace Application.User.Students.Query;
+public class DetailsStudent
 {
-    public class DetailsStudent
+    public class Query : IRequest<Result<StudentGetByIdDto>>
     {
-        public class Query : IRequest<Result<StudentGetByIdDto>>
+        public Guid StudentId { get; set; }
+    }
+
+    public class Handler : IRequestHandler<Query, Result<StudentGetByIdDto>>
+    {
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+
+        public Handler(DataContext context, IMapper mapper)
         {
-            public Guid StudentId { get; set; }
+            _context = context;
+            _mapper = mapper;
         }
 
-        public class Handler : IRequestHandler<Query, Result<StudentGetByIdDto>>
+        public async Task<Result<StudentGetByIdDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
+            /** Langkah 1: Mencari siswa berdasarkan ID **/
+            var student = await _context.Students
+                .Include(s => s.User) // Memuat relasi User
+                .Include(s => s.ClassRoom) // Memuat relasi ClassRoom
+                .Where(s => s.Id == request.StudentId) // Memfilter berdasarkan StudentId
+                .ProjectTo<StudentGetByIdDto>(_mapper.ConfigurationProvider) // Memetakan hasil ke DTO menggunakan AutoMapper
+                .FirstOrDefaultAsync(cancellationToken); // Ambil siswa pertama yang cocok dengan ID yang diberikan
 
-            public Handler(DataContext context, IMapper mapper)
+            /** Langkah 2: Memeriksa apakah siswa ditemukan **/
+            if (student == null)
             {
-                _context = context;
-                _mapper = mapper;
+                return Result<StudentGetByIdDto>.Failure("Student not found.");
             }
 
-            public async Task<Result<StudentGetByIdDto>> Handle(Query request, CancellationToken cancellationToken)
-            {
-                /** Langkah 1: Mencari siswa berdasarkan ID **/
-                var student = await _context.Students
-                    .Include(s => s.User) // Memuat relasi User
-                    .Include(s => s.ClassRoom) // Memuat relasi ClassRoom
-                    .Where(s => s.Id == request.StudentId) // Memfilter berdasarkan StudentId
-                    .ProjectTo<StudentGetByIdDto>(_mapper.ConfigurationProvider) // Memetakan hasil ke DTO menggunakan AutoMapper
-                    .FirstOrDefaultAsync(cancellationToken); // Ambil siswa pertama yang cocok dengan ID yang diberikan
-
-                /** Langkah 2: Memeriksa apakah siswa ditemukan **/
-                if (student == null)
-                {
-                    return Result<StudentGetByIdDto>.Failure("Student not found.");
-                }
-
-                /** Langkah 3: Mengembalikan hasil dalam bentuk Success Result dengan data siswa yang ditemukan **/
-                return Result<StudentGetByIdDto>.Success(student);
-            }
+            /** Langkah 3: Mengembalikan hasil dalam bentuk Success Result dengan data siswa yang ditemukan **/
+            return Result<StudentGetByIdDto>.Success(student);
         }
     }
 }

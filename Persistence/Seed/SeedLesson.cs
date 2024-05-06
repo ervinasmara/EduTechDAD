@@ -1,34 +1,32 @@
 ﻿using Domain.Learn.Lessons;
 
-namespace Persistence.Seed
+namespace Persistence.Seed;
+public class SeedLesson
 {
-    public class SeedLesson
+    public static async Task SeedData(DataContext context)
     {
-        public static async Task SeedData(DataContext context)
+        if (context.Lessons.Any()) return;
+
+        var classmajors = new List<Lesson>
         {
-            if (context.Lessons.Any()) return;
-
-            var classmajors = new List<Lesson>
+            new Lesson
             {
-                new Lesson
-                {
-                    LessonName = "Komputer dan Jaringan Dasar",
-                    UniqueNumberOfLesson = "01",
-                },
-                new Lesson
-                {
-                    LessonName = "Pemograman Dasar",
-                    UniqueNumberOfLesson = "02",
-                },
-                new Lesson
-                {
-                    LessonName = "Teknologi Dasar Otomotif",
-                    UniqueNumberOfLesson = "03",
-                },
-            };
+                LessonName = "Komputer dan Jaringan Dasar",
+                UniqueNumberOfLesson = "01",
+            },
+            new Lesson
+            {
+                LessonName = "Pemograman Dasar",
+                UniqueNumberOfLesson = "02",
+            },
+            new Lesson
+            {
+                LessonName = "Teknologi Dasar Otomotif",
+                UniqueNumberOfLesson = "03",
+            },
+        };
 
-            await context.Lessons.AddRangeAsync(classmajors);
-            await context.SaveChangesAsync();
-        }
+        await context.Lessons.AddRangeAsync(classmajors);
+        await context.SaveChangesAsync();
     }
 }

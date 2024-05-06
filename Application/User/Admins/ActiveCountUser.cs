@@ -4,37 +4,35 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.User.Admins
+namespace Application.User.Admins;
+public class ActiveCountUser
 {
-    public class ActiveCountUser
+    public class ActiveCountQuery : IRequest<Result<ActiveCountDto>>
     {
-        public class ActiveCountQuery : IRequest<Result<ActiveCountDto>>
+    }
+
+    // Query Handler
+    public class ActiveCountQueryHandler : IRequestHandler<ActiveCountQuery, Result<ActiveCountDto>>
+    {
+        private readonly DataContext _context;
+
+        public ActiveCountQueryHandler(DataContext context)
         {
+            _context = context;
         }
 
-        // Query Handler
-        public class ActiveCountQueryHandler : IRequestHandler<ActiveCountQuery, Result<ActiveCountDto>>
+        public async Task<Result<ActiveCountDto>> Handle(ActiveCountQuery request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
+            var activeStudentCount = await _context.Students.CountAsync(s => s.Status == 1, cancellationToken);
+            var activeTeacherCount = await _context.Teachers.CountAsync(t => t.Status == 1, cancellationToken);
 
-            public ActiveCountQueryHandler(DataContext context)
+            var activeCountDto = new ActiveCountDto
             {
-                _context = context;
-            }
+                ActiveStudentCount = activeStudentCount,
+                ActiveTeacherCount = activeTeacherCount
+            };
 
-            public async Task<Result<ActiveCountDto>> Handle(ActiveCountQuery request, CancellationToken cancellationToken)
-            {
-                var activeStudentCount = await _context.Students.CountAsync(s => s.Status == 1, cancellationToken);
-                var activeTeacherCount = await _context.Teachers.CountAsync(t => t.Status == 1, cancellationToken);
-
-                var activeCountDto = new ActiveCountDto
-                {
-                    ActiveStudentCount = activeStudentCount,
-                    ActiveTeacherCount = activeTeacherCount
-                };
-
-                return Result<ActiveCountDto>.Success(activeCountDto);
-            }
+            return Result<ActiveCountDto>.Success(activeCountDto);
         }
     }
 }

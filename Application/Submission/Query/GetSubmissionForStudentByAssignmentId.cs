@@ -6,57 +6,55 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Submission.Query
+namespace Application.Submission.Query;
+public class GetSubmissionForStudentByAssignmentId
 {
-    public class GetSubmissionForStudentByAssignmentId
+    public class Query : IRequest<Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>>
     {
-        public class Query : IRequest<Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>>
+        public Guid AssignmentId { get; set; }
+    }
+
+    public class Handler : IRequestHandler<Query, Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>>
+    {
+        private readonly DataContext _context;
+        private readonly IUserAccessor _userAccessor;
+        private readonly IMapper _mapper;
+
+        public Handler(DataContext context, IUserAccessor userAccessor, IMapper mapper)
         {
-            public Guid AssignmentId { get; set; }
+            _context = context;
+            _userAccessor = userAccessor;
+            _mapper = mapper;
         }
 
-        public class Handler : IRequestHandler<Query, Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>>
+        public async Task<Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>> Handle(Query request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
-            private readonly IUserAccessor _userAccessor;
-            private readonly IMapper _mapper;
-
-            public Handler(DataContext context, IUserAccessor userAccessor, IMapper mapper)
+            try
             {
-                _context = context;
-                _userAccessor = userAccessor;
-                _mapper = mapper;
+                /** Langkah 1: Mendapatkan ID siswa dari token **/
+                var studentIdFromToken = Guid.Parse(_userAccessor.GetStudentIdFromToken());
+
+                /** Langkah 2: Memeriksa apakah ID siswa ditemukan di token **/
+                if (studentIdFromToken == Guid.Empty)
+                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("Student ID not found in token.");
+
+                /** Langkah 3: Mencari pengajuan tugas berdasarkan ID tugas dan ID siswa **/
+                var assignmentSubmissionDto = await _context.AssignmentSubmissions
+                    .Where(s => s.AssignmentId == request.AssignmentId && s.StudentId == studentIdFromToken)
+                    .ProjectTo<AssignmentSubmissionGetByAssignmentIdAndStudentId>(_mapper.ConfigurationProvider)
+                    .SingleOrDefaultAsync(cancellationToken);
+
+                /** Langkah 4: Memeriksa apakah pengajuan tugas ditemukan **/
+                if (assignmentSubmissionDto == null)
+                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("No assignment submission found.");
+
+                /** Langkah 5: Mengembalikan pengajuan tugas yang berhasil ditemukan **/
+                return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Success(assignmentSubmissionDto);
             }
-
-            public async Task<Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>> Handle(Query request, CancellationToken cancellationToken)
+            catch (Exception ex)
             {
-                try
-                {
-                    /** Langkah 1: Mendapatkan ID siswa dari token **/
-                    var studentIdFromToken = Guid.Parse(_userAccessor.GetStudentIdFromToken());
-
-                    /** Langkah 2: Memeriksa apakah ID siswa ditemukan di token **/
-                    if (studentIdFromToken == Guid.Empty)
-                        return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("Student ID not found in token.");
-
-                    /** Langkah 3: Mencari pengajuan tugas berdasarkan ID tugas dan ID siswa **/
-                    var assignmentSubmissionDto = await _context.AssignmentSubmissions
-                        .Where(s => s.AssignmentId == request.AssignmentId && s.StudentId == studentIdFromToken)
-                        .ProjectTo<AssignmentSubmissionGetByAssignmentIdAndStudentId>(_mapper.ConfigurationProvider)
-                        .SingleOrDefaultAsync(cancellationToken);
-
-                    /** Langkah 4: Memeriksa apakah pengajuan tugas ditemukan **/
-                    if (assignmentSubmissionDto == null)
-                        return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("No assignment submission found.");
-
-                    /** Langkah 5: Mengembalikan pengajuan tugas yang berhasil ditemukan **/
-                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Success(assignmentSubmissionDto);
-                }
-                catch (Exception ex)
-                {
-                    /** Langkah 6: Menangani kesalahan jika terjadi **/
-                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure($"Failed to handle assignment submission: {ex.Message}");
-                }
+                /** Langkah 6: Menangani kesalahan jika terjadi **/
+                return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure($"Failed to handle assignment submission: {ex.Message}");
             }
         }
     }

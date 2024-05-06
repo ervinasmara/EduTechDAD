@@ -5,42 +5,40 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Learn.Schedules.Query
+namespace Application.Learn.Schedules.Query;
+public class ListSchedule
 {
-    public class ListSchedule
+    public class Query : IRequest<Result<List<ScheduleGetDto>>>
     {
-        public class Query : IRequest<Result<List<ScheduleGetDto>>>
+    }
+
+    public class Handler : IRequestHandler<Query, Result<List<ScheduleGetDto>>>
+    {
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+
+        public Handler(DataContext context, IMapper mapper)
         {
+            _context = context;
+            _mapper = mapper;
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<ScheduleGetDto>>>
+        public async Task<Result<List<ScheduleGetDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            private readonly DataContext _context;
-            private readonly IMapper _mapper;
-
-            public Handler(DataContext context, IMapper mapper)
+            try
             {
-                _context = context;
-                _mapper = mapper;
+                /** Langkah 1: Mengambil Jadwal dan Memetakkannya ke ScheduleGetDto **/
+                var schedule = await _context.Schedules
+                    .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
+                    .ToListAsync(cancellationToken);
+
+                /** Langkah 2: Mengembalikan Hasil dalam Bentuk Success Result **/
+                return Result<List<ScheduleGetDto>>.Success(schedule);
             }
-
-            public async Task<Result<List<ScheduleGetDto>>> Handle(Query request, CancellationToken cancellationToken)
+            catch (Exception ex)
             {
-                try
-                {
-                    /** Langkah 1: Mengambil Jadwal dan Memetakkannya ke ScheduleGetDto **/
-                    var schedule = await _context.Schedules
-                        .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
-                        .ToListAsync(cancellationToken);
-
-                    /** Langkah 2: Mengembalikan Hasil dalam Bentuk Success Result **/
-                    return Result<List<ScheduleGetDto>>.Success(schedule);
-                }
-                catch (Exception ex)
-                {
-                    /** Langkah 3: Menangani Kesalahan Jika Terjadi **/
-                    return Result<List<ScheduleGetDto>>.Failure($"Failed to retrieve schedules: {ex.Message}");
-                }
+                /** Langkah 3: Menangani Kesalahan Jika Terjadi **/
+                return Result<List<ScheduleGetDto>>.Failure($"Failed to retrieve schedules: {ex.Message}");
             }
         }
     }
