@@ -29,7 +29,7 @@ public class DeleteLesson
 
             var result = await _context.SaveChangesAsync() > 0;
 
-            if (!result) return Result<Unit>.Failure("Failed to delete Lesson");
+            if (!result) return Result<Unit>.Failure("Gagal untuk menghapus pelajaran");
 
             return Result<Unit>.Success(Unit.Value);
         }

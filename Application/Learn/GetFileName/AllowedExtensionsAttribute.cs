@@ -36,6 +36,6 @@ public class AllowedExtensionsAttribute : ValidationAttribute
 
     public string GetErrorMessage()
     {
-        return $"Only files with the following extensions are allowed: {string.Join(", ", _extensions)}";
+        return $"Hanya file dengan ekstensi berikut ini yang diizinkan: {string.Join(", ", _extensions)}";
     }
 }

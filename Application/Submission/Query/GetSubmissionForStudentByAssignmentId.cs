@@ -36,7 +36,7 @@ public class GetSubmissionForStudentByAssignmentId
 
                 /** Langkah 2: Memeriksa apakah ID siswa ditemukan di token **/
                 if (studentIdFromToken == Guid.Empty)
-                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("Student ID not found in token.");
+                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("StudentId tidak ditemukan ditoken.");
 
                 /** Langkah 3: Mencari pengajuan tugas berdasarkan ID tugas dan ID siswa **/
                 var assignmentSubmissionDto = await _context.AssignmentSubmissions
@@ -46,7 +46,7 @@ public class GetSubmissionForStudentByAssignmentId
 
                 /** Langkah 4: Memeriksa apakah pengajuan tugas ditemukan **/
                 if (assignmentSubmissionDto == null)
-                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("No assignment submission found.");
+                    return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure("Pengumpulan tugas tidak ditemukan");
 
                 /** Langkah 5: Mengembalikan pengajuan tugas yang berhasil ditemukan **/
                 return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Success(assignmentSubmissionDto);
@@ -54,7 +54,7 @@ public class GetSubmissionForStudentByAssignmentId
             catch (Exception ex)
             {
                 /** Langkah 6: Menangani kesalahan jika terjadi **/
-                return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure($"Failed to handle assignment submission: {ex.Message}");
+                return Result<AssignmentSubmissionGetByAssignmentIdAndStudentId>.Failure($"Gagal menangani pengumpulan tugas: {ex.Message}");
             }
         }
     }

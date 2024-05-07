@@ -37,13 +37,13 @@ public class CreateTeacher
             /** Langkah 1: Periksa apakah username sudah digunakan **/
             if (await _userManager.Users.AnyAsync(x => x.UserName == teacherDto.Username, cancellationToken))
             {
-                return Result<RegisterTeacherDto>.Failure("Username already in use");
+                return Result<RegisterTeacherDto>.Failure("Username sudah digunakan");
             }
 
             /** Langkah 2: Periksa apakah NIP sudah digunakan **/
             if (await _context.Teachers.AnyAsync(t => t.Nip == teacherDto.Nip, cancellationToken))
             {
-                return Result<RegisterTeacherDto>.Failure("NIP already in use");
+                return Result<RegisterTeacherDto>.Failure("NIP sudah digunakan");
             }
 
             /** Langkah 3: Dapatkan daftar pelajaran yang valid dari input guru **/
@@ -56,7 +56,7 @@ public class CreateTeacher
             if (validLessons.Count != teacherDto.LessonNames.Count)
             {
                 var invalidLessonNames = teacherDto.LessonNames.Except(validLessons.Select(l => l.LessonName)).ToList();
-                return Result<RegisterTeacherDto>.Failure($"Invalid lesson names: {string.Join(", ", invalidLessonNames)}");
+                return Result<RegisterTeacherDto>.Failure($"Nama pelajaran tidak valid: {string.Join(", ", invalidLessonNames)}");
             }
 
             /** Langkah 5: Buat AppUser baru jika semua validasi berhasil **/
@@ -102,21 +102,27 @@ public class RegisterTeacherCommandValidator : AbstractValidator<RegisterTeacher
 {
     public RegisterTeacherCommandValidator()
     {
-        RuleFor(x => x.NameTeacher).NotEmpty().WithMessage("Name is required.");
-        RuleFor(x => x.BirthDate).NotEmpty().WithMessage("BirthDate is required.");
-        RuleFor(x => x.BirthPlace).NotEmpty().WithMessage("BirthPlace is required.");
-        RuleFor(x => x.Address).NotEmpty().WithMessage("Address is required.");
-        RuleFor(x => x.PhoneNumber).NotEmpty().WithMessage("Phone number is required.")
-                                      .Matches("^[0-9]{8,13}$").WithMessage("Phone number must be between 8 and 13 digits and contain only numbers.");
-        RuleFor(x => x.Nip).NotEmpty().WithMessage("Nip is required.");
-        RuleFor(x => x.Gender).NotEmpty().WithMessage("Gender is required.")
-                              .InclusiveBetween(1, 2).WithMessage("Gender must be 1 for Male or 2 for Female.");
-        RuleFor(x => x.Username).NotEmpty().WithMessage("Username is required.");
+        RuleFor(x => x.NameTeacher).NotEmpty().WithMessage("Nama tidak boleh kosong");
+        RuleFor(x => x.BirthDate).NotEmpty().WithMessage("Tanggal lahir tidak boleh kosong");
+        RuleFor(x => x.BirthPlace).NotEmpty().WithMessage("Tempat lahir tidak boleh kosong");
+        RuleFor(x => x.Address).NotEmpty().WithMessage("Alamat tidak boleh kosong");
+        RuleFor(x => x.PhoneNumber)
+            .NotEmpty().WithMessage("Nomor telepon tidak boleh kosong")
+            .Matches("^[0-9\\-+]*$").WithMessage("Nomor telepon hanya boleh berisi angka, tanda minus (-), atau tanda plus (+).")
+            .Length(8, 13).WithMessage("Nomor telepon harus terdiri dari 8 hingga 13 digit");
+        RuleFor(x => x.Nip).NotEmpty().WithMessage("Nip tidak boleh kosong");
+        RuleFor(x => x.Gender)
+            .NotEmpty().WithMessage("Jenis kelamin tidak boleh kosong")
+            .Must(gender => gender >= 1 && gender <= 2)
+            .WithMessage("Nilai Jenis kelamin tidak valid. Gunakan 1 untuk Laki-laki, 2 untuk Perempuan");
+        RuleFor(x => x.Username)
+            .NotEmpty().WithMessage("Nama pengguna tidak boleh kosong")
+            .Length(5, 20).WithMessage("Panjang nama pengguna harus antara 5 hingga 20 karakter")
+            .Must(x => !x.Contains(" ")).WithMessage("Nama pengguna tidak boleh mengandung spasi");
         RuleFor(x => x.Password)
-            .NotEmpty()
+            .NotEmpty().WithMessage("Kata sandi tidak boleh kosong")
             .Matches("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{8,16}")
-            .WithMessage("Password must be complex");
-
-        RuleFor(x => x.LessonNames).NotEmpty().WithMessage("LessonNames is required.");
+            .WithMessage("Kata sandi harus memenuhi kriteria berikut: minimal 8 karakter, maksimal 16 karakter, setidaknya satu huruf kecil, satu huruf besar, dan satu angka");
+        RuleFor(x => x.LessonNames).NotEmpty().WithMessage("Nama Pelajaran tidak boleh kosong");
     }
 }

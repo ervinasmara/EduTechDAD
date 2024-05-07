@@ -43,7 +43,7 @@ public class EditLesson
 
                 if (lesson == null)
                 {
-                    return Result<LessonCreateAndEditDto>.Failure("Lesson not found");
+                    return Result<LessonCreateAndEditDto>.Failure("Pelajaran tidak ditemukan");
                 }
 
                 /** Langkah 2: Temukan Classroom berdasarkan ClassName **/
@@ -56,7 +56,7 @@ public class EditLesson
 
                 if (classroom == null)
                 {
-                    return Result<LessonCreateAndEditDto>.Failure($"Classroom with name '{requestedClassName}' not found.");
+                    return Result<LessonCreateAndEditDto>.Failure($"Kelas dengan nama '{requestedClassName}' tidak ditemukan");
                 }
 
                 /** Langkah 3: Update properti Lesson **/
@@ -77,7 +77,7 @@ public class EditLesson
             }
             catch (Exception ex)
             {
-                return Result<LessonCreateAndEditDto>.Failure($"Failed to edit lesson: {ex.Message}");
+                return Result<LessonCreateAndEditDto>.Failure($"Gagal untuk mengedit pelajaran: {ex.Message}");
             }
         }
     }

@@ -30,7 +30,7 @@ public class CreateAttendance
             // Ambil ClassRoomId dari siswa pertama dalam daftar kehadiran
             var firstStudentId = request.AttendanceCreateDto.AttendanceStudentCreate.FirstOrDefault()?.StudentId;
             if (firstStudentId == null)
-                return Result<AttendanceCreateDto>.Failure("No students provided in the attendance list.");
+                return Result<AttendanceCreateDto>.Failure("Tidak ada siswa yang tercantum dalam daftar hadir");
 
             var classroom = await _context.Students
                 .Where(s => s.Id == firstStudentId)
@@ -38,7 +38,7 @@ public class CreateAttendance
                 .FirstOrDefaultAsync();
 
             if (classroom == null)
-                return Result<AttendanceCreateDto>.Failure("Invalid StudentId or no class associated with the student.");
+                return Result<AttendanceCreateDto>.Failure("StudentId tidak valid atau tidak ada kelas yang terkait dengan siswa tersebut");
 
             // Dapatkan daftar siswa dalam kelas
             var studentsInClassroom = await _context.Students
@@ -54,7 +54,7 @@ public class CreateAttendance
             if (studentsNotYetAttendance.Any())
             {
                 var studentNames = string.Join(", ", studentsNotYetAttendance.Select(s => s.NameStudent));
-                return Result<AttendanceCreateDto>.Failure($"Students not yet attended: {studentNames}");
+                return Result<AttendanceCreateDto>.Failure($"Siswa yang belum hadir: {studentNames}");
             }
 
             /** Langkah 1: Validasi duplikasi siswa **/
@@ -65,7 +65,7 @@ public class CreateAttendance
                 .ToList();
 
             if (duplicateStudentIds.Any())
-                return Result<AttendanceCreateDto>.Failure($"Duplicate StudentIds: {string.Join(", ", duplicateStudentIds)}");
+                return Result<AttendanceCreateDto>.Failure($"Duplikat StudentIds: {string.Join(", ", duplicateStudentIds)}");
 
             /** Langkah 2: Validasi StudentId yang valid **/
             var validStudentIds = request.AttendanceCreateDto.AttendanceStudentCreate
@@ -85,7 +85,7 @@ public class CreateAttendance
             if (existingAttendances.Any())
             {
                 var existingStudentIds = existingAttendances.Select(a => a.StudentId).Distinct().ToList();
-                return Result<AttendanceCreateDto>.Failure($"Attendance already exists for StudentIds: {string.Join(", ", existingStudentIds)} on {request.AttendanceCreateDto.Date}");
+                return Result<AttendanceCreateDto>.Failure($"Kehadiran sudah ada untuk StudentIds: {string.Join(", ", existingStudentIds)} on {request.AttendanceCreateDto.Date}");
             }
 
             /** Langkah 4: Menambahkan entri kehadiran **/
@@ -104,7 +104,7 @@ public class CreateAttendance
             var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
             if (!result)
-                return Result<AttendanceCreateDto>.Failure("Failed to create Attendance");
+                return Result<AttendanceCreateDto>.Failure("Gagal untuk membuat Daftar Hadir");
 
             /** Langkah 6: Memetakan kembali ke Dto **/
             var attendanceDto = _mapper.Map<AttendanceCreateDto>(request.AttendanceCreateDto);
@@ -130,7 +130,7 @@ public class AttendanceStudentValidator : AbstractValidator<AttendanceStudentCre
     public AttendanceStudentValidator()
     {
         RuleFor(x => x.StudentId).NotEmpty();
-        RuleFor(x => x.Status).NotEmpty().WithMessage("Status is required.");
-        RuleFor(x => x.Status).InclusiveBetween(1, 3).WithMessage("Status must be between 1 and 3.");
+        RuleFor(x => x.Status).NotEmpty().WithMessage("Status tidak boleh kosong");
+        RuleFor(x => x.Status).InclusiveBetween(1, 3).WithMessage("Status harus antara 1 dan 3");
     }
 }

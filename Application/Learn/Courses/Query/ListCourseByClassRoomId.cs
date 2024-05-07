@@ -34,12 +34,12 @@ public class ListCourseByClassRoomId
             /** Langkah 2: Periksa jika ClassRoomId ada di token **/
             if (string.IsNullOrEmpty(classRoomIdToken))
             {
-                return Result<List<CourseGetDto>>.Failure("ClassRoomId not found in token");
+                return Result<List<CourseGetDto>>.Failure("ClassRoomId tidak ditemukan ditoken");
             }
 
             if (!Guid.TryParse(classRoomIdToken, out var classRoomId))
             {
-                return Result<List<CourseGetDto>>.Failure("ClassRoomId not valid.");
+                return Result<List<CourseGetDto>>.Failure("ClassRoomId tidak valid.");
             }
 
             /** Langkah 3: Gunakan ProjectTo untuk langsung memproyeksikan ke DTO **/
@@ -52,7 +52,7 @@ public class ListCourseByClassRoomId
             /** Langkah 4: Periksa jika tidak ada course yang ditemukan untuk kelas **/
             if (!courses.Any())
             {
-                return Result<List<CourseGetDto>>.Failure("No courses found for the ClassRoom");
+                return Result<List<CourseGetDto>>.Failure("Tidak ada kursus yang ditemukan untuk ClassRoom");
             }
 
             /** Langkah 5: Kembalikan hasil yang berhasil bersama dengan daftar course DTO **/

@@ -57,7 +57,7 @@ public class CreateClassRoom
                     else
                     {
                         // Jika gagal mengonversi, kembalikan pesan kesalahan
-                        return Result<ClassRoomCreateAndEditDto>.Failure("Failed to generate UniqueNumberOfClassRoom.");
+                        return Result<ClassRoomCreateAndEditDto>.Failure("Gagal menghasilkan UniqueNumberOfClassRoom.");
                     }
                 }
 
@@ -77,7 +77,7 @@ public class CreateClassRoom
 
                 /** Langkah 8: Memeriksa hasil penyimpanan **/
                 if (!result)
-                    return Result<ClassRoomCreateAndEditDto>.Failure("Failed to Create ClassRoom");
+                    return Result<ClassRoomCreateAndEditDto>.Failure("Gagal untuk membuat ClassRoom");
 
                 /** Langkah 9: Memetakan kembali entitas ClassRoom ke DTO **/
                 var classRoomDto = _mapper.Map<ClassRoomCreateAndEditDto>(classRoom);
@@ -88,7 +88,7 @@ public class CreateClassRoom
             catch (Exception ex)
             {
                 /** Langkah 11: Menangani kesalahan jika terjadi **/
-                return Result<ClassRoomCreateAndEditDto>.Failure($"Failed to create ClassRoom: {ex.Message}");
+                return Result<ClassRoomCreateAndEditDto>.Failure($"Gagal untuk membuat ClassRoom: {ex.Message}");
             }
         }
     }

@@ -44,7 +44,7 @@ public class CreateCourse
             var teacherId = _userAccessor.GetTeacherIdFromToken();
             if (teacherId == null)
             {
-                return Result<CourseCreateAndEditDto>.Failure("Teacher ID not found in token");
+                return Result<CourseCreateAndEditDto>.Failure("TeacherId tidak ditemukan ditoken");
             }
 
             /** Langkah 2: Memeriksa LessonName dan mendapatkan LessonId **/
@@ -53,13 +53,13 @@ public class CreateCourse
                 .FirstOrDefaultAsync(x => x.LessonName == request.CourseCreateAndEditDto.LessonName);
             if (lesson == null)
             {
-                return Result<CourseCreateAndEditDto>.Failure($"Lesson with LessonName {request.CourseCreateAndEditDto.LessonName} not found.");
+                return Result<CourseCreateAndEditDto>.Failure($"Mapel dengan nama mapel {request.CourseCreateAndEditDto.LessonName} tidak ditemukan");
             }
 
             // Memeriksa apakah teacher memiliki keterkaitan dengan lesson yang dimasukkan
             if (lesson.TeacherLessons == null || !lesson.TeacherLessons.Any(tl => tl.TeacherId == Guid.Parse(teacherId)))
             {
-                return Result<CourseCreateAndEditDto>.Failure($"Teacher does not have this lesson.");
+                return Result<CourseCreateAndEditDto>.Failure($"Guru tidak memiliki pelajaran ini");
             }
 
             /** Langkah 3: Membuat entity Course dari DTO **/
@@ -81,7 +81,7 @@ public class CreateCourse
                 string fileExtension = Path.GetExtension(request.CourseCreateAndEditDto.FileData.FileName);
                 if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
                 {
-                    return Result<CourseCreateAndEditDto>.Failure("Only PDF files are allowed.");
+                    return Result<CourseCreateAndEditDto>.Failure("Hanya file PDF yang diperbolehkan");
                 }
             }
 
@@ -96,7 +96,7 @@ public class CreateCourse
             var result = await _context.SaveChangesAsync() > 0;
             if (!result)
             {
-                return Result<CourseCreateAndEditDto>.Failure("Failed to create course.");
+                return Result<CourseCreateAndEditDto>.Failure("Gagal untuk membuat course.");
             }
 
             /** Langkah 6: Mengembalikan hasil **/

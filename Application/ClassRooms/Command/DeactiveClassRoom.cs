@@ -34,10 +34,10 @@ public class DeactiveClassRoom
             var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
             /** Langkah 5: Memeriksa Hasil Simpan **/
-            if (!result) return Result<object>.Failure("Failed to deactivate ClassRoom");
+            if (!result) return Result<object>.Failure("Gagal menonaktifkan ClassRoom");
 
             /** Langkah 6: Mengembalikan Hasil dalam Bentuk Success Result dengan Pesan **/
-            return Result<object>.Success(new { Message = "ClassRoom status updated successfully" });
+            return Result<object>.Success(new { Message = "Status ClassRoom berhasil diperbarui" });
         }
     }
 }

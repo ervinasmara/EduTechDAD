@@ -38,7 +38,7 @@ public class EditStudent
             /** Langkah 2: Memeriksa apakah siswa ditemukan **/
             if (student == null)
             {
-                return Result<EditStudentDto>.Failure("Student not found");
+                return Result<EditStudentDto>.Failure("Siswa tidak ditemukan");
             }
 
             /** Langkah 3: Memetakan data dari DTO ke entitas siswa **/
@@ -56,7 +56,7 @@ public class EditStudent
                 var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == request.StudentEditDto.UniqueNumberOfClassRoom);
                 if (classRoom == null)
                 {
-                    return Result<EditStudentDto>.Failure("Invalid UniqueNumberOfClassRoom");
+                    return Result<EditStudentDto>.Failure("UniqueNumberOfClassRoom tidak valid");
                 }
                 student.ClassRoom = classRoom;
             }

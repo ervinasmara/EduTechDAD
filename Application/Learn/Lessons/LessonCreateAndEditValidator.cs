@@ -5,7 +5,7 @@ public class LessonCreateAndEditValidator : AbstractValidator<LessonCreateAndEdi
 {
     public LessonCreateAndEditValidator()
     {
-        RuleFor(x => x.LessonName).NotEmpty();
-        RuleFor(x => x.ClassName).NotEmpty();
+        RuleFor(x => x.LessonName).NotEmpty().WithMessage("Nama pelajaran tidak boleh kosong");
+        RuleFor(x => x.ClassName).NotEmpty().WithMessage("Nama kelas tidak boleh kosong");
     }
 }

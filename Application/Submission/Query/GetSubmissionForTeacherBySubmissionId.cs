@@ -35,7 +35,7 @@ public class GetSubmissionForTeacherBySubmissionId
 
                 /** Langkah 2: Memeriksa apakah ID guru ditemukan di token **/
                 if (teacherIdFromToken == Guid.Empty)
-                    return Result<AssignmentSubmissionGetBySubmissionIdAndTeacherId>.Failure("Teacher ID not found in token.");
+                    return Result<AssignmentSubmissionGetBySubmissionIdAndTeacherId>.Failure("TeacherId tidak ditemukan ditoken.");
 
                 /** Langkah 3: Mendapatkan pengajuan tugas dengan menyertakan informasi yang terkait **/
                 var assignmentSubmission = await _context.AssignmentSubmissions
@@ -49,7 +49,7 @@ public class GetSubmissionForTeacherBySubmissionId
 
                 /** Langkah 4: Memeriksa apakah pengajuan tugas ditemukan **/
                 if (assignmentSubmission == null)
-                    return Result<AssignmentSubmissionGetBySubmissionIdAndTeacherId>.Failure("No assignment submission found.");
+                    return Result<AssignmentSubmissionGetBySubmissionIdAndTeacherId>.Failure("Pengumpulan tugas tidak ditemukan");
 
                 /** Langkah 5: Memeriksa apakah guru terkait dengan pelajaran **/
                 var isTeacherRelatedToLesson = assignmentSubmission.Assignment.Course.Lesson.TeacherLessons
@@ -57,7 +57,7 @@ public class GetSubmissionForTeacherBySubmissionId
 
                 /** Langkah 6: Memeriksa apakah pengajuan tugas terkait dengan guru **/
                 if (!isTeacherRelatedToLesson)
-                    return Result<AssignmentSubmissionGetBySubmissionIdAndTeacherId>.Failure("The submission is not related to the teacher.");
+                    return Result<AssignmentSubmissionGetBySubmissionIdAndTeacherId>.Failure("Pengumpulan tugas tersebut tidak terkait dengan guru.");
 
                 /** Langkah 7: Mengonversi entity pengajuan tugas menjadi DTO **/
                 var assignmentSubmissionDto = _mapper.Map<AssignmentSubmissionGetBySubmissionIdAndTeacherId>(assignmentSubmission);
@@ -68,7 +68,7 @@ public class GetSubmissionForTeacherBySubmissionId
             catch (Exception ex)
             {
                 /** Langkah 9: Menangani kesalahan jika terjadi **/
-                return Result<AssignmentSubmissionGetBySubmissionIdAndTeacherId>.Failure($"Failed to handle assignment submission: {ex.Message}");
+                return Result<AssignmentSubmissionGetBySubmissionIdAndTeacherId>.Failure($"Gagal menangani pengumpulan tugas: {ex.Message}");
             }
         }
     }

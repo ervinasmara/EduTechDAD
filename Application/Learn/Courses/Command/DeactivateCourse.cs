@@ -1,6 +1,5 @@
 ﻿using Application.Core;
 using Application.Interface;
-using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -32,12 +31,12 @@ public class DeactivateCourse
             /** Langkah 2: Periksa jika TeacherId ada di token **/
             if (string.IsNullOrEmpty(teacherIdString))
             {
-                return Result<object>.Failure("TeacherId not found in token");
+                return Result<object>.Failure("TeacherId tidak ditemukan ditoken");
             }
 
             if (!Guid.TryParse(teacherIdString, out var teacherId))
             {
-                return Result<object>.Failure("TeacherId not valid.");
+                return Result<object>.Failure("TeacherId tidak valid.");
             }
 
             /** Langkah 3: Ubah status Course menjadi 0 **/
@@ -49,13 +48,13 @@ public class DeactivateCourse
             // Periksa apakah ada course yang ditemukan
             if (course == null)
             {
-                return Result<object>.Failure("Course not found");
+                return Result<object>.Failure("Materi tidak ditemukan");
             }
 
             // Memeriksa apakah teacher memiliki keterkaitan dengan course yang dimasukkan
             if (course.Lesson.TeacherLessons == null || !course.Lesson.TeacherLessons.Any(tl => tl.TeacherId == teacherId))
             {
-                return Result<object>.Failure($"Teacher does not have this course.");
+                return Result<object>.Failure($"Guru tidak memiliki materi ini.");
             }
 
             /** Langkah 4: Mengubah status course menjadi 0 (nonaktif) **/
@@ -65,7 +64,7 @@ public class DeactivateCourse
             await _context.SaveChangesAsync(cancellationToken);
 
             /** Langkah 6: Mengembalikan hasil berhasil dengan pesan **/
-            return Result<object>.Success(new { Message = "Course status updated successfully" });
+            return Result<object>.Success(new { Message = "Status materi berhasil diperbarui" });
         }
     }
 }

@@ -35,13 +35,13 @@ public class LessonByTeacherId
             /** Langkah 2: Cek apakah TeacherId ada di dalam token **/
             if (string.IsNullOrEmpty(teacherIdString))
             {
-                return Result<List<LessonGetByTeacherIdOrClassRoomIdDto>>.Failure("TeacherId not found in token");
+                return Result<List<LessonGetByTeacherIdOrClassRoomIdDto>>.Failure("TeacherId tidak ditemukan ditoken");
             }
 
             /** Langkah 3: Validasi format TeacherId **/
             if (!Guid.TryParse(teacherIdString, out var teacherId))
             {
-                return Result<List<LessonGetByTeacherIdOrClassRoomIdDto>>.Failure("TeacherId not valid.");
+                return Result<List<LessonGetByTeacherIdOrClassRoomIdDto>>.Failure("TeacherId tidak valid.");
             }
 
             /** Langkah 4: Dapatkan daftar Lesson berdasarkan TeacherId **/
@@ -53,7 +53,7 @@ public class LessonByTeacherId
             /** Langkah 5: Cek apakah Lesson ada dari TeacherId yang ada **/
             if (!lessons.Any())
             {
-                return Result<List<LessonGetByTeacherIdOrClassRoomIdDto>>.Failure("No lessons found for the given TeacherId");
+                return Result<List<LessonGetByTeacherIdOrClassRoomIdDto>>.Failure("Tidak ada pelajaran yang ditemukan untuk TeacherId yang diberikan");
             }
 
             return Result<List<LessonGetByTeacherIdOrClassRoomIdDto>>.Success(lessons);

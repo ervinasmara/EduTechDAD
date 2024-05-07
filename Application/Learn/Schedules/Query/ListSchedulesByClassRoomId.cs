@@ -36,7 +36,7 @@ public class ListSchedulesByClassRoomId
 
                 /** Langkah 2: Memeriksa Ketersediaan ID Ruang Kelas **/
                 if (string.IsNullOrEmpty(classRoomId))
-                    return Result<List<ScheduleGetDto>>.Failure("Classroom ID not found in token");
+                    return Result<List<ScheduleGetDto>>.Failure("ClassroomId tidak ditemukan ditoken");
 
                 /** Langkah 3: Mengambil Jadwal **/
                 var schedule = await _context.Schedules
@@ -45,7 +45,7 @@ public class ListSchedulesByClassRoomId
 
                 /** Langkah 4: Memeriksa Ketersediaan Jadwal untuk Ruang Kelas Tertentu **/
                 if (!schedule.Any())
-                    return Result<List<ScheduleGetDto>>.Failure("Schedules not found for this classroom.");
+                    return Result<List<ScheduleGetDto>>.Failure("Jadwal tidak ditemukan untuk kelas ini");
 
                 /** Langkah 5: Mengembalikan Hasil dalam Bentuk Success Result **/
                 return Result<List<ScheduleGetDto>>.Success(schedule);
@@ -53,7 +53,7 @@ public class ListSchedulesByClassRoomId
             catch (Exception ex)
             {
                 /** Langkah 6: Menangani Kesalahan Jika Terjadi **/
-                return Result<List<ScheduleGetDto>>.Failure($"Failed to retrieve schedules: {ex.Message}");
+                return Result<List<ScheduleGetDto>>.Failure($"Gagal mengambil jadwal: {ex.Message}");
             }
         }
     }

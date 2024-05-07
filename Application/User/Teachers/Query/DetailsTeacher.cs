@@ -34,7 +34,7 @@ public class DetailsTeacher
 
             /** Langkah 2: Memeriksa apakah guru ditemukan **/
             if (teacher == null)
-                return Result<TeacherGetAllAndByIdDto>.Failure("Teacher not found.");
+                return Result<TeacherGetAllAndByIdDto>.Failure("Guru tidak ditemukan");
 
             /** Langkah 3: Mengembalikan hasil dalam bentuk Success Result dengan data guru yang ditemukan **/
             return Result<TeacherGetAllAndByIdDto>.Success(teacher);

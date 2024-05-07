@@ -34,7 +34,7 @@ public class DetailsAttendance
 
             /** Langkah 2: Memeriksa kehadiran ditemukan atau tidak **/
             if (attendanceDto == null)
-                return Result<AttendanceGetByIdDto>.Failure("Attendance not found.");
+                return Result<AttendanceGetByIdDto>.Failure("Kehadiran tidak ditemukan");
 
             /** Langkah 3: Mengembalikan hasil dalam bentuk Success Result **/
             return Result<AttendanceGetByIdDto>.Success(attendanceDto);

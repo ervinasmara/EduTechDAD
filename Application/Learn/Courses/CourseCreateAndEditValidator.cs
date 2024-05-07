@@ -5,14 +5,14 @@ public class CourseCreateAndEditValidator : AbstractValidator<CourseCreateAndEdi
 {
     public CourseCreateAndEditValidator()
     {
-        RuleFor(x => x.CourseName).NotEmpty();
-        RuleFor(x => x.Description).NotEmpty();
-        RuleFor(x => x.LessonName).NotEmpty();
+        RuleFor(x => x.CourseName).NotEmpty().WithMessage("Nama materi tidak boleh kosong");
+        RuleFor(x => x.Description).NotEmpty().WithMessage("Deskripsi tidak boleh kosong");
+        RuleFor(x => x.LessonName).NotEmpty().WithMessage("Nama mapel tidak boleh kosong");
 
         // Validasi untuk memastikan bahwa setidaknya satu dari LinkCourse diisi
         RuleFor(x => x.LinkCourse)
             .NotEmpty()
             .When(x => x.FileData == null) // Hanya memeriksa LinkCourse jika FileData kosong
-            .WithMessage("LinkCourse must be provided if FileData is not provided.");
+            .WithMessage("Link materi harus disediakan jika File tidak disediakan.");
     }
 }

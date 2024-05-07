@@ -26,7 +26,7 @@ public class CeklisToDoList
 
             /** Langkah 2: Memeriksa Ketersediaan ToDoList **/
             if (toDoList == null)
-                return Result<object>.Failure("ToDoList not found");
+                return Result<object>.Failure("ToDoList tidak ditemukan");
 
             /** Langkah 3: Mengubah Status ToDoList Menjadi Nonaktif **/
             toDoList.Status = 0;
@@ -35,7 +35,7 @@ public class CeklisToDoList
             await _context.SaveChangesAsync(cancellationToken);
 
             /** Langkah 5: Mengembalikan Hasil dalam Bentuk Success Result dengan Pesan **/
-            return Result<object>.Success(new { Message = "ToDoList status updated successfully" });
+            return Result<object>.Success(new { Message = "Status ToDoList berhasil diperbarui" });
         }
     }
 }

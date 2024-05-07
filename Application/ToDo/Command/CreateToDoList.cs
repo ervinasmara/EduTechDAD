@@ -37,7 +37,7 @@ public class CreateToDoList
 
             /** Langkah 4: Memeriksa apakah penyimpanan berhasil **/
             if (!result)
-                return Result<ToDoListDto>.Failure("Failed to Create ToDoList");
+                return Result<ToDoListDto>.Failure("Gagal untuk membuat ToDoList");
 
             /** Langkah 5: Memetakan entitas ToDoList kembali ke DTO ToDoListDto menggunakan AutoMapper **/
             var toDoListDto = _mapper.Map<ToDoListDto>(toDoList);
@@ -52,6 +52,6 @@ public class CommandValidator : AbstractValidator<ToDoListDto>
 {
     public CommandValidator()
     {
-        RuleFor(x => x.Description).NotEmpty();
+        RuleFor(x => x.Description).NotEmpty().WithMessage("Deskripsi tidak boleh kosong");
     }
 }

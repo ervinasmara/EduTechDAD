@@ -34,7 +34,7 @@ public class EditSubmissionByTeacherId
                 /** Langkah 2: Memeriksa apakah AssignmentSubmission ditemukan **/
                 if (assignmentSubmission == null)
                 {
-                    return Result<AssignmentSubmissionTeacherDto>.Failure($"AssignmentSubmission with ID {request.SubmissionId} not found");
+                    return Result<AssignmentSubmissionTeacherDto>.Failure($"Pengumpulan tugas dengan ID {request.SubmissionId} tidak ditemukan");
                 }
 
                 /** Langkah 3: Menggunakan AutoMapper untuk memperbarui AssignmentSubmission **/
@@ -49,7 +49,7 @@ public class EditSubmissionByTeacherId
             catch (Exception ex)
             {
                 /** Langkah 6: Menangani kesalahan jika terjadi **/
-                return Result<AssignmentSubmissionTeacherDto>.Failure($"Failed to update AssignmentSubmission: {ex.Message}");
+                return Result<AssignmentSubmissionTeacherDto>.Failure($"Gagal untuk mengupdate pengumpulan tugas: {ex.Message}");
             }
         }
     }
@@ -59,10 +59,10 @@ public class EditSubmissionByTeacherIdValidator : AbstractValidator<AssignmentSu
 {
     public EditSubmissionByTeacherIdValidator()
     {
-        RuleFor(x => x.Comment).NotEmpty();
+        RuleFor(x => x.Comment).NotEmpty().WithMessage("Komentar tidak boleh kosong");
         RuleFor(x => x.Grade)
         .NotEmpty()
         .InclusiveBetween(0M, 100M) // Gunakan rentang dari 0 hingga 100 dengan tipe data decimal
-        .WithMessage("Grade must be a number between 0 and 100");
+        .WithMessage("Nilai harus berupa angka antara 0 dan 100");
     }
 }

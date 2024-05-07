@@ -29,7 +29,7 @@ public class DetailsClassRoom
 
             /** Langkah 2: Memeriksa Ketersediaan Ruang Kelas **/
             if (classRoom == null)
-                return Result<ClassRoomGetDto>.Failure("ClassRoom not found.");
+                return Result<ClassRoomGetDto>.Failure("ClassRoom tidak ditemukan");
 
             /** Langkah 3: Memetakan Data Ruang Kelas ke ClassRoomGetDto Menggunakan AutoMapper **/
             var classRoomDtos = _mapper.Map<ClassRoomGetDto>(classRoom);

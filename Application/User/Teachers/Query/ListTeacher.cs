@@ -39,7 +39,7 @@ public class ListTeacher
             /** Langkah 3: Memeriksa apakah ada guru yang ditemukan **/
             if (!teacherDtos.Any())
             {
-                return Result<List<TeacherGetAllAndByIdDto>>.Failure("No teachers found.");
+                return Result<List<TeacherGetAllAndByIdDto>>.Failure("Tidak ada guru yang ditemukan");
             }
 
             /** Langkah 4: Mengembalikan hasil dalam bentuk Success Result dengan daftar guru yang ditemukan **/

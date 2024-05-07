@@ -40,18 +40,18 @@ public class CreateSubmissionByStudentId
                 /** Langkah 2: Ambil tugas yang sesuai dari database **/
                 var assignment = await _context.Assignments.FindAsync(request.SubmissionDto.AssignmentId);
                 if (assignment == null)
-                    return Result<SubmissionCreateByStudentIdDto>.Failure($"Assignment with ID {request.SubmissionDto.AssignmentId} not found.");
+                    return Result<SubmissionCreateByStudentIdDto>.Failure($"Tugas dengan ID {request.SubmissionDto.AssignmentId} tidak ditemukan");
 
                 /** Langkah 3: Ambil siswa yang sesuai dari database **/
                 var student = await _context.Students.FindAsync(studentId);
                 if (student == null)
-                    return Result<SubmissionCreateByStudentIdDto>.Failure($"Student with ID {studentId} not found.");
+                    return Result<SubmissionCreateByStudentIdDto>.Failure($"Siswa dengan ID {studentId} tidak ditemukan");
 
                 /** Langkah 4: Periksa apakah submission sudah ada sebelumnya **/
                 var existingSubmission = await _context.AssignmentSubmissions
                     .FirstOrDefaultAsync(s => s.AssignmentId == assignment.Id && s.StudentId == studentId, cancellationToken);
                 if (existingSubmission != null)
-                    return Result<SubmissionCreateByStudentIdDto>.Failure($"Submission already exists for assignment ID {assignment.Id} and student ID {studentId}.");
+                    return Result<SubmissionCreateByStudentIdDto>.Failure($"Pengumpulan sudah ada untuk tugas ID {assignment.Id} and siswa ID {studentId}.");
 
                 /** Langkah 5: Buat objek SubmissionCreateByStudentIdDto **/
                 var submissionDto = new SubmissionCreateByStudentIdDto
@@ -78,7 +78,7 @@ public class CreateSubmissionByStudentId
                     string fileExtension = Path.GetExtension(request.SubmissionDto.FileData.FileName);
                     if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
                     {
-                        return Result<SubmissionCreateByStudentIdDto>.Failure("Only PDF files are allowed.");
+                        return Result<SubmissionCreateByStudentIdDto>.Failure("Hanya file PDF yang diperbolehkan");
                     }
                 }
 
@@ -89,7 +89,7 @@ public class CreateSubmissionByStudentId
                 /** Langkah 7: Simpan perubahan ke database **/
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
                 if (!result)
-                    return Result<SubmissionCreateByStudentIdDto>.Failure("Failed to create assignment submission");
+                    return Result<SubmissionCreateByStudentIdDto>.Failure("Gagal untuk membuat pengumpulan tugas");
 
                 /** Langkah 8: Kembalikan hasil yang berhasil **/
                 return Result<SubmissionCreateByStudentIdDto>.Success(submissionDto);
@@ -97,7 +97,7 @@ public class CreateSubmissionByStudentId
             catch (Exception ex)
             {
                 /** Langkah 9: Tangani kesalahan jika terjadi **/
-                return Result<SubmissionCreateByStudentIdDto>.Failure($"Failed to create assignment submission: {ex.Message}");
+                return Result<SubmissionCreateByStudentIdDto>.Failure($"Gagal untuk membuat pengumpulan tugas: {ex.Message}");
             }
         }
     }

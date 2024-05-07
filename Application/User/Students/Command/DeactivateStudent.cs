@@ -25,7 +25,7 @@ public class DeactivateStudent
 
             /** Langkah 2: Memeriksa apakah siswa ditemukan **/
             if (student == null)
-                return Result<object>.Failure("Student not found");
+                return Result<object>.Failure("Siswa tidak ditemukan");
 
             // Mengubah status Student menjadi 0
             /** Langkah 3: Mengubah status siswa menjadi nonaktif **/
@@ -35,7 +35,7 @@ public class DeactivateStudent
             await _context.SaveChangesAsync(cancellationToken);
 
             /** Langkah 5: Mengembalikan hasil dalam bentuk Success Result dengan pesan **/
-            return Result<object>.Success(new { Message = "Student status updated successfully" });
+            return Result<object>.Success(new { Message = "Status siswa berhasil diperbarui" });
         }
     }
 }

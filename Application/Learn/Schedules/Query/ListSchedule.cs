@@ -38,7 +38,7 @@ public class ListSchedule
             catch (Exception ex)
             {
                 /** Langkah 3: Menangani Kesalahan Jika Terjadi **/
-                return Result<List<ScheduleGetDto>>.Failure($"Failed to retrieve schedules: {ex.Message}");
+                return Result<List<ScheduleGetDto>>.Failure($"Gagal mengambil jadwal: {ex.Message}");
             }
         }
     }

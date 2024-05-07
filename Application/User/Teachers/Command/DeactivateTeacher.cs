@@ -1,5 +1,4 @@
 ﻿using Application.Core;
-using FluentValidation;
 using MediatR;
 using Persistence;
 
@@ -28,7 +27,7 @@ namespace Application.User.Teachers.Command
 
                 /** Langkah 2: Memeriksa apakah guru ditemukan **/
                 if (teacher == null)
-                    return Result<object>.Failure("Teacher not found");
+                    return Result<object>.Failure("Guru tidak ditemukan");
 
                 /** Langkah 3: Mengubah status guru menjadi nonaktif **/
                 teacher.Status = 0;
@@ -37,7 +36,7 @@ namespace Application.User.Teachers.Command
                 await _context.SaveChangesAsync(cancellationToken);
 
                 /** Langkah 5: Mengembalikan hasil dalam bentuk Success Result dengan pesan **/
-                return Result<object>.Success(new { Message = "Teacher status updated successfully" });
+                return Result<object>.Success(new { Message = "Status guru berhasil diperbarui" });
             }
         }
     }

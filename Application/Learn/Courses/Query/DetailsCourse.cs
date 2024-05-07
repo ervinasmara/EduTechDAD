@@ -34,7 +34,7 @@ public class DetailsCourse
 
             if (courses == null)
             {
-                return Result<CourseGetDto>.Failure("No courses found.");
+                return Result<CourseGetDto>.Failure("Materi tidak ditemukan");
             }
 
             return Result<CourseGetDto>.Success(courses);

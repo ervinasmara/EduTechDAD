@@ -29,7 +29,7 @@ public class DeactivateLesson
             // Periksa apakah ada lesson yang ditemukan
             if (lesson == null)
             {
-                return Result<object>.Failure("Lesson not found");
+                return Result<object>.Failure("Lesson tidak ditemukan");
             }
 
             /** Langkah 2: Mengubah status lesson menjadi 0 (nonaktif) **/
@@ -39,7 +39,7 @@ public class DeactivateLesson
             await _context.SaveChangesAsync(cancellationToken);
 
             /** Langkah 4: Mengembalikan hasil berhasil dengan pesan **/
-            return Result<object>.Success(new { Message = "Lesson status updated successfully" });
+            return Result<object>.Success(new { Message = "Status pelajaran berhasil diperbarui" });
         }
     }
 }

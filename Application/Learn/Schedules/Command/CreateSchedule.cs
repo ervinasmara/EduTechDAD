@@ -43,7 +43,7 @@ public class CreateSchedule
 
                 /** Langkah 2: Memeriksa Ketersediaan Pelajaran **/
                 if (lesson == null)
-                    return Result<ScheduleCreateAndEditDto>.Failure($"Lesson with name '{request.ScheduleCreateAndEditDto.LessonName}' not found.");
+                    return Result<ScheduleCreateAndEditDto>.Failure($"Pelajaran dengan nama '{request.ScheduleCreateAndEditDto.LessonName}' tidak ditemukan");
 
                 /** Langkah 3: Membuat Instance Jadwal dari ScheduleCreateAndEditDto dan Mengatur LessonId **/
                 var schedule = _mapper.Map<Schedule>(request.ScheduleCreateAndEditDto);
@@ -57,7 +57,7 @@ public class CreateSchedule
 
                 /** Langkah 6: Memeriksa Hasil Simpan **/
                 if (!result)
-                    return Result<ScheduleCreateAndEditDto>.Failure("Failed to create Schedule");
+                    return Result<ScheduleCreateAndEditDto>.Failure("Gagal untuk membuat jadwal");
 
                 /** Langkah 7: Mengembalikan Hasil dalam Bentuk Success Result **/
                 var scheduleDto = _mapper.Map<ScheduleCreateAndEditDto>(schedule);
@@ -67,7 +67,7 @@ public class CreateSchedule
             catch (Exception ex)
             {
                 /** Langkah 8: Menangani Kesalahan Jika Terjadi **/
-                return Result<ScheduleCreateAndEditDto>.Failure($"Failed to create schedule: {ex.Message}");
+                return Result<ScheduleCreateAndEditDto>.Failure($"Gagal untuk membuat jadwal: {ex.Message}");
             }
         }
     }

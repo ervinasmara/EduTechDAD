@@ -38,7 +38,7 @@ public class DetailsStudent
             /** Langkah 2: Memeriksa apakah siswa ditemukan **/
             if (student == null)
             {
-                return Result<StudentGetByIdDto>.Failure("Student not found.");
+                return Result<StudentGetByIdDto>.Failure("Siswa tidak ditemukan");
             }
 
             /** Langkah 3: Mengembalikan hasil dalam bentuk Success Result dengan data siswa yang ditemukan **/

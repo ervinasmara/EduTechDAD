@@ -41,7 +41,7 @@ public class EditClassRoom
             /** Langkah 2: Memeriksa Ketersediaan Ruang Kelas **/
             if (classRoom == null)
             {
-                return Result<ClassRoomCreateAndEditDto>.Failure("ClassRoom Not Found");
+                return Result<ClassRoomCreateAndEditDto>.Failure("ClassRoom tidak ditemukan");
             }
 
             /** Langkah 3: Memetakan Data yang Diperbarui dari DTO ke Entitas ClassRoom Menggunakan AutoMapper **/
@@ -53,7 +53,7 @@ public class EditClassRoom
             /** Langkah 5: Memeriksa Hasil Simpan **/
             if (!result)
             {
-                return Result<ClassRoomCreateAndEditDto>.Failure("Failed to edit ClassRoom");
+                return Result<ClassRoomCreateAndEditDto>.Failure("Gagal untuk edit ClassRoom");
             }
 
             /** Langkah 6: Membuat Instance ClassRoomCreateAndEditDto yang Mewakili Hasil Edit **/

@@ -43,7 +43,7 @@ public class GetListSubmissionForTeacherGrades
                 /** Langkah 3: Memeriksa apakah pelajaran ditemukan dan terkait dengan guru **/
                 if (lesson == null)
                 {
-                    return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure("Lesson not found or not related to the teacher.");
+                    return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure("Pelajaran tidak ditemukan atau tidak berhubungan dengan guru");
                 }
 
                 /** Langkah 4: Memverifikasi apakah tugas terkait dengan pelajaran **/
@@ -54,7 +54,7 @@ public class GetListSubmissionForTeacherGrades
                 /** Langkah 5: Memeriksa apakah tugas ditemukan dan terkait dengan pelajaran **/
                 if (assignment == null)
                 {
-                    return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure("Assignment not found or not related to the lesson.");
+                    return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure("Tugas yang tidak ditemukan atau tidak berhubungan dengan pelajaran");
                 }
 
                 /** Langkah 6: Mendapatkan daftar pengajuan tugas untuk tugas yang diberikan **/
@@ -104,7 +104,7 @@ public class GetListSubmissionForTeacherGrades
             catch (Exception ex)
             {
                 /** Langkah 13: Menangani kesalahan jika terjadi **/
-                return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure($"Failed to handle assignment submission: {ex.Message}");
+                return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure($"Gagal menangani pengumpulan tugas: {ex.Message}");
             }
         }
 

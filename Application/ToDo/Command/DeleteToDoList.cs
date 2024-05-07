@@ -34,7 +34,7 @@ public class DeleteToDoList
             var result = await _context.SaveChangesAsync() > 0;
 
             /** Langkah 5: Memeriksa apakah penyimpanan berhasil **/
-            if (!result) return Result<Unit>.Failure("Failed to delete ToDoList");
+            if (!result) return Result<Unit>.Failure("Gagal untuk menghapus ToDoList");
 
             /** Langkah 6: Mengembalikan hasil berhasil tanpa data (Unit) **/
             return Result<Unit>.Success(Unit.Value);

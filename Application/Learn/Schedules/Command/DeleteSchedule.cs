@@ -34,7 +34,7 @@ public class DeleteSchedule
             var result = await _context.SaveChangesAsync() > 0;
 
             /** Langkah 5: Memeriksa Hasil Penghapusan **/
-            if (!result) return Result<Unit>.Failure("Failed to delete Schedule");
+            if (!result) return Result<Unit>.Failure("Gagal untuk menghapus jadwal");
 
             /** Langkah 6: Mengembalikan Hasil dalam Bentuk Success Result **/
             return Result<Unit>.Success(Unit.Value);

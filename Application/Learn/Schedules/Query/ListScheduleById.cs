@@ -36,7 +36,7 @@ public class ListScheduleById
                 /** Langkah 2: Memeriksa Ketersediaan Jadwal **/
                 if (schedule == null)
                 {
-                    return Result<ScheduleGetDto>.Failure("Schedule not found");
+                    return Result<ScheduleGetDto>.Failure("Jadwal tidak ditemukan");
                 }
 
                 /** Langkah 3: Mengembalikan Hasil dalam Bentuk Success Result **/
@@ -45,7 +45,7 @@ public class ListScheduleById
             catch (Exception ex)
             {
                 /** Langkah 4: Menangani Kesalahan Jika Terjadi **/
-                return Result<ScheduleGetDto>.Failure($"Failed to retrieve schedule: {ex.Message}");
+                return Result<ScheduleGetDto>.Failure($"Gagal mengambil jadwal: {ex.Message}");
             }
         }
     }

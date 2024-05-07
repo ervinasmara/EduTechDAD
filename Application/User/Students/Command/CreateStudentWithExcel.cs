@@ -22,22 +22,31 @@ namespace Application.User.Students.Command;
         {
             public RegisterStudentCommandValidator()
             {
-                RuleFor(x => x.NameStudent).NotEmpty();
-                RuleFor(x => x.BirthDate).NotEmpty().WithMessage("BirthDate is required");
-                RuleFor(x => x.BirthPlace).NotEmpty();
-                RuleFor(x => x.Address).NotEmpty();
-                RuleFor(x => x.PhoneNumber).NotEmpty().Matches("^[0-9]{8,13}$").WithMessage("Phone number must be between 8 and 13 digits and contain only numbers.");
-                RuleFor(x => x.Nis).NotEmpty();
-                RuleFor(x => x.ParentName).NotEmpty();
+                RuleFor(x => x.NameStudent).NotEmpty().WithMessage("Nama tidak boleh kosong");
+                RuleFor(x => x.BirthDate).NotEmpty().WithMessage("Tanggal lahir tidak boleh kosong");
+                RuleFor(x => x.BirthPlace).NotEmpty().WithMessage("Tempat lahir tidak boleh kosong");
+                RuleFor(x => x.Address).NotEmpty().WithMessage("Alamat tidak boleh kosong");
+                RuleFor(x => x.PhoneNumber)
+                    .NotEmpty().WithMessage("Nomor telepon tidak boleh kosong")
+                    .Matches("^[0-9\\-+]*$").WithMessage("Nomor telepon hanya boleh berisi angka, tanda minus (-), atau tanda plus (+).")
+                    .Length(8, 13).WithMessage("Nomor telepon harus terdiri dari 8 hingga 13 digit");
+                RuleFor(x => x.Nis).NotEmpty().WithMessage("NIS tidak boleh kosong");
+                RuleFor(x => x.ParentName).NotEmpty().WithMessage("Nama orang tua tidak boleh kosong");
                 RuleFor(x => x.Gender)
-                    .NotEmpty().WithMessage("Gender is required")
+                    .NotEmpty().WithMessage("Jenis kelamin tidak boleh kosong")
                     .Must(gender => gender >= 1 && gender <= 2)
-                    .WithMessage("Invalid Gender value. Use 1 for Male, 2 for Female");
-                RuleFor(x => x.Username).NotEmpty();
-                RuleFor(x => x.Password).NotEmpty().Matches("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}$").WithMessage("Password Harus Rumit");
-                RuleFor(x => x.Role).NotEmpty().Equal(3).WithMessage("Role must be 3");
-                RuleFor(x => x.UniqueNumberOfClassRoom).NotEmpty();
-            }
+                    .WithMessage("Nilai Jenis kelamin tidak valid. Gunakan 1 untuk Laki-laki, 2 untuk Perempuan");
+                RuleFor(x => x.Username)
+                .NotEmpty().WithMessage("Nama pengguna tidak boleh kosong")
+                .Length(5, 20).WithMessage("Panjang nama pengguna harus antara 5 hingga 20 karakter")
+                .Must(x => !x.Contains(" ")).WithMessage("Nama pengguna tidak boleh mengandung spasi");
+                RuleFor(x => x.Password)
+                    .NotEmpty().WithMessage("Kata sandi tidak boleh kosong")
+                    .Matches("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{8,16}")
+                    .WithMessage("Kata sandi harus memenuhi kriteria berikut: minimal 8 karakter, maksimal 16 karakter, setidaknya satu huruf kecil, satu huruf besar, dan satu angka");
+                RuleFor(x => x.Role).NotEmpty().Equal(3).WithMessage("Role harus 3");
+                RuleFor(x => x.UniqueNumberOfClassRoom).NotEmpty().WithMessage("Nomor unik ruang kelas tidak boleh kosong");
+        }
         }
 
         public class UploadStudentExcelCommandHandler : IRequestHandler<UploadStudentExcelCommand, Result<List<RegisterStudentExcelDto>>>
@@ -58,7 +67,7 @@ namespace Application.User.Students.Command;
                 /** Langkah 1: Memeriksa validitas berkas **/
                 if (request.File == null || request.File.Length <= 0)
                 {
-                    return Result<List<RegisterStudentExcelDto>>.Failure("Invalid file");
+                    return Result<List<RegisterStudentExcelDto>>.Failure("File tidak valid");
                 }
 
                 var studentsToSave = new List<RegisterStudentExcelDto>(); // Menyimpan siswa yang lolos validasi
@@ -112,7 +121,7 @@ namespace Application.User.Students.Command;
                             {
                                 foreach (var error in validationResult.Errors)
                                 {
-                                    errors.Add($"Error in row {row}: {error.ErrorMessage}");
+                                    errors.Add($"Kesalahan dalam baris {row}: {error.ErrorMessage}");
                                 }
                                 continue; /** Langkah 6.1: Lewati iterasi saat ini jika validasi gagal **/
                             }
@@ -120,14 +129,14 @@ namespace Application.User.Students.Command;
                             /** Langkah 7: Memeriksa duplikasi NIS **/
                             if (nisList.Contains(studentDto.Nis))
                             {
-                                errors.Add($"Error in row {row}: NIS {studentDto.Nis} already exists in previous rows.");
+                                errors.Add($"Kesalahan dalam baris {row}: NIS {studentDto.Nis} sudah ada di baris sebelumnya");
                                 continue; /** Langkah 7.1: Lewati iterasi saat ini jika NIS sudah ada sebelumnya **/
                             }
 
                             /** Langkah 7.2: Periksa duplikasi NIS di database **/
                             if (existingNisList.Contains(studentDto.Nis))
                             {
-                                errors.Add($"Error in row {row}: NIS {studentDto.Nis} already exists in the database.");
+                                errors.Add($"Kesalahan dalam baris {row}: NIS {studentDto.Nis} sudah ada dalam database");
                                 continue; // Skip the current iteration if NIS already exists in the database
                             }
 
@@ -151,7 +160,7 @@ namespace Application.User.Students.Command;
                         var createUserResult = await CreateUserAndStudent(studentDto);
                         if (!createUserResult.IsSuccess)
                         {
-                            errors.Add($"Error in row: {createUserResult.Error}");
+                            errors.Add($"Kesalahan dalam baris: {createUserResult.Error}");
                             break; /** Langkah 11.1: Berhenti memproses jika terjadi kesalahan saat penyimpanan **/
                         }
                     }
@@ -187,7 +196,7 @@ namespace Application.User.Students.Command;
                 /** Langkah 13: Memeriksa duplikasi nama pengguna **/
                 if (await _userManager.Users.AnyAsync(x => x.UserName == user.UserName))
                 {
-                    return Result<List<RegisterStudentExcelDto>>.Failure($"Username {user.UserName} already in use");
+                    return Result<List<RegisterStudentExcelDto>>.Failure($"Username {user.UserName} sudah digunakan");
                 }
 
                 var student = _mapper.Map<Student>(studentDto);
@@ -195,13 +204,13 @@ namespace Application.User.Students.Command;
                 /** Langkah 14: Memeriksa duplikasi NIS **/
                 if (await _context.Students.AnyAsync(s => s.Nis == student.Nis))
                 {
-                    return Result<List<RegisterStudentExcelDto>>.Failure($"Nis {student.Nis} already in use");
+                    return Result<List<RegisterStudentExcelDto>>.Failure($"Nis {student.Nis} sudah digunakan");
                 }
 
                 var selectedClass = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == studentDto.UniqueNumberOfClassRoom);
                 if (selectedClass == null)
                 {
-                    return Result<List<RegisterStudentExcelDto>>.Failure("Selected UniqueNumberOfClass not found");
+                    return Result<List<RegisterStudentExcelDto>>.Failure("Nomor UnikKelas yang dipilih tidak ditemukan");
                 }
 
                 student.AppUserId = user.Id;

@@ -35,7 +35,7 @@ public class ClassRoomTeacher
             /** Langkah 2: Memeriksa Ketersediaan ID Guru **/
             if (teacherId == null)
             {
-                return Result<ClassRoomTeacherDto>.Failure("Teacher ID not found in token");
+                return Result<ClassRoomTeacherDto>.Failure("TeacherId tidak ditemukan ditoken");
             }
 
             /** Langkah 3: Mendapatkan ID Pelajaran yang Diajar oleh Guru **/

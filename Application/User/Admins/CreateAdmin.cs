@@ -16,19 +16,6 @@ public class CreateAdmin
         public RegisterAdminDto AdminDto { get; set; }
     }
 
-    public class RegisterAdminCommandValidator : AbstractValidator<RegisterAdminCommand>
-    {
-        public RegisterAdminCommandValidator()
-        {
-            RuleFor(x => x.AdminDto.NameAdmin).NotEmpty();
-            RuleFor(x => x.AdminDto.Username).NotEmpty().Length(5, 20).WithMessage("Username length must be between 5 and 20 characters");
-            RuleFor(x => x.AdminDto.Password)
-                .NotEmpty()
-                .Matches("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{8,16}")
-                .WithMessage("Password must be complex");
-        }
-    }
-
     public class RegisterAdminCommandHandler : IRequestHandler<RegisterAdminCommand, Result<RegisterAdminDto>>
     {
         private readonly UserManager<AppUser> _userManager;
@@ -81,5 +68,21 @@ public class CreateAdmin
             var result = _mapper.Map<RegisterAdminDto>(admin);
             return Result<RegisterAdminDto>.Success(result);
         }
+    }
+}
+
+public class RegisterAdminCommandValidator : AbstractValidator<RegisterAdminDto>
+{
+    public RegisterAdminCommandValidator()
+    {
+        RuleFor(x => x.NameAdmin).NotEmpty().WithMessage("Nama admin tidak boleh kosong");
+        RuleFor(x => x.Username)
+            .NotEmpty().WithMessage("Nama pengguna tidak boleh kosong")
+            .Length(5, 20).WithMessage("Panjang nama pengguna harus antara 5 hingga 20 karakter")
+            .Must(x => !x.Contains(" ")).WithMessage("Nama pengguna tidak boleh mengandung spasi");
+        RuleFor(x => x.Password)
+            .NotEmpty().WithMessage("Kata sandi tidak boleh kosong")
+            .Matches("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{8,16}")
+            .WithMessage("Kata sandi harus memenuhi kriteria berikut: minimal 8 karakter, maksimal 16 karakter, setidaknya satu huruf kecil, satu huruf besar, dan satu angka");
     }
 }

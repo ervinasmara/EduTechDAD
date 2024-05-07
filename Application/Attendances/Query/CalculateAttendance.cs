@@ -27,7 +27,7 @@ public class CalculateAttendance
             /** Langkah 1: Memeriksa ketersediaan parameter tahun dan bulan **/
             if (string.IsNullOrEmpty(request.Year) || string.IsNullOrEmpty(request.Month))
             {
-                return Result<AttendanceSummaryDto>.Failure("Year and Month parameters are required.");
+                return Result<AttendanceSummaryDto>.Failure("Parameter Tahun dan Bulan diperlukan.");
             }
 
             /** Langkah 2: Menentukan rentang tanggal berdasarkan tahun dan bulan **/

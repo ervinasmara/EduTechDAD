@@ -8,7 +8,6 @@ using Application.User.DTOs.Registration;
 using FluentValidation;
 using System.Text.RegularExpressions;
 using AutoMapper;
-using static Application.User.Students.Command.CreateStudent;
 
 namespace Application.User.Students.Command;
 public class CreateStudent
@@ -104,18 +103,19 @@ public class RegisterStudentCommandValidator : AbstractValidator<RegisterStudent
 {
     public RegisterStudentCommandValidator()
     {
-        RuleFor(x => x.NameStudent).NotEmpty().WithMessage("Name is required");
-        RuleFor(x => x.BirthDate).NotEmpty().WithMessage("BirthDate is required");
-        RuleFor(x => x.BirthPlace).NotEmpty().WithMessage("BirthPlace is required");
-        RuleFor(x => x.Address).NotEmpty().WithMessage("Address is required");
+        RuleFor(x => x.NameStudent).NotEmpty().WithMessage("Nama tidak boleh kosong");
+        RuleFor(x => x.BirthDate).NotEmpty().WithMessage("Tanggal lahir tidak boleh kosong");
+        RuleFor(x => x.BirthPlace).NotEmpty().WithMessage("Tempat lahir tidak boleh kosong");
+        RuleFor(x => x.Address).NotEmpty().WithMessage("Alamat tidak boleh kosong");
         RuleFor(x => x.PhoneNumber)
-            .NotEmpty().WithMessage("Phone number is required")
-            .Matches("^[0-9]{8,13}$").WithMessage("Phone number must be between 8 and 13 digits and contain only numbers.");
-        RuleFor(x => x.ParentName).NotEmpty().WithMessage("ParentName is required");
+            .NotEmpty().WithMessage("Nomor telepon tidak boleh kosong")
+            .Matches("^[0-9\\-+]*$").WithMessage("Nomor telepon hanya boleh berisi angka, tanda minus (-), atau tanda plus (+).")
+            .Length(8, 13).WithMessage("Nomor telepon harus terdiri dari 8 hingga 13 digit");
+        RuleFor(x => x.ParentName).NotEmpty().WithMessage("Nama orang tua tidak boleh kosong");
         RuleFor(x => x.Gender)
-            .NotEmpty().WithMessage("Gender is required")
+            .NotEmpty().WithMessage("Jenis kelamin tidak boleh kosong")
             .Must(gender => gender >= 1 && gender <= 2)
-            .WithMessage("Invalid Gender value. Use 1 for Male, 2 for Female");
-        RuleFor(x => x.UniqueNumberOfClassRoom).NotEmpty().WithMessage("UniqueNumberOfClassRoom is required");
+            .WithMessage("Nilai Jenis kelamin tidak valid. Gunakan 1 untuk Laki-laki, 2 untuk Perempuan");
+        RuleFor(x => x.UniqueNumberOfClassRoom).NotEmpty().WithMessage("Nomor unik ruang kelas tidak boleh kosong");
     }
 }

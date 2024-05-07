@@ -34,12 +34,12 @@ public class ListCourseByTeacherId
             /** Langkah 2: Periksa jika TeacherId ada di token **/
             if (string.IsNullOrEmpty(teacherIdString))
             {
-                return Result<List<CourseGetDto>>.Failure("TeacherId not found in token");
+                return Result<List<CourseGetDto>>.Failure("TeacherId tidak ditemukan ditoken");
             }
 
             if (!Guid.TryParse(teacherIdString, out var teacherId))
             {
-                return Result<List<CourseGetDto>>.Failure("TeacherId not valid.");
+                return Result<List<CourseGetDto>>.Failure("TeacherId tidak valid.");
             }
 
             /** Langkah 3: Gunakan ProjectTo untuk langsung memproyeksikan ke DTO **/
@@ -52,7 +52,7 @@ public class ListCourseByTeacherId
             /** Langkah 4: Periksa jika tidak ada course yang ditemukan untuk guru **/
             if (!courses.Any())
             {
-                return Result<List<CourseGetDto>>.Failure("No courses found for the teacher");
+                return Result<List<CourseGetDto>>.Failure("Tidak ada kursus yang ditemukan untuk Guru");
             }
 
             /** Langkah 5: Kembalikan hasil yang berhasil bersama dengan daftar course DTO **/

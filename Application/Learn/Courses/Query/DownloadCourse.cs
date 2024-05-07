@@ -28,7 +28,7 @@ public class DownloadCourse
             var course = await _context.Courses.FindAsync(request.CourseId);
             if (course == null)
             {
-                return Result<DownloadFileDto>.Failure("File not found.");
+                return Result<DownloadFileDto>.Failure("File tidak ditemukan");
             }
 
             // AutoMapper akan menangani pembacaan file dan penentuan ContentType
@@ -36,7 +36,7 @@ public class DownloadCourse
 
             if (downloadFileDto.FileData == null)
             {
-                return Result<DownloadFileDto>.Failure("File not found.");
+                return Result<DownloadFileDto>.Failure("File tidak ditemukan");
             }
 
             return Result<DownloadFileDto>.Success(downloadFileDto);

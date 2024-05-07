@@ -32,7 +32,7 @@ public class DownloadSubmission
 
             if (submission == null)
             {
-                return Result<DownloadFileDto>.Failure("File not found.");
+                return Result<DownloadFileDto>.Failure("File tidak ditemukan");
             }
 
             // AutoMapper akan menangani pembacaan file dan penentuan ContentType
@@ -40,7 +40,7 @@ public class DownloadSubmission
 
             if (downloadFileDto.FileData == null)
             {
-                return Result<DownloadFileDto>.Failure("File not found.");
+                return Result<DownloadFileDto>.Failure("File tidak ditemukan");
             }
 
             return Result<DownloadFileDto>.Success(downloadFileDto);

@@ -42,7 +42,7 @@ public class EditSchedule
 
                 /** Langkah 2: Memeriksa Ketersediaan Jadwal yang Akan Diedit **/
                 if (schedule == null)
-                    return Result<ScheduleCreateAndEditDto>.Failure($"Schedule with id '{request.ScheduleId}' not found.");
+                    return Result<ScheduleCreateAndEditDto>.Failure($"Jadwal dengan id '{request.ScheduleId}' tidak ditemukan");
 
                 /** Langkah 3: Memetakan Data yang Diperbarui dari DTO ke Entitas Schedule menggunakan AutoMapper **/
                 _mapper.Map(request.ScheduleCreateAndEditDto, schedule);
@@ -53,7 +53,7 @@ public class EditSchedule
 
                 /** Langkah 5: Memeriksa Ketersediaan Pelajaran **/
                 if (lesson == null)
-                    return Result<ScheduleCreateAndEditDto>.Failure($"Lesson with name '{request.ScheduleCreateAndEditDto.LessonName}' not found.");
+                    return Result<ScheduleCreateAndEditDto>.Failure($"Pelajaran dengan nama '{request.ScheduleCreateAndEditDto.LessonName}' tidak ditemukan");
 
                 /** Langkah 6: Memperbarui Properti LessonId **/
                 schedule.LessonId = lesson.Id;
@@ -63,7 +63,7 @@ public class EditSchedule
 
                 /** Langkah 8: Memeriksa Hasil Simpan **/
                 if (!result)
-                    return Result<ScheduleCreateAndEditDto>.Failure("Failed to edit Schedule");
+                    return Result<ScheduleCreateAndEditDto>.Failure("Gagal untuk mengedit jadwal");
 
                 /** Langkah 9: Membuat DTO Respons dan Mengembalikan **/
                 var scheduleDto = _mapper.Map<ScheduleCreateAndEditDto>(schedule);
@@ -74,7 +74,7 @@ public class EditSchedule
             catch (Exception ex)
             {
                 /** Langkah 10: Menangani Kesalahan Jika Terjadi **/
-                return Result<ScheduleCreateAndEditDto>.Failure($"Failed to edit schedule: {ex.Message}");
+                return Result<ScheduleCreateAndEditDto>.Failure($"Gagal untuk mengedit jadwal: {ex.Message}");
             }
         }
     }

@@ -5,7 +5,7 @@ public class ClassRoomCreateAndEditValidator : AbstractValidator<ClassRoomCreate
 {
     public ClassRoomCreateAndEditValidator()
     {
-        RuleFor(x => x.ClassName).NotEmpty();
-        RuleFor(x => x.LongClassName).NotEmpty();
+        RuleFor(x => x.ClassName).NotEmpty().WithMessage("Nama kelas tidak boleh kosong");
+        RuleFor(x => x.LongClassName).NotEmpty().WithMessage("Nama lengkap kelas tidak boleh kosong");
     }
 }

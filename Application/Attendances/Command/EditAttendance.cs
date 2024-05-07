@@ -33,7 +33,7 @@ public class EditAttendance
             // Periksa apakah attendance ditemukan
             if (attendance == null)
             {
-                return Result<AttendanceEditDto>.Failure("Attendance has not found");
+                return Result<AttendanceEditDto>.Failure("Kehadiran tidak ditemukan");
             }
 
             /** Langkah 3: Memetakan data edit ke kehadiran yang ditemukan **/
@@ -44,7 +44,7 @@ public class EditAttendance
 
             if (!result)
             {
-                return Result<AttendanceEditDto>.Failure("Failed to edit Attendance");
+                return Result<AttendanceEditDto>.Failure("Gagal untuk edit Kehadiran");
             }
 
             /** Langkah 5: Membuat instance AttendanceEditDto untuk hasil edit **/
@@ -60,7 +60,7 @@ public class CommandValidatorDto : AbstractValidator<AttendanceEditDto>
     public CommandValidatorDto()
     {
         RuleFor(x => x.Date).NotEmpty();
-        RuleFor(x => x.Status).NotEmpty().WithMessage("Status is required.");
-        RuleFor(x => x.Status).InclusiveBetween(1, 3).WithMessage("Status must be between 1 and 3.");
+        RuleFor(x => x.Status).NotEmpty().WithMessage("Status tidak boleh kosong");
+        RuleFor(x => x.Status).InclusiveBetween(1, 3).WithMessage("Status harus antara 1 dan 3");
     }
 }

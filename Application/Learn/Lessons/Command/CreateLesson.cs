@@ -41,7 +41,7 @@ public class CreateLesson
 
             if (classroom == null)
             {
-                return Result<LessonCreateAndEditDto>.Failure($"Classroom with name '{request.LessonCreateAndEditDto.ClassName}' not found.");
+                return Result<LessonCreateAndEditDto>.Failure($"Classroom dengan nama '{request.LessonCreateAndEditDto.ClassName}' tidak ditemukan");
             }
 
             /** Langkah 2: Validasi Keunikan Nama Pelajaran **/
@@ -50,7 +50,7 @@ public class CreateLesson
 
             if (!isLessonNameUnique)
             {
-                return Result<LessonCreateAndEditDto>.Failure("Lesson name must be unique");
+                return Result<LessonCreateAndEditDto>.Failure("Nama mapel harus unik");
             }
 
             /** Langkah 3: Tentukan UniqueNumberOfLesson **/
@@ -73,7 +73,7 @@ public class CreateLesson
             var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
             if (!result)
-                return Result<LessonCreateAndEditDto>.Failure("Failed to create Lesson");
+                return Result<LessonCreateAndEditDto>.Failure("Gagal untuk membuat Lesson");
 
             /** Langkah 6: Kirimkan DTO dalam Response **/
             var lessonDto = _mapper.Map<LessonCreateAndEditDto>(lesson);

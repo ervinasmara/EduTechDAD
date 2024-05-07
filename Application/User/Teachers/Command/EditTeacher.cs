@@ -38,7 +38,7 @@ public class EditTeacher
             /** Langkah 2: Memeriksa apakah guru ditemukan **/
             if (teacher == null)
             {
-                return Result<EditTeacherDto>.Failure("Teacher not found");
+                return Result<EditTeacherDto>.Failure("Guru tidak ditemukan");
             }
 
             /** Langkah 3: Memetakan data dari EditTeacherCommand ke entitas Teacher menggunakan AutoMapper **/
@@ -50,7 +50,7 @@ public class EditTeacher
                 var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.LessonName == lessonName);
                 if (lesson == null)
                 {
-                    return Result<EditTeacherDto>.Failure($"LessonName '{lessonName}' you choose doesn't exist");
+                    return Result<EditTeacherDto>.Failure($"Nama pelajaran '{lessonName}' yang Anda pilih tidak ada");
                 }
             }
 
@@ -73,7 +73,7 @@ public class EditTeacher
             /** Langkah 8: Memeriksa hasil penyimpanan **/
             if (!result)
             {
-                return Result<EditTeacherDto>.Failure("Failed to update teacher");
+                return Result<EditTeacherDto>.Failure("Gagal untuk edit Guru");
             }
 
             /** Langkah 9: Memetakan kembali entitas Teacher ke DTO **/
@@ -90,9 +90,11 @@ public class EditTeacherCommandValidator : AbstractValidator<EditTeacherDto>
 {
     public EditTeacherCommandValidator()
     {
-        RuleFor(x => x.Address).NotEmpty().WithMessage("Address is required.");
-        RuleFor(x => x.PhoneNumber).NotEmpty().WithMessage("Phone number is required.")
-                                      .Matches("^[0-9]{8,13}$").WithMessage("Phone number must be between 8 and 13 digits and contain only numbers.");
-        RuleFor(x => x.LessonNames).NotEmpty().WithMessage("LessonNames is required.");
+        RuleFor(x => x.Address).NotEmpty().WithMessage("Alamat tidak boleh kosong");
+        RuleFor(x => x.PhoneNumber)
+            .NotEmpty().WithMessage("Nomor telepon tidak boleh kosong")
+            .Matches("^[0-9\\-+]*$").WithMessage("Nomor telepon hanya boleh berisi angka, tanda minus (-), atau tanda plus (+).")
+            .Length(8, 13).WithMessage("Nomor telepon harus terdiri dari 8 hingga 13 digit");
+        RuleFor(x => x.LessonNames).NotEmpty().WithMessage("Nama pelajaran tidak boleh kosong");
     }
 }
