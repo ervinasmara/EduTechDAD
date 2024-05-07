@@ -29,6 +29,7 @@ public class GetAllByStudentId
             var attendances = await _context.Attendances
                 .Where(a => a.StudentId == request.StudentId)
                 .ProjectTo<AttendanceGetByStudentIdDto>(_mapper.ConfigurationProvider)
+                .OrderByDescending(a => a.Date)
                 .ToListAsync(cancellationToken);
 
             return Result<List<AttendanceGetByStudentIdDto>>.Success(attendances);

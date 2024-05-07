@@ -11,7 +11,6 @@ public class CreateAttendance
 {
     public class Command : IRequest<Result<AttendanceCreateDto>>
     {
-        public Guid ClassRoomId { get; set; }
         public AttendanceCreateDto AttendanceCreateDto { get; set; }
     }
 
@@ -28,14 +27,22 @@ public class CreateAttendance
 
         public async Task<Result<AttendanceCreateDto>> Handle(Command request, CancellationToken cancellationToken)
         {
-            // Validasi ClassRoomId
-            var classroom = await _context.ClassRooms.FindAsync(request.ClassRoomId);
+            // Ambil ClassRoomId dari siswa pertama dalam daftar kehadiran
+            var firstStudentId = request.AttendanceCreateDto.AttendanceStudentCreate.FirstOrDefault()?.StudentId;
+            if (firstStudentId == null)
+                return Result<AttendanceCreateDto>.Failure("No students provided in the attendance list.");
+
+            var classroom = await _context.Students
+                .Where(s => s.Id == firstStudentId)
+                .Select(s => s.ClassRoomId)
+                .FirstOrDefaultAsync();
+
             if (classroom == null)
-                return Result<AttendanceCreateDto>.Failure($"Invalid ClassRoomId: {request.ClassRoomId}");
+                return Result<AttendanceCreateDto>.Failure("Invalid StudentId or no class associated with the student.");
 
             // Dapatkan daftar siswa dalam kelas
             var studentsInClassroom = await _context.Students
-                .Where(s => s.ClassRoomId == request.ClassRoomId && s.Status != 0)
+                .Where(s => s.ClassRoomId == classroom && s.Status != 0)
                 .ToListAsync(cancellationToken);
 
             // Periksa apakah semua siswa diabsen

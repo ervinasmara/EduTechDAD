@@ -42,9 +42,9 @@ public class AttendancesController : BaseApiController
     /** Create Attendance **/
     [Authorize(Policy = "RequireRole1")]
     [HttpPost]
-    public async Task<IActionResult> CreateAttendanceDto([FromQuery] Guid classRoomId, [FromBody] AttendanceCreateDto announcementDto, CancellationToken ct)
+    public async Task<IActionResult> CreateAttendanceDto(AttendanceCreateDto announcementDto, CancellationToken ct)
     {
-        return HandleResult(await Mediator.Send(new CreateAttendance.Command { ClassRoomId = classRoomId, AttendanceCreateDto = announcementDto }, ct));
+        return HandleResult(await Mediator.Send(new CreateAttendance.Command { AttendanceCreateDto = announcementDto }, ct));
     }
 
     /** Edit Attendance **/
