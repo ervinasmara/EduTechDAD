@@ -5,19 +5,19 @@ public class AssignmentValidator : AbstractValidator<AssignmentCreateAndEditDto>
 {
     public AssignmentValidator()
     {
-        RuleFor(x => x.AssignmentName).NotEmpty();
-        RuleFor(x => x.AssignmentDate).NotEmpty();
-        RuleFor(x => x.AssignmentDeadline).NotEmpty();
-        RuleFor(x => x.AssignmentDescription).NotEmpty();
-        RuleFor(x => x.CourseId).NotEmpty();
+        RuleFor(x => x.AssignmentName).NotEmpty().WithMessage("Nama tugas tidak boleh kosong");
+        RuleFor(x => x.AssignmentDate).NotEmpty().WithMessage("Tanggal tugas tidak boleh kosong");
+        RuleFor(x => x.AssignmentDeadline).NotEmpty().WithMessage("Tenggat waktu tugas tidak boleh kosong");
+        RuleFor(x => x.AssignmentDescription).NotEmpty().WithMessage("Deskripsi tugas tidak boleh kosong");
+        RuleFor(x => x.CourseId).NotEmpty().WithMessage("Materi tugas tidak boleh kosong");
         RuleFor(x => x.TypeOfSubmission)
-            .NotEmpty().WithMessage("Type of submission is required.")
+            .NotEmpty().WithMessage("Tipe pengumpulan tidak boleh kosong")
             .Must(x => x == 1 || x == 2)
-            .WithMessage("Type of submission must be either 1 (for file) or 2 (for link).");
+            .WithMessage("Jenis pengiriman harus berupa 1 (untuk file) atau 2 (untuk tautan).");
 
         RuleFor(x => x.AssignmentLink)
             .NotEmpty()
             .When(x => x.AssignmentFileData == null) // Hanya memeriksa AssignmentLink jika FileData kosong
-            .WithMessage("AssignmentLink must be provided if FileData is not provided.");
+            .WithMessage("Link Tugas harus disediakan jika FileData tidak disediakan.");
     }
 }

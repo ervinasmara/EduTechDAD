@@ -46,7 +46,7 @@ public class ListAssignmentsByClassRoomId
             /** 3. Periksa hasil kosong dan kembalikan kegagalan jika tidak ada penugasan yang ditemukan **/
             if (!assignments.Any())
             {
-                return Result<List<AssignmentGetByClassRoomIdDto>>.Failure("No assignments found for the given ClassRoomId");
+                return Result<List<AssignmentGetByClassRoomIdDto>>.Failure("Tidak ada tugas yang ditemukan untuk ClassRoomId yang diberikan");
             }
 
             /** Langkah 4: Ulangi penugasan dan tambahkan status pengajuan ke setiap DTO **/

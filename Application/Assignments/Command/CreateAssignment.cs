@@ -45,7 +45,7 @@ public class CreateAssignment
 
             if (teacherId == null)
             {
-                return Result<AssignmentCreateAndEditDto>.Failure("Teacher ID not found in token");
+                return Result<AssignmentCreateAndEditDto>.Failure("TeacherId tidak ditemukan ditoken");
             }
 
             /** Langkah 2: Periksa akses Guru ke Course **/
@@ -55,7 +55,7 @@ public class CreateAssignment
 
             if (!isTeacherHasAccessToCourse)
             {
-                return Result<AssignmentCreateAndEditDto>.Failure("Teacher does not have access to this Course");
+                return Result<AssignmentCreateAndEditDto>.Failure("Guru tidak memiliki akses ke Materi ini");
             }
 
             /** Langkah 3: Buat objek Assignment dari DTO menggunakan AutoMapper **/
@@ -74,7 +74,7 @@ public class CreateAssignment
                 string fileExtension = Path.GetExtension(request.AssignmentCreateAndEditDto.AssignmentFileData.FileName);
                 if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
                 {
-                    return Result<AssignmentCreateAndEditDto>.Failure("Only PDF files are allowed.");
+                    return Result<AssignmentCreateAndEditDto>.Failure("Hanya file PDF yang diperbolehkan");
                 }
             }
 
@@ -82,7 +82,7 @@ public class CreateAssignment
             var course = await _context.Courses.FindAsync(courseId);
             if (course == null)
             {
-                return Result<AssignmentCreateAndEditDto>.Failure("Course not found");
+                return Result<AssignmentCreateAndEditDto>.Failure("Materi tidak ditemukan");
             }
 
             course.Assignments ??= new List<Assignment>(); // Pastikan koleksi Assignments tidak null
@@ -94,7 +94,7 @@ public class CreateAssignment
 
             if (!result)
             {
-                return Result<AssignmentCreateAndEditDto>.Failure("Failed to create Assignment");
+                return Result<AssignmentCreateAndEditDto>.Failure("Gagal untuk membuat tugas");
             }
 
             /** Langkah 7: Kirim kembali DTO sebagai respons **/

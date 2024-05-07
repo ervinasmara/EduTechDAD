@@ -31,12 +31,12 @@ public class DeactivateAssignment
             /** Langkah 2: Periksa jika TeacherId ada di token **/
             if (string.IsNullOrEmpty(teacherIdString))
             {
-                return Result<object>.Failure("TeacherId not found in token");
+                return Result<object>.Failure("TeacherId tidak ditemukan ditoken");
             }
 
             if (!Guid.TryParse(teacherIdString, out var teacherId))
             {
-                return Result<object>.Failure("TeacherId not valid.");
+                return Result<object>.Failure("TeacherId tidak valid.");
             }
 
             /** Langkah 3: Ubah status Assignment menjadi 0 **/
@@ -49,13 +49,13 @@ public class DeactivateAssignment
             // Periksa apakah ada assignment yang ditemukan
             if (assignment == null)
             {
-                return Result<object>.Failure("Assignment not found");
+                return Result<object>.Failure("Tugas tidak ditemukan");
             }
 
             // Memeriksa apakah teacher memiliki keterkaitan dengan assignment yang dimasukkan
             if (assignment.Course.Lesson.TeacherLessons == null || !assignment.Course.Lesson.TeacherLessons.Any(tl => tl.TeacherId == teacherId))
             {
-                return Result<object>.Failure($"Teacher does not have this assignment.");
+                return Result<object>.Failure($"Guru tidak memiliki tugas ini");
             }
 
             /** Langkah 4: Mengubah status assignment menjadi 0 (nonaktif) **/
@@ -65,7 +65,7 @@ public class DeactivateAssignment
             await _context.SaveChangesAsync(cancellationToken);
 
             /** Langkah 6: Mengembalikan hasil berhasil dengan pesan **/
-            return Result<object>.Success(new { Message = "Assignment status updated successfully" });
+            return Result<object>.Success(new { Message = "Status tugas berhasil diupdate" });
         }
     }
 }

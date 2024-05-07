@@ -26,7 +26,7 @@ public class DownloadAssignment
             var assignment = await _context.Assignments.FindAsync(request.AssignmentId);
             if (assignment == null)
             {
-                return Result<DownloadFileDto>.Failure("File not found.");
+                return Result<DownloadFileDto>.Failure("File tidak ditemukan");
             }
 
             // AutoMapper akan menangani pembacaan file dan penentuan ContentType
@@ -34,7 +34,7 @@ public class DownloadAssignment
 
             if (downloadFileDto.FileData == null)
             {
-                return Result<DownloadFileDto>.Failure("File not found.");
+                return Result<DownloadFileDto>.Failure("File tidak ditemukan");
             }
 
             return Result<DownloadFileDto>.Success(downloadFileDto);

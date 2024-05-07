@@ -35,7 +35,7 @@ public class ListAssignmentsByTeacherId
             /** Langkah 2: Validasi TeacherId (penanganan kesalahan untuk string kosong) **/
             if (string.IsNullOrEmpty(teacherId))
             {
-                return Result<List<AssignmentGetByTeacherIdDto>>.Failure("TeacherId not found in token.");
+                return Result<List<AssignmentGetByTeacherIdDto>>.Failure("TeacherId tidak ditemukan ditoken");
             }
 
             try
@@ -50,7 +50,7 @@ public class ListAssignmentsByTeacherId
                 /** Langkah 4: Periksa hasil kosong dan kembalikan kegagalan jika tidak ada penugasan yang ditemukan **/
                 if (assignments == null || !assignments.Any())
                 {
-                    return Result<List<AssignmentGetByTeacherIdDto>>.Failure("No assignments found for the given TeacherId");
+                    return Result<List<AssignmentGetByTeacherIdDto>>.Failure("Tidak ada tugas yang ditemukan untuk TeacherId yang diberikan");
                 }
 
                 /** Langkah 5: Kembalikan hasil yang berhasil dengan daftar Assignments **/
@@ -59,7 +59,7 @@ public class ListAssignmentsByTeacherId
             catch (Exception ex)
             {
                 /** 6. Menangkap pengecualian potensial selama pengambilan data dan kegagalan pengembalian dengan pesan kesalahan **/
-                return Result<List<AssignmentGetByTeacherIdDto>>.Failure($"Failed to retrieve assignments: {ex.Message}");
+                return Result<List<AssignmentGetByTeacherIdDto>>.Failure($"Gagal mengambil tugas: {ex.Message}");
             }
         }
     }

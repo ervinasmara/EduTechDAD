@@ -35,7 +35,7 @@ public class DetailsAssignment
             // Periksa apakah assignment ditemukan
             if (assignmentDto == null)
             {
-                return Result<AssignmentGetByIdDto>.Failure("Assignment not found.");
+                return Result<AssignmentGetByIdDto>.Failure("Tugas tidak ditemukan");
             }
 
             return Result<AssignmentGetByIdDto>.Success(assignmentDto);

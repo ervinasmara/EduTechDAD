@@ -45,7 +45,7 @@ public class EditAssignment
 
             if (teacherId == null)
             {
-                return Result<AssignmentCreateAndEditDto>.Failure("Teacher ID not found in token");
+                return Result<AssignmentCreateAndEditDto>.Failure("TeacherId tidak ditemukan ditoken");
             }
 
             /** Step 2: Cek apakah Teacher punya akses ke Course yang dipilih **/
@@ -63,7 +63,7 @@ public class EditAssignment
 
             if (assignment == null)
             {
-                return Result<AssignmentCreateAndEditDto>.Failure("Assignment not found");
+                return Result<AssignmentCreateAndEditDto>.Failure("Tugas tidak ditemukan");
             }
 
             /** Langkah 4 (Opsional): Menangani pengunggahan file **/
@@ -84,7 +84,7 @@ public class EditAssignment
 
             if (!result)
             {
-                return Result<AssignmentCreateAndEditDto>.Failure("Failed to update Assignment");
+                return Result<AssignmentCreateAndEditDto>.Failure("Gagal untuk mengupdate tugas");
             }
 
             /** Langkah 7: Kembalikan respons sukses dengan DTO **/
