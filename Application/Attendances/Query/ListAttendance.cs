@@ -30,6 +30,7 @@ public class ListAttendance
             var studentsQuery = _context.Students
                 .Include(s => s.ClassRoom)
                 .Include(s => s.Attendances)
+                .OrderBy(s => s.Nis)
                 .AsQueryable();
 
             /** Langkah 2: Proyeksi ke AttendanceGetDto menggunakan AutoMapper **/

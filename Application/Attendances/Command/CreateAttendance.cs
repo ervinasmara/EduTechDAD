@@ -84,8 +84,8 @@ public class CreateAttendance
 
             if (existingAttendances.Any())
             {
-                var existingStudentIds = existingAttendances.Select(a => a.StudentId).Distinct().ToList();
-                return Result<AttendanceCreateDto>.Failure($"Kehadiran sudah ada untuk StudentIds: {string.Join(", ", existingStudentIds)} on {request.AttendanceCreateDto.Date}");
+                var existingStudentIds = existingAttendances.Select(a => a.Student.NameStudent).Distinct().ToList();
+                return Result<AttendanceCreateDto>.Failure($"Absensi sudah ada pada tanggal {request.AttendanceCreateDto.Date}");
             }
 
             /** Langkah 4: Menambahkan entri kehadiran **/

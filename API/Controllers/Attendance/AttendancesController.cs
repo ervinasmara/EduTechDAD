@@ -55,4 +55,23 @@ public class AttendancesController : BaseApiController
         var result = await Mediator.Send(new EditAttendance.Command { Id = id, AttendanceEditDto = announcementEditDto }, ct);
         return HandleResult(result);
     }
+
+    [AllowAnonymous]
+    [HttpGet("download-attendance")]
+    public async Task<IActionResult> DownloadAttendance([FromQuery] DownloadAttendance.AttendanceQuery query)
+    {
+        var result = await Mediator.Send(query);
+
+        if (result.IsSuccess)
+        {
+            var fileContent = result.Value.Item1; // Mengambil byte array dari hasil
+            var fileName = result.Value.Item2; // Mengambil fileName dari hasil
+
+            return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName + ".xlsx");
+        }
+        else
+        {
+            return BadRequest(result.Error);
+        }
+    }
 }

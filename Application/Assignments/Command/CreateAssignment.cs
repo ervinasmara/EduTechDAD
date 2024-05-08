@@ -62,13 +62,7 @@ public class CreateAssignment
             var assignment = _mapper.Map<Assignment>(request.AssignmentCreateAndEditDto);
 
             /** Langkah 4 (Opsional): Simpan file dan dapatkan path **/
-            if (request.AssignmentCreateAndEditDto.AssignmentFileData != null)
-            {
-                string relativeFolderPath = "Upload/FileAssignment";
-                assignment.FilePath = await _fileService.SaveFileAsync(request.AssignmentCreateAndEditDto.AssignmentFileData,
-                    relativeFolderPath, request.AssignmentCreateAndEditDto.AssignmentName, assignment.CreatedAt);
-            }
-
+            string filePath = null;
             if (request.AssignmentCreateAndEditDto.AssignmentFileData != null)
             {
                 string fileExtension = Path.GetExtension(request.AssignmentCreateAndEditDto.AssignmentFileData.FileName);
@@ -76,6 +70,22 @@ public class CreateAssignment
                 {
                     return Result<AssignmentCreateAndEditDto>.Failure("Hanya file PDF yang diperbolehkan");
                 }
+
+                string relativeFolderPath = "Upload/FileAssignment";
+                filePath = await _fileService.SaveFileAsync(request.AssignmentCreateAndEditDto.AssignmentFileData,
+                    relativeFolderPath, request.AssignmentCreateAndEditDto.AssignmentName, assignment.CreatedAt);
+            }
+
+            // Jika tidak ada file yang diunggah atau jika file yang diunggah adalah file PDF, lanjutkan proses
+            if (filePath != null || request.AssignmentCreateAndEditDto.AssignmentFileData == null)
+            {
+                // Setelah menyimpan file, set FilePath pada assignment
+                assignment.FilePath = filePath;
+            }
+            else
+            {
+                // Jika file yang diunggah bukan file PDF, hentikan proses dan kembalikan kegagalan
+                return Result<AssignmentCreateAndEditDto>.Failure("Hanya file PDF yang diperbolehkan");
             }
 
             /** Langkah 5: Tambahkan Assignment ke Course **/

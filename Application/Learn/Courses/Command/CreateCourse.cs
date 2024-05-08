@@ -72,24 +72,30 @@ public class CreateCourse
             string filePath = null;
             if (request.CourseCreateAndEditDto.FileData != null)
             {
-                string relativeFolderPath = "Upload/FileCourse";
-                filePath = await _fileService.SaveFileAsync(request.CourseCreateAndEditDto.FileData, relativeFolderPath, request.CourseCreateAndEditDto.CourseName, course.CreatedAt);
-            }
-
-            if (request.CourseCreateAndEditDto.FileData != null)
-            {
                 string fileExtension = Path.GetExtension(request.CourseCreateAndEditDto.FileData.FileName);
                 if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
                 {
                     return Result<CourseCreateAndEditDto>.Failure("Hanya file PDF yang diperbolehkan");
                 }
+
+                string relativeFolderPath = "Upload/FileCourse";
+                filePath = await _fileService.SaveFileAsync(request.CourseCreateAndEditDto.FileData, relativeFolderPath, request.CourseCreateAndEditDto.CourseName, course.CreatedAt);
             }
 
-            // Setelah menyimpan file, set FilePath pada course
-            course.FilePath = filePath;
+            // Jika tidak ada file yang diunggah atau jika file yang diunggah adalah file PDF, lanjutkan proses
+            if (filePath != null || request.CourseCreateAndEditDto.FileData == null)
+            {
+                // Setelah menyimpan file, set FilePath pada course
+                course.FilePath = filePath;
 
-            // Menyesuaikan CreatedAt dengan waktu Indonesia
-            course.CreatedAt = DateTime.UtcNow.AddHours(7);
+                // Menyesuaikan CreatedAt dengan waktu Indonesia
+                course.CreatedAt = DateTime.UtcNow.AddHours(7);
+            }
+            else
+            {
+                // Jika file yang diunggah bukan file PDF, hentikan proses dan kembalikan kegagalan
+                return Result<CourseCreateAndEditDto>.Failure("Hanya file PDF yang diperbolehkaaaaaaaaaaaaaan");
+            }
 
             /** Langkah 5: Menyimpan Course ke database **/
             _context.Courses.Add(course);

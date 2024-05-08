@@ -1,5 +1,4 @@
-﻿using Application.Learn.GetFileName;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
 namespace Application.Assignments;
 public class AssignmentGetByIdDto
@@ -60,7 +59,6 @@ public class AssignmentCreateAndEditDto
     public DateOnly AssignmentDate { get; set; }
     public DateTime AssignmentDeadline { get; set; }
     public string AssignmentDescription { get; set; }
-    [AllowedExtensions(new string[] { ".pdf" })]
     public IFormFile AssignmentFileData { get; set; }
     public string AssignmentLink { get; set; }
     public int TypeOfSubmission { get; set; }

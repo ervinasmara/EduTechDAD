@@ -66,14 +66,21 @@ public class CreateSubmissionByStudentId
                 assignmentSubmission.StudentId = studentId;
 
                 /** Langkah 5.2: Simpan file submission jika ada **/
+                string submissionFilePath = null;
                 if (request.SubmissionDto.FileData != null)
                 {
+                    string fileExtension = Path.GetExtension(request.SubmissionDto.FileData.FileName);
+                    if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return Result<SubmissionCreateByStudentIdDto>.Failure("Hanya file PDF yang diperbolehkan");
+                    }
+
                     string relativeFolderPath = "Upload/FileAssignmentSubmission";
-                    assignmentSubmission.FilePath = await _fileService.SaveFileSubmission(request.SubmissionDto.FileData, relativeFolderPath, DateTime.UtcNow);
+                    submissionFilePath = await _fileService.SaveFileSubmission(request.SubmissionDto.FileData, relativeFolderPath, DateTime.UtcNow);
                 }
 
                 /** Langkah 5.3: Validasi jenis file **/
-                if (request.SubmissionDto.FileData != null)
+                if (request.SubmissionDto.FileData != null && submissionFilePath == null)
                 {
                     string fileExtension = Path.GetExtension(request.SubmissionDto.FileData.FileName);
                     if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
@@ -84,6 +91,7 @@ public class CreateSubmissionByStudentId
 
                 /** Langkah 6: Tetapkan ID tugas dan tambahkan submission ke konteks **/
                 assignmentSubmission.AssignmentId = assignment.Id;
+                assignmentSubmission.FilePath = submissionFilePath;
                 _context.AssignmentSubmissions.Add(assignmentSubmission);
 
                 /** Langkah 7: Simpan perubahan ke database **/

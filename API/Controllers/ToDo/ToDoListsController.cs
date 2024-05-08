@@ -32,7 +32,14 @@ public class ToDoListsController : BaseApiController
 
     /** Ceklis ToDoList */
     [HttpPut("{id}")]
-    public async Task<IActionResult> EditToDoList(Guid id, CancellationToken ct)
+    public async Task<IActionResult> EditToDoList(Guid id, ToDoListDto toDoList, CancellationToken ct)
+    {
+        return HandleResult(await Mediator.Send(new EditToDoList.Command { ToDoListId = id, ToDoListDto = toDoList }, ct));
+    }
+
+    /** Ceklis ToDoList */
+    [HttpPut("ceklis/{id}")]
+    public async Task<IActionResult> EditToDoListCeklis(Guid id, CancellationToken ct)
     {
         return HandleResult(await Mediator.Send(new CeklisToDoList.Command { ToDoListId = id }, ct));
     }
