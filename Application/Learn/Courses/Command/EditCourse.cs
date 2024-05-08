@@ -76,6 +76,12 @@ public class EditCourse
             string filePath = null;
             if (request.CourseCreateAndEditDto.FileData != null)
             {
+                string fileExtension = Path.GetExtension(request.CourseCreateAndEditDto.FileData.FileName);
+                if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Result<CourseCreateAndEditDto>.Failure("Hanya file PDF yang diperbolehkan");
+                }
+
                 string relativeFolderPath = "Upload/FileCourse";
                 filePath = await _fileService.SaveFileAsync(request.CourseCreateAndEditDto.FileData, relativeFolderPath, request.CourseCreateAndEditDto.CourseName, course.CreatedAt);
             }

@@ -67,20 +67,34 @@ public class EditAssignment
             }
 
             /** Langkah 4 (Opsional): Menangani pengunggahan file **/
+            string assignmentFilePath = null;
             if (request.AssignmentCreateAndEditDto.AssignmentFileData != null)
             {
+                string fileExtension = Path.GetExtension(request.AssignmentCreateAndEditDto.AssignmentFileData.FileName);
+                if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Result<AssignmentCreateAndEditDto>.Failure("Hanya file PDF yang diperbolehkan");
+                }
+
                 string relativeFolderPath = "Upload/FileAssignment";
-                assignment.FilePath = await _fileService.SaveFileAsync(request.AssignmentCreateAndEditDto.AssignmentFileData,
+                assignmentFilePath = await _fileService.SaveFileAsync(request.AssignmentCreateAndEditDto.AssignmentFileData,
                     relativeFolderPath, request.AssignmentCreateAndEditDto.AssignmentName, assignment.CreatedAt);
             }
 
             /** Langkah 5: Perbarui properti Assignment menggunakan AutoMapper **/
             _mapper.Map(request.AssignmentCreateAndEditDto, assignment);
 
-            // **Note:** Baris ini memperbarui properti `penugasan` yang ada dengan nilai dari DTO.
+            // **Note:** Baris ini memperbarui properti `assignment` yang ada dengan nilai dari DTO.
+
+            // Tetapkan FilePath dengan nilai yang disimpan (jika ada)
+            assignment.FilePath = assignmentFilePath;
 
             /** Langkah 6: Menyimpan perubahan ke basis data **/
             var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+            if (!result)
+            {
+                return Result<AssignmentCreateAndEditDto>.Failure("Gagal menyimpan perubahan tugas.");
+            }
 
             if (!result)
             {
