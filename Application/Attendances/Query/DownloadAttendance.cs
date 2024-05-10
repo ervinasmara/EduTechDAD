@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using Application.Core;
 using Domain.Attendances;
-using Domain.Class;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
@@ -67,9 +60,6 @@ public class DownloadAttendance
                 return Result<(byte[], string)>.Failure("Data kehadiran tidak ditemukan.");
             }
 
-            // Buat nama file
-            var fileName = $"{classRoom.LongClassName}, {CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(startDate.Month)} {startDate.Year}";
-
             // Buat workbook Excel
             var workbook = new XSSFWorkbook();
             var sheet = workbook.CreateSheet("Attendance");
@@ -87,6 +77,7 @@ public class DownloadAttendance
             using (var ms = new MemoryStream())
             {
                 workbook.Write(ms);
+                var fileName = $"{classRoom.LongClassName}, {CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(startDate.Month)} {startDate.Year}";
                 return Result<(byte[], string)>.Success((ms.ToArray(), fileName));
             }
         }
@@ -125,12 +116,6 @@ public class DownloadAttendance
             nisCell.CellStyle = GetCellStyle(sheet.Workbook, 0); // Memanggil metode GetCellStyle dengan kode status 0
             sheet.AddMergedRegion(new CellRangeAddress(0, 1, 1, 1));
 
-            //// Kelas
-            //var classCell = headerRow.CreateCell(2);
-            //classCell.SetCellValue("Kelas");
-            //classCell.CellStyle = GetCellStyle(sheet.Workbook, 0); // Memanggil metode GetCellStyle dengan kode status 0
-            //sheet.AddMergedRegion(new CellRangeAddress(0, 1, 2, 2));
-
             // Bulan dan Tahun
             var monthYearCell = headerRow.CreateCell(2);
             monthYearCell.SetCellValue(startDate.ToString("MMMM yyyy"));
@@ -141,10 +126,21 @@ public class DownloadAttendance
             // Tanggal dalam bulan
             for (int i = 0; i < daysInMonth; i++)
             {
+                var date = startDate.AddDays(i);
                 var dateCell = headerRow2.CreateCell(2 + i);
-                dateCell.SetCellValue(startDate.AddDays(i).Day);
-                dateCell.CellStyle = styles["bordered"];
+                dateCell.SetCellValue(date.Day);
+
+                // Periksa apakah hari Sabtu atau Minggu
+                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    dateCell.CellStyle = GetCellStyle(sheet.Workbook, 3); // Warna merah untuk hari Sabtu dan Minggu
+                }
+                else
+                {
+                    dateCell.CellStyle = GetCellStyle(sheet.Workbook, 0); // Warna default
+                }
             }
+
 
             // Keterangan
             var keteranganCell = headerRow.CreateCell(2 + daysInMonth);
@@ -166,10 +162,57 @@ public class DownloadAttendance
             tidakHadirCell.CellStyle = styles["absent"];
         }
 
+        private void MergeWeekendColumns(ISheet sheet, DateOnly startDate, int daysInMonth, int lastRow)
+        {
+            // Loop untuk setiap hari dalam bulan
+            for (int i = 0; i < daysInMonth; i++)
+            {
+                var date = startDate.AddDays(i);
+                int columnIndex = 2 + i; // Kolom dimulai dari 2 karena 0 dan 1 digunakan untuk data lain
+
+                // Jika hari adalah Sabtu atau Minggu, merge kolom tersebut
+                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    // Merge kolom dari baris ke-3 hingga baris terakhir data
+                    if (lastRow > 2) // Pastikan ada lebih dari satu baris untuk di-merge
+                    {
+                        sheet.AddMergedRegion(new CellRangeAddress(2, lastRow, columnIndex, columnIndex));
+                    }
+                }
+            }
+        }
+
+        private void LabelAndRotateWeekendColumns(ISheet sheet, DateOnly startDate, int daysInMonth)
+        {
+            ICellStyle verticalTextStyle = sheet.Workbook.CreateCellStyle();
+            verticalTextStyle.Rotation = 90; // Putar teks 90 derajat
+
+            // Loop untuk setiap hari dalam bulan
+            for (int i = 0; i < daysInMonth; i++)
+            {
+                var date = startDate.AddDays(i);
+                int columnIndex = 2 + i; // Kolom dimulai dari 2 karena 0 dan 1 digunakan untuk data lain
+
+                // Jika hari adalah Sabtu, tulis "Sabtu" dan putar teks
+                if (date.DayOfWeek == DayOfWeek.Saturday)
+                {
+                    ICell cell = sheet.GetRow(2).CreateCell(columnIndex); // Asumsikan baris 1 digunakan untuk label hari
+                    cell.SetCellValue("Sabtu");
+                    cell.CellStyle = verticalTextStyle;
+                }
+            }
+        }
+
+        // Di dalam metode WriteAttendanceData, setelah loop foreach
+
+
 
         private void WriteAttendanceData(ISheet sheet, List<Attendance> attendances, DateOnly startDate, Dictionary<string, ICellStyle> styles)
         {
             int rowIndex = 2;
+            int lastRow = rowIndex + attendances.Count - 1; // Baris terakhir setelah menulis semua data
+            var daysInMonth = startDate.AddMonths(1).AddDays(-1).Day;
+
             foreach (var attendanceGroup in attendances.GroupBy(a => a.StudentId))
             {
                 var row = sheet.CreateRow(rowIndex++);
@@ -186,33 +229,35 @@ public class DownloadAttendance
                 var nisCell = row.CreateCell(1);
                 nisCell.SetCellValue(student.Nis); // Ambil NIS dari objek student
                 nisCell.CellStyle = styles["bordered"];
-                // Tambahkan border di sebelah kanan
-                //nisCell.CellStyle.BorderRight = BorderStyle.Thin;
-
-                //row.CreateCell(2).SetCellValue("Kelas");
-                //var classCell = row.CreateCell(3); // Buat sel baru di kolom 3
-                //classCell.SetCellValue(student.ClassRoom.LongClassName); // Isi dengan LongClassName
-                //classCell.CellStyle = styles["bordered"]; // Terapkan gaya sel
 
                 // Status Kehadiran
-                var daysInMonth = startDate.AddMonths(1).AddDays(-1).Day;
                 for (int i = 0; i < daysInMonth; i++)
                 {
                     var date = startDate.AddDays(i);
                     var attendance = attendanceGroup.FirstOrDefault(a => a.Date == date);
                     var statusCell = row.CreateCell(2 + i);
 
-                    if (attendance != null)
+                    // Periksa apakah hari Sabtu atau Minggu
+                    if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
                     {
-                        statusCell.SetCellValue(GetStatusString(attendance.Status));
-                        statusCell.CellStyle = styles[GetStatusKey(attendance.Status)];
+                        statusCell.CellStyle = GetCellStyle(sheet.Workbook, 3); // Warna merah untuk hari Sabtu dan Minggu
                     }
                     else
                     {
-                        statusCell.SetCellValue("");
-                        statusCell.CellStyle = styles["bordered"];
+                        statusCell.CellStyle = styles["bordered"]; // Gaya sel default
+                    }
+
+                    if (attendance != null)
+                    {
+                        statusCell.SetCellValue(GetStatusString(attendance.Status));
+                        statusCell.CellStyle = styles[GetStatusKey(attendance.Status)]; // Terapkan gaya sel sesuai status kehadiran
+                    }
+                    else
+                    {
+                        statusCell.SetCellValue(""); // Jika tidak ada data kehadiran, set nilai sel menjadi kosong
                     }
                 }
+
 
                 // Jumlah Hadir, Sakit, Tidak Hadir
                 var attendanceCounts = attendanceGroup.GroupBy(a => a.Status).ToDictionary(g => g.Key, g => g.Count());
@@ -225,7 +270,11 @@ public class DownloadAttendance
                 row.CreateCell(4 + daysInMonth).SetCellValue(attendanceCounts.GetValueOrDefault(3, 0));
                 row.GetCell(4 + daysInMonth).CellStyle = styles["bordered"];
             }
+
+            MergeWeekendColumns(sheet, startDate, daysInMonth, lastRow); // Panggil di luar loop foreach
+        LabelAndRotateWeekendColumns(sheet, startDate, daysInMonth);
         }
+
 
         private string GetStatusKey(int statusCode)
         {

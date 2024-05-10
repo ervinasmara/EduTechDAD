@@ -76,18 +76,6 @@ public class CreateAssignment
                     relativeFolderPath, request.AssignmentCreateAndEditDto.AssignmentName, assignment.CreatedAt);
             }
 
-            // Jika tidak ada file yang diunggah atau jika file yang diunggah adalah file PDF, lanjutkan proses
-            if (filePath != null || request.AssignmentCreateAndEditDto.AssignmentFileData == null)
-            {
-                // Setelah menyimpan file, set FilePath pada assignment
-                assignment.FilePath = filePath;
-            }
-            else
-            {
-                // Jika file yang diunggah bukan file PDF, hentikan proses dan kembalikan kegagalan
-                return Result<AssignmentCreateAndEditDto>.Failure("Hanya file PDF yang diperbolehkan");
-            }
-
             /** Langkah 5: Tambahkan Assignment ke Course **/
             var course = await _context.Courses.FindAsync(courseId);
             if (course == null)

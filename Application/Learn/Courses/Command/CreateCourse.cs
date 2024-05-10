@@ -82,20 +82,8 @@ public class CreateCourse
                 filePath = await _fileService.SaveFileAsync(request.CourseCreateAndEditDto.FileData, relativeFolderPath, request.CourseCreateAndEditDto.CourseName, course.CreatedAt);
             }
 
-            // Jika tidak ada file yang diunggah atau jika file yang diunggah adalah file PDF, lanjutkan proses
-            if (filePath != null || request.CourseCreateAndEditDto.FileData == null)
-            {
-                // Setelah menyimpan file, set FilePath pada course
-                course.FilePath = filePath;
-
-                // Menyesuaikan CreatedAt dengan waktu Indonesia
-                course.CreatedAt = DateTime.UtcNow.AddHours(7);
-            }
-            else
-            {
-                // Jika file yang diunggah bukan file PDF, hentikan proses dan kembalikan kegagalan
-                return Result<CourseCreateAndEditDto>.Failure("Hanya file PDF yang diperbolehkaaaaaaaaaaaaaan");
-            }
+            // Setelah menyimpan file, set FilePath pada course
+            course.FilePath = filePath;
 
             /** Langkah 5: Menyimpan Course ke database **/
             _context.Courses.Add(course);

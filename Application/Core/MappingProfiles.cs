@@ -222,6 +222,7 @@ public class MappingProfiles : Profile
         CreateMap<Course, CourseCreateAndEditDto>();
         CreateMap<CourseCreateAndEditDto, Course>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => 1)) // Set status menjadi 1 (Aktif)
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow.AddHours(7)))
             .ForMember(dest => dest.FilePath, opt => opt.Ignore()) // FilePath akan dihandle secara terpisah
             .ForMember(dest => dest.LessonId, opt => opt.Ignore()) // Karena LessonId akan di-set secara terpisah
             .ForMember(dest => dest.Assignments, opt => opt.Ignore()) // Assignments tidak di-set dari DTO

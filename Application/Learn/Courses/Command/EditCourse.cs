@@ -86,9 +86,6 @@ public class EditCourse
                 filePath = await _fileService.SaveFileAsync(request.CourseCreateAndEditDto.FileData, relativeFolderPath, request.CourseCreateAndEditDto.CourseName, course.CreatedAt);
             }
 
-            // Setelah menyimpan file, set FilePath pada course
-            course.FilePath = filePath;
-
             // Membuat Mapper untuk edit course
             _mapper.Map(request.CourseCreateAndEditDto, course, opts =>
             {
