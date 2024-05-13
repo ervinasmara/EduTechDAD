@@ -1,8 +1,11 @@
 ﻿using System.Globalization;
+using System.Security.Cryptography;
 using Application.Core;
 using Domain.Attendances;
 using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
@@ -133,7 +136,7 @@ public class DownloadAttendance
                 // Periksa apakah hari Sabtu atau Minggu
                 if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
                 {
-                    dateCell.CellStyle = GetCellStyle(sheet.Workbook, 3); // Warna merah untuk hari Sabtu dan Minggu
+                    dateCell.CellStyle = GetCellStyle(sheet.Workbook, 4); // Warna merah untuk hari Sabtu dan Minggu
                 }
                 else
                 {
@@ -150,62 +153,17 @@ public class DownloadAttendance
 
             // H, I, T
             var hadirCell = headerRow2.CreateCell(2 + daysInMonth);
-            hadirCell.SetCellValue("H");
+            hadirCell.SetCellValue("Hadir");
             hadirCell.CellStyle = styles["present"];
 
             var sakitCell = headerRow2.CreateCell(3 + daysInMonth);
-            sakitCell.SetCellValue("I");
+            sakitCell.SetCellValue("Izin");
             sakitCell.CellStyle = styles["sick"];
 
             var tidakHadirCell = headerRow2.CreateCell(4 + daysInMonth);
-            tidakHadirCell.SetCellValue("T");
+            tidakHadirCell.SetCellValue("Alpha");
             tidakHadirCell.CellStyle = styles["absent"];
         }
-
-        private void MergeWeekendColumns(ISheet sheet, DateOnly startDate, int daysInMonth, int lastRow)
-        {
-            // Loop untuk setiap hari dalam bulan
-            for (int i = 0; i < daysInMonth; i++)
-            {
-                var date = startDate.AddDays(i);
-                int columnIndex = 2 + i; // Kolom dimulai dari 2 karena 0 dan 1 digunakan untuk data lain
-
-                // Jika hari adalah Sabtu atau Minggu, merge kolom tersebut
-                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    // Merge kolom dari baris ke-3 hingga baris terakhir data
-                    if (lastRow > 2) // Pastikan ada lebih dari satu baris untuk di-merge
-                    {
-                        sheet.AddMergedRegion(new CellRangeAddress(2, lastRow, columnIndex, columnIndex));
-                    }
-                }
-            }
-        }
-
-        private void LabelAndRotateWeekendColumns(ISheet sheet, DateOnly startDate, int daysInMonth)
-        {
-            ICellStyle verticalTextStyle = sheet.Workbook.CreateCellStyle();
-            verticalTextStyle.Rotation = 90; // Putar teks 90 derajat
-
-            // Loop untuk setiap hari dalam bulan
-            for (int i = 0; i < daysInMonth; i++)
-            {
-                var date = startDate.AddDays(i);
-                int columnIndex = 2 + i; // Kolom dimulai dari 2 karena 0 dan 1 digunakan untuk data lain
-
-                // Jika hari adalah Sabtu, tulis "Sabtu" dan putar teks
-                if (date.DayOfWeek == DayOfWeek.Saturday)
-                {
-                    ICell cell = sheet.GetRow(2).CreateCell(columnIndex); // Asumsikan baris 1 digunakan untuk label hari
-                    cell.SetCellValue("Sabtu");
-                    cell.CellStyle = verticalTextStyle;
-                }
-            }
-        }
-
-        // Di dalam metode WriteAttendanceData, setelah loop foreach
-
-
 
         private void WriteAttendanceData(ISheet sheet, List<Attendance> attendances, DateOnly startDate, Dictionary<string, ICellStyle> styles)
         {
@@ -240,7 +198,7 @@ public class DownloadAttendance
                     // Periksa apakah hari Sabtu atau Minggu
                     if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
                     {
-                        statusCell.CellStyle = GetCellStyle(sheet.Workbook, 3); // Warna merah untuk hari Sabtu dan Minggu
+                        statusCell.CellStyle = GetCellStyle(sheet.Workbook, 4); // Warna merah untuk hari Sabtu dan Minggu
                     }
                     else
                     {
@@ -261,20 +219,21 @@ public class DownloadAttendance
 
                 // Jumlah Hadir, Sakit, Tidak Hadir
                 var attendanceCounts = attendanceGroup.GroupBy(a => a.Status).ToDictionary(g => g.Key, g => g.Count());
+                var presentCellStyle = styles["present"]; // Gaya sel untuk jumlah hadir
+                var sickCellStyle = styles["sick"]; // Gaya sel untuk jumlah sakit
+                var absentCellStyle = styles["absent"]; // Gaya sel untuk jumlah tidak hadir
+
                 row.CreateCell(2 + daysInMonth).SetCellValue(attendanceCounts.GetValueOrDefault(1, 0));
-                row.GetCell(2 + daysInMonth).CellStyle = styles["bordered"];
+                row.GetCell(2 + daysInMonth).CellStyle = presentCellStyle; // Terapkan gaya sel untuk jumlah hadir
 
                 row.CreateCell(3 + daysInMonth).SetCellValue(attendanceCounts.GetValueOrDefault(2, 0));
-                row.GetCell(3 + daysInMonth).CellStyle = styles["bordered"];
+                row.GetCell(3 + daysInMonth).CellStyle = sickCellStyle; // Terapkan gaya sel untuk jumlah sakit
 
                 row.CreateCell(4 + daysInMonth).SetCellValue(attendanceCounts.GetValueOrDefault(3, 0));
-                row.GetCell(4 + daysInMonth).CellStyle = styles["bordered"];
+                row.GetCell(4 + daysInMonth).CellStyle = absentCellStyle; // Terapkan gaya sel untuk jumlah tidak hadir
+
             }
-
-            MergeWeekendColumns(sheet, startDate, daysInMonth, lastRow); // Panggil di luar loop foreach
-        LabelAndRotateWeekendColumns(sheet, startDate, daysInMonth);
         }
-
 
         private string GetStatusKey(int statusCode)
         {
@@ -297,7 +256,7 @@ public class DownloadAttendance
                 case 2: // Sakit
                     return "I";
                 case 3: // Tidak Hadir
-                    return "T";
+                    return "A";
                 default:
                     return "";
             }
@@ -367,6 +326,10 @@ public class DownloadAttendance
                     cellStyle.FillPattern = FillPattern.SolidForeground;
                     break;
                 case 3: // Tidak Hadir
+                    cellStyle.FillForegroundColor = IndexedColors.LightOrange.Index;
+                    cellStyle.FillPattern = FillPattern.SolidForeground;
+                    break;
+                case 4: // Sabtu & Minggu
                     cellStyle.FillForegroundColor = IndexedColors.Red.Index;
                     cellStyle.FillPattern = FillPattern.SolidForeground;
                     break;

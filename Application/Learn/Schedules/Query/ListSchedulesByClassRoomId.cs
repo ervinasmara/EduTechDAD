@@ -40,6 +40,7 @@ public class ListSchedulesByClassRoomId
 
                 /** Langkah 3: Mengambil Jadwal **/
                 var schedule = await _context.Schedules
+                    .Where(s => s.Lesson.ClassRoomId.ToString() == classRoomId) // Filter berdasarkan ID ruang kelas
                     .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
                     .ToListAsync(cancellationToken);
 

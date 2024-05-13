@@ -30,6 +30,7 @@ public class ListAttendance
             var studentsQuery = _context.Students
                 .Include(s => s.ClassRoom)
                 .Include(s => s.Attendances)
+                .Where(s => s.Status != 0) // Menyembunyikan siswa dengan status 0
                 .OrderBy(s => s.Nis)
                 .AsQueryable();
 
