@@ -66,7 +66,7 @@ public class ListAssignmentsByClassRoomId
 
                 /** Langkah 4.3: Mengatur status Assignment berdasarkan AssignmentDeadline dan AssignmentSubmission **/
                 dto.AssignmentSubmissionStatus = submission == null
-                    ? DateTime.UtcNow > dto.AssignmentDeadline ? "Terlambat Mengerjakan" : "Belum Mengerjakan"
+                    ? DateTime.UtcNow.AddHours(7) > dto.AssignmentDeadline ? "Terlambat Mengerjakan" : "Belum Mengerjakan"
                     : submission.Status switch
                     {
                         1 => "Sudah mengerjakan",

@@ -51,9 +51,21 @@ public class CreateSubmissionByStudentId
                 var existingSubmission = await _context.AssignmentSubmissions
                     .FirstOrDefaultAsync(s => s.AssignmentId == assignment.Id && s.StudentId == studentId, cancellationToken);
                 if (existingSubmission != null)
-                    return Result<SubmissionCreateByStudentIdDto>.Failure($"Pengumpulan sudah ada untuk tugas ID {assignment.Id} and siswa ID {studentId}.");
+                    return Result<SubmissionCreateByStudentIdDto>.Failure($"Pengumpulan sudah ada untuk tugas '{assignment.AssignmentName}' dan siswa '{student.NameStudent}'.");
 
-                /** Langkah 5: Buat objek SubmissionCreateByStudentIdDto **/
+                /** Langkah 5: Validasi submission berdasarkan status assignment **/
+                //if (assignment.TypeOfSubmission == 1)
+                //{
+                //    if (request.SubmissionDto.FileData == null)
+                //        return Result<SubmissionCreateByStudentIdDto>.Failure("Pengumpulan harus mengirim file.");
+                //}
+                //else if (assignment.TypeOfSubmission == 2)
+                //{
+                //    if (string.IsNullOrEmpty(request.SubmissionDto.Link))
+                //        return Result<SubmissionCreateByStudentIdDto>.Failure("Pengumpulan harus mengirim link.");
+                //}
+
+                /** Langkah 5.1: Buat objek SubmissionCreateByStudentIdDto **/
                 var submissionDto = new SubmissionCreateByStudentIdDto
                 {
                     AssignmentId = request.SubmissionDto.AssignmentId,
@@ -61,11 +73,11 @@ public class CreateSubmissionByStudentId
                     Link = request.SubmissionDto.Link
                 };
 
-                /** Langkah 5.1: Pemetaan dari DTO ke objek AssignmentSubmission **/
+                /** Langkah 5.2: Pemetaan dari DTO ke objek AssignmentSubmission **/
                 var assignmentSubmission = _mapper.Map<AssignmentSubmission>(submissionDto);
                 assignmentSubmission.StudentId = studentId;
 
-                /** Langkah 5.2: Simpan file submission jika ada **/
+                /** Langkah 5.3: Simpan file submission jika ada **/
                 string submissionFilePath = null;
                 if (request.SubmissionDto.FileData != null)
                 {
@@ -79,7 +91,7 @@ public class CreateSubmissionByStudentId
                     submissionFilePath = await _fileService.SaveFileSubmission(request.SubmissionDto.FileData, relativeFolderPath, DateTime.UtcNow);
                 }
 
-                /** Langkah 5.3: Validasi jenis file **/
+                /** Langkah 5.4: Validasi jenis file **/
                 if (request.SubmissionDto.FileData != null && submissionFilePath == null)
                 {
                     string fileExtension = Path.GetExtension(request.SubmissionDto.FileData.FileName);

@@ -74,6 +74,9 @@ public class CreateAssignment
                 string relativeFolderPath = "Upload/FileAssignment";
                 filePath = await _fileService.SaveFileAsync(request.AssignmentCreateAndEditDto.AssignmentFileData,
                     relativeFolderPath, request.AssignmentCreateAndEditDto.AssignmentName, assignment.CreatedAt);
+
+                // Tetapkan nilai filePath ke properti FilePath dari objek assignment
+                assignment.FilePath = filePath;
             }
 
             /** Langkah 5: Tambahkan Assignment ke Course **/
