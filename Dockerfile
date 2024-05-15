@@ -25,8 +25,13 @@ WORKDIR /app
 # Menyalin build output dari tahap sebelumnya
 COPY --from=build-env /app/out .
 
-# Expose port 8080
-EXPOSE 8080
+# Menetapkan variabel lingkungan
+ENV ConnectionStrings__KoneksiKePostgreSQL="Host=root;Port=5432;Database=DbLMSEduTechIBE;Username=root;Password=root;"
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://+:80
+
+# Expose port 80
+EXPOSE 80
 
 # Menjalankan aplikasi
 ENTRYPOINT ["dotnet", "API.dll"]
