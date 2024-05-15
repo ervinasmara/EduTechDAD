@@ -9,21 +9,13 @@ using FluentValidation;
 namespace Application.Learn.Courses.Command;
 public class EditCourse
 {
-    public class Command : IRequest<Result<CourseCreateAndEditDto>>
+    public class Command : IRequest<Result<CourseEditDto>>
     {
         public Guid CourseId { get; set; }
-        public CourseCreateAndEditDto CourseCreateAndEditDto { get; set; }
+        public CourseEditDto CourseEditDto { get; set; }
     }
 
-    public class CommandValidatorDto : AbstractValidator<Command>
-    {
-        public CommandValidatorDto()
-        {
-            RuleFor(x => x.CourseCreateAndEditDto).SetValidator(new CourseCreateAndEditValidator());
-        }
-    }
-
-    public class Handler : IRequestHandler<Command, Result<CourseCreateAndEditDto>>
+    public class Handler : IRequestHandler<Command, Result<CourseEditDto>>
     {
         private readonly DataContext _context;
         private readonly IUserAccessor _userAccessor;
@@ -38,30 +30,30 @@ public class EditCourse
             _fileService = fileService;
         }
 
-        public async Task<Result<CourseCreateAndEditDto>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<CourseEditDto>> Handle(Command request, CancellationToken cancellationToken)
         {
             /** Langkah 1: Memeriksa teacherId **/
             var teacherId = _userAccessor.GetTeacherIdFromToken();
             if (teacherId == null)
             {
-                return Result<CourseCreateAndEditDto>.Failure("TeacherId tidak ditemukan ditoken");
+                return Result<CourseEditDto>.Failure("TeacherId tidak ditemukan ditoken");
             }
 
             /** Langkah 2: Memeriksa LessonName dan mendapatkan LessonId **/
             var lesson = await _context.Lessons
                 .Include(tl => tl.TeacherLessons)
-                .FirstOrDefaultAsync(x => x.LessonName == request.CourseCreateAndEditDto.LessonName);
+                .FirstOrDefaultAsync(x => x.LessonName == request.CourseEditDto.LessonName);
 
             // Memeriksa apakah lesson yang dimasukkan ada didatabase
             if (lesson == null)
             {
-                return Result<CourseCreateAndEditDto>.Failure($"Mapel dengan nama mapel {request.CourseCreateAndEditDto.LessonName} tidak ditemukan");
+                return Result<CourseEditDto>.Failure($"Mapel dengan nama mapel {request.CourseEditDto.LessonName} tidak ditemukan");
             }
 
             // Memeriksa apakah teacher memiliki keterkaitan dengan lesson yang dimasukkan
             if (lesson.TeacherLessons == null || !lesson.TeacherLessons.Any(tl => tl.TeacherId == Guid.Parse(teacherId)))
             {
-                return Result<CourseCreateAndEditDto>.Failure($"Guru tidak memiliki pelajaran ini");
+                return Result<CourseEditDto>.Failure($"Guru tidak memiliki pelajaran ini");
             }
 
             /** Langkah 3: Membuat entity Course dari DTO **/
@@ -69,25 +61,25 @@ public class EditCourse
 
             if (course == null)
             {
-                return Result<CourseCreateAndEditDto>.Failure("Materi tidak ditemukan");
+                return Result<CourseEditDto>.Failure("Materi tidak ditemukan");
             }
 
             /** Langkah 4: Menyimpan file jika ada **/
-            string filePath = null;
-            if (request.CourseCreateAndEditDto.FileData != null)
-            {
-                string fileExtension = Path.GetExtension(request.CourseCreateAndEditDto.FileData.FileName);
-                if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
-                {
-                    return Result<CourseCreateAndEditDto>.Failure("Hanya file PDF yang diperbolehkan");
-                }
+            //string filePath = null;
+            //if (request.CourseEditDto.FileData != null)
+            //{
+            //    string fileExtension = Path.GetExtension(request.CourseEditDto.FileData.FileName);
+            //    if (!string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
+            //    {
+            //        return Result<CourseEditDto>.Failure("Hanya file PDF yang diperbolehkan");
+            //    }
 
-                string relativeFolderPath = "Upload/FileCourse";
-                filePath = await _fileService.SaveFileAsync(request.CourseCreateAndEditDto.FileData, relativeFolderPath, request.CourseCreateAndEditDto.CourseName, course.CreatedAt);
-            }
+            //    string relativeFolderPath = "Upload/FileCourse";
+            //    filePath = await _fileService.SaveFileAsync(request.CourseEditDto.FileData, relativeFolderPath, request.CourseEditDto.CourseName, course.CreatedAt);
+            //}
 
             // Membuat Mapper untuk edit course
-            _mapper.Map(request.CourseCreateAndEditDto, course, opts =>
+            _mapper.Map(request.CourseEditDto, course, opts =>
             {
                 opts.Items["Lesson"] = lesson; // Menambahkan Lesson ke context untuk digunakan dalam AfterMap
             });
@@ -96,15 +88,24 @@ public class EditCourse
             var result = await _context.SaveChangesAsync() > 0;
             if (!result)
             {
-                return Result<CourseCreateAndEditDto>.Failure("Gagal untuk mengedit materi");
+                return Result<CourseEditDto>.Failure("Gagal untuk mengedit materi");
             }
 
             /** Langkah 6: Mengembalikan hasil **/
-            var courseDto = _mapper.Map<CourseCreateAndEditDto>(course);
-            courseDto.FileData = request.CourseCreateAndEditDto.FileData; // Menambahkan FileData ke DTO
+            var courseDto = _mapper.Map<CourseEditDto>(course);
             courseDto.LessonName = lesson?.LessonName; // Menambahkan LessonName ke DTO
 
-            return Result<CourseCreateAndEditDto>.Success(courseDto);
+            return Result<CourseEditDto>.Success(courseDto);
         }
+    }
+}
+
+public class CommandValidatorEditDto : AbstractValidator<CourseEditDto>
+{
+    public CommandValidatorEditDto()
+    {
+        RuleFor(x => x.CourseName).NotEmpty().WithMessage("Nama materi tidak boleh kosong");
+        RuleFor(x => x.Description).NotEmpty().WithMessage("Deskripsi tidak boleh kosong");
+        RuleFor(x => x.LessonName).NotEmpty().WithMessage("Nama mapel tidak boleh kosong");
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 
 namespace Application.Learn.Courses;
-public class CourseCreateAndEditDto
+public class CourseCreateDto
 {
     public string CourseName { get; set; }
     public string Description { get; set; }
@@ -10,6 +10,13 @@ public class CourseCreateAndEditDto
     public string LessonName { get; set; }
 }
 
+public class CourseEditDto
+{
+    public string CourseName { get; set; }
+    public string Description { get; set; }
+    public string LinkCourse { get; set; }
+    public string LessonName { get; set; }
+}
 
 public class CourseGetDto
 {

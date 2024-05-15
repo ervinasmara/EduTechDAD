@@ -55,17 +55,17 @@ public class CoursesController : BaseApiController
     /** Create Course Who TeacherId **/
     [Authorize(Policy = "RequireRole2")]
     [HttpPost]
-    public async Task<IActionResult> CreateCourseDto([FromForm] CourseCreateAndEditDto courseDto, CancellationToken ct)
+    public async Task<IActionResult> CreateCourseDto([FromForm] CourseCreateDto courseDto, CancellationToken ct)
     {
-        return HandleResult(await Mediator.Send(new CreateCourse.Command { CourseCreateAndEditDto = courseDto }, ct));
+        return HandleResult(await Mediator.Send(new CreateCourse.Command { CourseCreateDto = courseDto }, ct));
     }
 
     /** Edit Course Who TeacherId **/
     [Authorize(Policy = "RequireRole2")]
     [HttpPut("{id}")]
-    public async Task<IActionResult> EditCourse(Guid id, [FromForm] CourseCreateAndEditDto courseDto, CancellationToken ct)
+    public async Task<IActionResult> EditCourse(Guid id, [FromForm] CourseEditDto courseDto, CancellationToken ct)
     {
-        var result = await Mediator.Send(new EditCourse.Command { CourseId = id, CourseCreateAndEditDto = courseDto }, ct);
+        var result = await Mediator.Send(new EditCourse.Command { CourseId = id, CourseEditDto = courseDto }, ct);
         return HandleResult(result);
     }
 
