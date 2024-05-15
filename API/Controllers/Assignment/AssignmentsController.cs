@@ -55,17 +55,17 @@ public class AssignmentsController : BaseApiController
     /** Create Assignment Who TeachertId **/
     [Authorize(Policy = "RequireRole2")]
     [HttpPost]
-    public async Task<IActionResult> CreateAssignments([FromForm] AssignmentCreateAndEditDto dto, CancellationToken ct)
+    public async Task<IActionResult> CreateAssignments([FromForm] AssignmentCreateDto dto, CancellationToken ct)
     {
-        return HandleResult(await Mediator.Send(new CreateAssignment.Command { AssignmentCreateAndEditDto = dto }, ct));
+        return HandleResult(await Mediator.Send(new CreateAssignment.Command { AssignmentCreateDto = dto }, ct));
     }
 
     /** Edit Assignment Who TeachertId **/
     [Authorize(Policy = "RequireRole2")]
     [HttpPut("{id}")]
-    public async Task<IActionResult> EditAssignment(Guid id, [FromForm] AssignmentCreateAndEditDto assignmentDto, CancellationToken ct)
+    public async Task<IActionResult> EditAssignment(Guid id, [FromForm] AssignmentEditDto assignmentDto, CancellationToken ct)
     {
-        var result = await Mediator.Send(new EditAssignment.Command { AssignmentId = id, AssignmentCreateAndEditDto = assignmentDto }, ct);
+        var result = await Mediator.Send(new EditAssignment.Command { AssignmentId = id, AssignmentEditDto = assignmentDto }, ct);
         return HandleResult(result);
     }
 
