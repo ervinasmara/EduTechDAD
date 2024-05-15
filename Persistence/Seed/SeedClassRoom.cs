@@ -14,18 +14,21 @@ public class SeedClassRoom
                 ClassName = "TKJ",
                 LongClassName = "Teknik Komputer Jaringan",
                 UniqueNumberOfClassRoom = "001",
+                Status = 1
             },
             new ClassRoom
             {
                 ClassName = "TKR",
                 LongClassName = "Teknik Kendaraan Ringan",
                 UniqueNumberOfClassRoom = "002",
+                Status = 1
             },
             new ClassRoom
             {
                 ClassName = "RPL",
                 LongClassName = "Rekayasa Perangkat Lunak",
                 UniqueNumberOfClassRoom = "003",
+                Status = 1
             },
         };
 
