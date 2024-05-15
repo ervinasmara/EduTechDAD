@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   db:
-    container_name: postgres_container2
+    container_name: postgres_container
     image: postgres
     restart: always
     environment:
@@ -12,7 +12,7 @@ services:
       - "5432:5432"
 
   pgadmin:
-    container_name: pgadmin4_container2
+    container_name: pgadmin4_container
     image: dpage/pgadmin4
     restart: always
     environment:
