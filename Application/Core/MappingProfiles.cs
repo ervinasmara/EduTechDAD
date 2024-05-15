@@ -81,12 +81,18 @@ public class MappingProfiles : Profile
                     ? $"{src.AssignmentName}{Path.GetExtension(src.FilePath)}"
                     : "No File"));
 
-        /** Create & Edit Assignment **/
-        CreateMap<Assignment, AssignmentCreateAndEditDto>();
-        CreateMap<AssignmentCreateAndEditDto, Assignment>()
+        /** Create Assignment **/
+        CreateMap<Assignment, AssignmentCreateDto>();
+        CreateMap<AssignmentCreateDto, Assignment>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => 1)) // Set status menjadi 1 (Aktif)
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow.AddHours(7))) // Set waktu pembuatan
             .ForMember(dest => dest.FilePath, opt => opt.Ignore()); // FilePath akan dihandle secara terpisah
+
+        /** Edit Assignment **/
+        CreateMap<Assignment, AssignmentEditDto>();
+        CreateMap<AssignmentEditDto, Assignment>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => 1)) // Set status menjadi 1 (Aktif)
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow.AddHours(7))); // Set waktu pembuatan
 
         /** Download Assignment **/
         CreateMap<Assignment, DownloadFileDto>()

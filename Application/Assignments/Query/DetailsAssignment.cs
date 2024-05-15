@@ -38,6 +38,20 @@ public class DetailsAssignment
                 return Result<AssignmentGetByIdDto>.Failure("Tugas tidak ditemukan");
             }
 
+            // Baca file dari filePath dan konversi ke byte[]
+            if (!string.IsNullOrEmpty(assignmentDto.AssignmentFilePath))
+            {
+                var filePath = Path.Combine("Upload/FileAssignment", assignmentDto.AssignmentFilePath);
+                if (File.Exists(filePath))
+                {
+                    assignmentDto.AssignmentFileData = Convert.ToBase64String(await File.ReadAllBytesAsync(filePath));
+                }
+                else
+                {
+                    return Result<AssignmentGetByIdDto>.Failure("File tugas tidak ditemukan");
+                }
+            }
+
             return Result<AssignmentGetByIdDto>.Success(assignmentDto);
         }
     }

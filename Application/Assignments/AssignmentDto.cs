@@ -19,6 +19,7 @@ public class AssignmentGetByIdDto
     public string LongClassName { get; set; }
     public string AssignmentStatus { get; set; }
     public string AssignmentFilePath { get; set; }
+    public string AssignmentFileData { get; set; }
 }
 
 public class AssignmentGetByClassRoomIdDto
@@ -53,13 +54,24 @@ public class AssignmentGetByTeacherIdDto
     public string AssignmentFilePath { get; set; }
 }
 
-public class AssignmentCreateAndEditDto
+public class AssignmentCreateDto
 {
     public string AssignmentName { get; set; }
     public DateOnly AssignmentDate { get; set; }
     public DateTime AssignmentDeadline { get; set; }
     public string AssignmentDescription { get; set; }
     public IFormFile AssignmentFileData { get; set; }
+    public string AssignmentLink { get; set; }
+    public int TypeOfSubmission { get; set; }
+    public Guid CourseId { get; set; }
+}
+
+public class AssignmentEditDto
+{
+    public string AssignmentName { get; set; }
+    public DateOnly AssignmentDate { get; set; }
+    public DateTime AssignmentDeadline { get; set; }
+    public string AssignmentDescription { get; set; }
     public string AssignmentLink { get; set; }
     public int TypeOfSubmission { get; set; }
     public Guid CourseId { get; set; }
