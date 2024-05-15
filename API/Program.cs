@@ -1,6 +1,8 @@
 using API.Extensions;
 using API.Middleware;
+using Domain.User;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -81,14 +83,14 @@ var services = scope.ServiceProvider;
 try
 {
     var context = services.GetRequiredService<DataContext>();
-    //var userManager = services.GetRequiredService<UserManager<AppUser>>();
+    var userManager = services.GetRequiredService<UserManager<AppUser>>();
 
     await context.Database.MigrateAsync();
 
     await SeedClassRoom.SeedData(context);
     await SeedToDoList.SeedData(context);
     //await SeedLesson.SeedData(context);
-    //await SeedUser.SeedData(context, userManager);
+    await SeedUser.SeedData(context, userManager);
 }
 catch (Exception ex)
 {

@@ -6,21 +6,26 @@ public class SeedUser
 {
     public static async Task SeedData(DataContext context, UserManager<AppUser> userManager)
     {
-        if (!userManager.Users.Any()) // untuk memeriksa apakah kita memiliki User? Jika tidak maka akan dibuatkan
+        if (!userManager.Users.Any())
         {
-            var users = new List<AppUser>
-            {
-                new AppUser{UserName = "admin", Role = 1},
-                new AppUser{UserName = "guru", Role = 2},
-                new AppUser{UserName = "siswa", Role = 3}
-            };
+            var adminUser = new AppUser { UserName = "Zeladaa", Role = 1 };
 
-            foreach (var user in users)
+            var result = await userManager.CreateAsync(adminUser, "Pa$$w0rd");
+
+            if (result.Succeeded)
             {
-                await userManager.CreateAsync(user, "Pa$$w0rd");
+                var admin = new Admin
+                {
+                    Id = Guid.NewGuid(),
+                    NameAdmin = "Ekik",
+                    AppUserId = adminUser.Id,
+                    User = adminUser
+                };
+
+                context.Admins.Add(admin);
             }
         }
 
-        await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
     }
 }
