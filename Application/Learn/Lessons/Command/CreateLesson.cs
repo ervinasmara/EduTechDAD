@@ -77,6 +77,7 @@ public class CreateLesson
 
             /** Langkah 6: Kirimkan DTO dalam Response **/
             var lessonDto = _mapper.Map<LessonCreateAndEditDto>(lesson);
+            lessonDto.ClassName = classroom.ClassName;
             return Result<LessonCreateAndEditDto>.Success(lessonDto);
         }
     }
