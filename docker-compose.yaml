@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   db:
-    container_name: postgres_container
+    container_name: postgres_container2
     image: postgres
     restart: always
     environment:
@@ -12,7 +12,7 @@ services:
       - "5432:5432"
 
   pgadmin:
-    container_name: pgadmin4_container
+    container_name: pgadmin4_container2
     image: dpage/pgadmin4
     restart: always
     environment:
@@ -25,12 +25,26 @@ services:
 
   backend:
     container_name: dotnet_app
+    image: api-asp
     build:
-      context: .
+      context: ./EdutechDAD
       dockerfile: Dockerfile
     ports:
       - "8080:80"
     depends_on:
-      - db
+      - pgadmin
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+
+  frontend:
+    container_name: frontend-services
+    image: app-prod-i
+    stdin_open: true
+    tty: true
+    build:
+      context: ./edutech
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
