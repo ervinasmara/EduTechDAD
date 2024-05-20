@@ -37,38 +37,81 @@ public class CreateSchedule
         {
             try
             {
-                /** Langkah 1: Temukan Pelajaran Berdasarkan Nama Pelajaran yang Diberikan **/
+                // Validasi hari Sabtu dan Minggu
+                if (request.ScheduleCreateAndEditDto.Day == 6 || request.ScheduleCreateAndEditDto.Day == 7)
+                {
+                    return Result<ScheduleCreateAndEditDto>.Failure("Tidak boleh membuat jadwal di hari Sabtu dan Minggu");
+                }
+
+                // Langkah 1: Temukan Pelajaran Berdasarkan Nama Pelajaran yang Diberikan
                 var lesson = await _context.Lessons
+                    .Include(l => l.ClassRoom)
                     .FirstOrDefaultAsync(l => l.LessonName == request.ScheduleCreateAndEditDto.LessonName, cancellationToken);
 
-                /** Langkah 2: Memeriksa Ketersediaan Pelajaran **/
+                // Langkah 2: Memeriksa Ketersediaan Pelajaran
                 if (lesson == null)
                     return Result<ScheduleCreateAndEditDto>.Failure($"Pelajaran dengan nama '{request.ScheduleCreateAndEditDto.LessonName}' tidak ditemukan");
 
-                /** Langkah 3: Membuat Instance Jadwal dari ScheduleCreateAndEditDto dan Mengatur LessonId **/
-                var schedule = _mapper.Map<Schedule>(request.ScheduleCreateAndEditDto);
-                schedule.LessonId = lesson.Id;
+                // Langkah 3: Memeriksa Apakah Jadwal Bertumpuk dengan Jadwal yang Ada dalam Kelas yang Sama
+                var existingSchedules = await _context.Schedules
+                    .Where(s => s.Lesson.ClassRoomId == lesson.ClassRoomId && s.Day == request.ScheduleCreateAndEditDto.Day)
+                    .ToListAsync(cancellationToken);
 
-                /** Langkah 4: Menambahkan Jadwal ke Database **/
-                _context.Schedules.Add(schedule);
+                var newStartTime = request.ScheduleCreateAndEditDto.StartTime;
+                var newEndTime = request.ScheduleCreateAndEditDto.EndTime;
+                var dayName = GetDayName(request.ScheduleCreateAndEditDto.Day);
 
-                /** Langkah 5: Menyimpan Perubahan ke Database **/
+                foreach (var schedule in existingSchedules)
+                {
+                    if ((newStartTime >= schedule.StartTime && newStartTime < schedule.EndTime) ||
+                        (newEndTime > schedule.StartTime && newEndTime <= schedule.EndTime) ||
+                        (newStartTime <= schedule.StartTime && newEndTime >= schedule.EndTime))
+                    {
+                        return Result<ScheduleCreateAndEditDto>.Failure(
+                            $"Jadwal sudah ada pada hari {dayName} " +
+                            $"pada jam {schedule.StartTime:hh\\:mm} - {schedule.EndTime:hh\\:mm} di kelas {lesson.ClassRoom.ClassName}");
+                    }
+                }
+
+                // Langkah 4: Membuat Instance Jadwal dari ScheduleCreateAndEditDto dan Mengatur LessonId
+                var newSchedule = _mapper.Map<Schedule>(request.ScheduleCreateAndEditDto);
+                newSchedule.LessonId = lesson.Id;
+
+                // Langkah 5: Menambahkan Jadwal ke Database
+                _context.Schedules.Add(newSchedule);
+
+                // Langkah 6: Menyimpan Perubahan ke Database
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                /** Langkah 6: Memeriksa Hasil Simpan **/
+                // Langkah 7: Memeriksa Hasil Simpan
                 if (!result)
                     return Result<ScheduleCreateAndEditDto>.Failure("Gagal untuk membuat jadwal");
 
-                /** Langkah 7: Mengembalikan Hasil dalam Bentuk Success Result **/
-                var scheduleDto = _mapper.Map<ScheduleCreateAndEditDto>(schedule);
+                // Langkah 8: Mengembalikan Hasil dalam Bentuk Success Result
+                var scheduleDto = _mapper.Map<ScheduleCreateAndEditDto>(newSchedule);
 
                 return Result<ScheduleCreateAndEditDto>.Success(scheduleDto);
             }
             catch (Exception ex)
             {
-                /** Langkah 8: Menangani Kesalahan Jika Terjadi **/
+                // Langkah 9: Menangani Kesalahan Jika Terjadi
                 return Result<ScheduleCreateAndEditDto>.Failure($"Gagal untuk membuat jadwal: {ex.Message}");
             }
+        }
+
+        private static string GetDayName(int day)
+        {
+            return day switch
+            {
+                1 => "Senin",
+                2 => "Selasa",
+                3 => "Rabu",
+                4 => "Kamis",
+                5 => "Jumat",
+                6 => "Sabtu",
+                7 => "Minggu",
+                _ => "Tidak diketahui"
+            };
         }
     }
 }
