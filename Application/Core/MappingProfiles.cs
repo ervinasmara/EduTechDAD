@@ -296,7 +296,6 @@ public class MappingProfiles : Profile
         CreateMap<Lesson, LessonCreateAndEditDto>();
         CreateMap<LessonCreateAndEditDto, Lesson>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => 1)) // Set status menjadi 1 (Aktif)
-            .ForMember(dest => dest.UniqueNumberOfLesson, opt => opt.Ignore()) // UniqueNumber akan dihandle secara terpisah
             .AfterMap((src, dest, context) => {
                 // Temukan kelas berdasarkan nama yang diberikan
                 var classroom = context.Items["ClassRoom"] as ClassRoom;

@@ -53,21 +53,10 @@ public class CreateLesson
                 return Result<LessonCreateAndEditDto>.Failure("Nama mapel harus unik");
             }
 
-            /** Langkah 3: Tentukan UniqueNumberOfLesson **/
-            /** Langkah 3.1: Dapatkan Lesson terakhir (diurutkan berdasarkan UniqueNumberOfLesson) **/
-            var lastLesson = await _context.Lessons
-                .OrderByDescending(x => x.UniqueNumberOfLesson)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            /** Langkah 3.2: Hitung UniqueNumberOfLesson baru **/
-            int newUniqueNumber = lastLesson != null ? int.Parse(lastLesson.UniqueNumberOfLesson) + 1 : 1;
-            var uniqueNumber = newUniqueNumber.ToString("00"); // Format menjadi "00" (misal: 01, 02, dst)
-
-            /** Langkah 4: Buat objek Lesson dari DTO dan Atur properti **/
+            /** Langkah 3: Buat objek Lesson dari DTO dan Atur properti **/
             var lesson = _mapper.Map<Lesson>(request.LessonCreateAndEditDto, opts => opts.Items["ClassRoom"] = classroom);
-            lesson.UniqueNumberOfLesson = uniqueNumber;
 
-            /** Langkah 5: Simpan Lesson ke Database **/
+            /** Langkah 4: Simpan Lesson ke Database **/
             _context.Lessons.Add(lesson);
 
             var result = await _context.SaveChangesAsync(cancellationToken) > 0;
@@ -75,7 +64,7 @@ public class CreateLesson
             if (!result)
                 return Result<LessonCreateAndEditDto>.Failure("Gagal untuk membuat Lesson");
 
-            /** Langkah 6: Kirimkan DTO dalam Response **/
+            /** Langkah 5: Kirimkan DTO dalam Response **/
             var lessonDto = _mapper.Map<LessonCreateAndEditDto>(lesson);
             lessonDto.ClassName = classroom.ClassName;
             return Result<LessonCreateAndEditDto>.Success(lessonDto);

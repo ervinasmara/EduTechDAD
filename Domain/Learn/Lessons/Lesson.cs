@@ -9,7 +9,6 @@ public class Lesson
 {
     public Guid Id { get; set; }
     public string LessonName { get; set; }
-    public string UniqueNumberOfLesson { get; set; }
     public int Status { get; set; }
 
     // Kunci asing ke ClassRoom

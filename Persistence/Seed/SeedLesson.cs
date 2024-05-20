@@ -12,17 +12,14 @@ public class SeedLesson
             new Lesson
             {
                 LessonName = "Komputer dan Jaringan Dasar",
-                UniqueNumberOfLesson = "01",
             },
             new Lesson
             {
                 LessonName = "Pemograman Dasar",
-                UniqueNumberOfLesson = "02",
             },
             new Lesson
             {
                 LessonName = "Teknologi Dasar Otomotif",
-                UniqueNumberOfLesson = "03",
             },
         };
 

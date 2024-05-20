@@ -37,22 +37,16 @@ public class CreateSchedule
         {
             try
             {
-                // Validasi hari Sabtu dan Minggu
-                if (request.ScheduleCreateAndEditDto.Day == 6 || request.ScheduleCreateAndEditDto.Day == 7)
-                {
-                    return Result<ScheduleCreateAndEditDto>.Failure("Tidak boleh membuat jadwal di hari Sabtu dan Minggu");
-                }
-
-                // Langkah 1: Temukan Pelajaran Berdasarkan Nama Pelajaran yang Diberikan
+                /** Langkah 1: Temukan Pelajaran Berdasarkan Nama Pelajaran yang Diberikan **/
                 var lesson = await _context.Lessons
                     .Include(l => l.ClassRoom)
                     .FirstOrDefaultAsync(l => l.LessonName == request.ScheduleCreateAndEditDto.LessonName, cancellationToken);
 
-                // Langkah 2: Memeriksa Ketersediaan Pelajaran
+                /** Langkah 2: Memeriksa Ketersediaan Pelajaran **/
                 if (lesson == null)
                     return Result<ScheduleCreateAndEditDto>.Failure($"Pelajaran dengan nama '{request.ScheduleCreateAndEditDto.LessonName}' tidak ditemukan");
 
-                // Langkah 3: Memeriksa Apakah Jadwal Bertumpuk dengan Jadwal yang Ada dalam Kelas yang Sama
+                /** Langkah 3: Memeriksa Apakah Jadwal Bertumpuk dengan Jadwal yang Ada dalam Kelas yang Sama **/
                 var existingSchedules = await _context.Schedules
                     .Where(s => s.Lesson.ClassRoomId == lesson.ClassRoomId && s.Day == request.ScheduleCreateAndEditDto.Day)
                     .ToListAsync(cancellationToken);
@@ -73,28 +67,28 @@ public class CreateSchedule
                     }
                 }
 
-                // Langkah 4: Membuat Instance Jadwal dari ScheduleCreateAndEditDto dan Mengatur LessonId
+                /** Langkah 4: Membuat Instance Jadwal dari ScheduleCreateAndEditDto dan Mengatur LessonId **/
                 var newSchedule = _mapper.Map<Schedule>(request.ScheduleCreateAndEditDto);
                 newSchedule.LessonId = lesson.Id;
 
-                // Langkah 5: Menambahkan Jadwal ke Database
+                /** Langkah 5: Menambahkan Jadwal ke Database **/
                 _context.Schedules.Add(newSchedule);
 
-                // Langkah 6: Menyimpan Perubahan ke Database
+                /** Langkah 6: Menyimpan Perubahan ke Database **/
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                // Langkah 7: Memeriksa Hasil Simpan
+                /** Langkah 7: Memeriksa Hasil Simpan **/
                 if (!result)
                     return Result<ScheduleCreateAndEditDto>.Failure("Gagal untuk membuat jadwal");
 
-                // Langkah 8: Mengembalikan Hasil dalam Bentuk Success Result
+                /** Langkah 8: Mengembalikan Hasil dalam Bentuk Success Result **/
                 var scheduleDto = _mapper.Map<ScheduleCreateAndEditDto>(newSchedule);
 
                 return Result<ScheduleCreateAndEditDto>.Success(scheduleDto);
             }
             catch (Exception ex)
             {
-                // Langkah 9: Menangani Kesalahan Jika Terjadi
+                /** Langkah 9: Menangani Kesalahan Jika Terjadi **/
                 return Result<ScheduleCreateAndEditDto>.Failure($"Gagal untuk membuat jadwal: {ex.Message}");
             }
         }
