@@ -60,7 +60,7 @@ public static class ApplicationServiceExtensions
         {
             opt.AddPolicy("CorsPolicy", policy =>
             {
-                policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
+                policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://edutechibe.my.id", "http://www.edutechibe.my.id", "http://20.205.141.184", "http://localhost:5173");
             });
         });
 
