@@ -109,8 +109,9 @@ public class RegisterStudentCommandValidator : AbstractValidator<RegisterStudent
         RuleFor(x => x.Address).NotEmpty().WithMessage("Alamat tidak boleh kosong");
         RuleFor(x => x.PhoneNumber)
             .NotEmpty().WithMessage("Nomor telepon tidak boleh kosong")
-            .Matches("^[0-9\\-+]*$").WithMessage("Nomor telepon hanya boleh berisi angka, tanda minus (-), atau tanda plus (+).")
-            .Length(8, 13).WithMessage("Nomor telepon harus terdiri dari 8 hingga 13 digit");
+            .Matches("^[0-9]*$").WithMessage("Nomor telepon hanya boleh berisi angka")
+            .Length(8, 13).WithMessage("Nomor telepon harus terdiri dari 8 hingga 13 digit")
+            .Must(phone => phone.StartsWith("0")).WithMessage("Nomor telepon harus diawali dengan angka 0");
         RuleFor(x => x.ParentName).NotEmpty().WithMessage("Nama orang tua tidak boleh kosong");
         RuleFor(x => x.Gender)
             .NotEmpty().WithMessage("Jenis kelamin tidak boleh kosong")
