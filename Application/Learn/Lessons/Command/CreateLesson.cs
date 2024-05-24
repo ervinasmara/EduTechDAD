@@ -45,8 +45,9 @@ public class CreateLesson
             }
 
             /** Langkah 2: Validasi Keunikan Nama Pelajaran **/
+            var lessonNameWithClass = $"{request.LessonCreateAndEditDto.LessonName} - {classroom.ClassName}";
             var isLessonNameUnique = await _context.Lessons
-                .AllAsync(l => l.LessonName != request.LessonCreateAndEditDto.LessonName);
+                .AllAsync(l => l.LessonName != lessonNameWithClass);
 
             if (!isLessonNameUnique)
             {
@@ -54,6 +55,7 @@ public class CreateLesson
             }
 
             /** Langkah 3: Buat objek Lesson dari DTO dan Atur properti **/
+            request.LessonCreateAndEditDto.LessonName = lessonNameWithClass;
             var lesson = _mapper.Map<Lesson>(request.LessonCreateAndEditDto, opts => opts.Items["ClassRoom"] = classroom);
 
             /** Langkah 4: Simpan Lesson ke Database **/
