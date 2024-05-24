@@ -87,7 +87,7 @@ public class CreateSubmissionByStudentId
                         return Result<SubmissionCreateByStudentIdDto>.Failure("Hanya file PDF yang diperbolehkan");
                     }
 
-                    string relativeFolderPath = "Upload/FileAssignmentSubmission";
+                    string relativeFolderPath = "/app/uploads/assignmentSubmission";
                     submissionFilePath = await _fileService.SaveFileSubmission(request.SubmissionDto.FileData, relativeFolderPath, DateTime.UtcNow);
                 }
 

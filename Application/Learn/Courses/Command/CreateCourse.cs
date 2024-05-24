@@ -70,7 +70,7 @@ public class CreateCourse
                     return Result<CourseCreateDto>.Failure("Hanya file PDF yang diperbolehkan");
                 }
 
-                string relativeFolderPath = "Upload/FileCourse";
+                string relativeFolderPath = "/app/uploads/course";
                 filePath = await _fileService.SaveFileAsync(request.CourseCreateDto.FileData, relativeFolderPath, request.CourseCreateDto.CourseName, course.CreatedAt);
             }
 

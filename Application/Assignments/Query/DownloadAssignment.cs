@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using AutoMapper;
+using Domain.Learn.Courses;
 using MediatR;
 using Persistence;
 
@@ -29,13 +30,17 @@ public class DownloadAssignment
                 return Result<DownloadFileDto>.Failure("File tidak ditemukan");
             }
 
-            // AutoMapper akan menangani pembacaan file dan penentuan ContentType
-            var downloadFileDto = _mapper.Map<DownloadFileDto>(assignment);
-
-            if (downloadFileDto.FileData == null)
+            // Pastikan path file benar dalam container
+            var filePath = assignment.FilePath;
+            if (!System.IO.File.Exists(filePath))
             {
                 return Result<DownloadFileDto>.Failure("File tidak ditemukan");
             }
+
+            var downloadFileDto = _mapper.Map<DownloadFileDto>(assignment);
+            downloadFileDto.FileData = await System.IO.File.ReadAllBytesAsync(filePath);
+            downloadFileDto.FileName = Path.GetFileName(filePath);
+            downloadFileDto.ContentType = "application/pdf"; // Sesuaikan ContentType jika perlu
 
             return Result<DownloadFileDto>.Success(downloadFileDto);
         }

@@ -63,7 +63,7 @@ public class CreateAssignment
                     return Result<AssignmentCreateDto>.Failure("Hanya file PDF yang diperbolehkan");
                 }
 
-                string relativeFolderPath = "Upload/FileAssignment";
+                string relativeFolderPath = "/app/uploads/assignment";
                 filePath = await _fileService.SaveFileAsync(request.AssignmentCreateDto.AssignmentFileData,
                     relativeFolderPath, request.AssignmentCreateDto.AssignmentName, assignment.CreatedAt);
 
