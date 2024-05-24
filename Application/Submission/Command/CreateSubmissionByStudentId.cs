@@ -131,6 +131,6 @@ public class CreateSubmissionByStudentIdValidator : AbstractValidator<Submission
         RuleFor(x => x.Link)
             .NotEmpty()
             .When(x => x.FileData == null) // Hanya memeriksa Link jika FileData kosong
-            .WithMessage("AssignmentLink must be provided if FileData is not provided.");
+            .WithMessage("Link harus disediakan jika File tidak disediakan");
     }
 }
