@@ -13,7 +13,7 @@ COPY "Infrastructure/Infrastructure.csproj" "Infrastructure/Infrastructure.cspro
 # Restore dependencies
 RUN dotnet restore "EduTechDAD.sln"
 
-# Copy the rest of the files and build
+# Salin file lainnya dan build
 COPY . .
 WORKDIR /app
 RUN dotnet publish -c Release -o out

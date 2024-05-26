@@ -34,7 +34,7 @@ services:
     depends_on:
       - pgadmin
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: Production
     volumes:
       - /home/azureuser/Upload/FileCourse:/app/uploads/course
       - /home/azureuser/Upload/FileAssignment:/app/uploads/assignment
