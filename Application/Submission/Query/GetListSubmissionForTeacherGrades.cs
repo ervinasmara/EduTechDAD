@@ -54,12 +54,13 @@ public class GetListSubmissionForTeacherGrades
                 /** Langkah 5: Memeriksa apakah tugas ditemukan dan terkait dengan pelajaran **/
                 if (assignment == null)
                 {
-                    return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure("Tugas yang tidak ditemukan atau tidak berhubungan dengan pelajaran");
+                    return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure("Tugas tidak ditemukan atau tidak berhubungan dengan pelajaran");
                 }
 
                 /** Langkah 6: Mendapatkan daftar pengajuan tugas untuk tugas yang diberikan **/
                 var submissions = await _context.AssignmentSubmissions
-                    .Where(s => s.AssignmentId == request.AssignmentId)
+                    .Include(s => s.Student)
+                    .Where(s => s.Student.Status != 0 && s.AssignmentId == request.AssignmentId)
                     .ProjectTo<AssignmentSubmissionListGradeDto>(_mapper.ConfigurationProvider)
                     .OrderBy(a => a.SubmissionTime)
                     .ToListAsync(cancellationToken);
@@ -67,13 +68,17 @@ public class GetListSubmissionForTeacherGrades
                 /** Langkah 7: Menghitung jumlah Pengajuan yang sudah dinilai, belum dinilai, dan belum dikumpulkan **/
                 var alreadyGradesCount = submissions.Count(s => s.Grade > 0);
                 var notAlreadyGradesCount = submissions.Count(s => s.Grade == 0);
-                var totalStudents = await _context.Students.CountAsync(s => s.ClassRoom.Lessons.Any(l => l.Id == request.LessonId), cancellationToken);
+
+                // Hanya menghitung siswa yang statusnya tidak 0
+                var totalStudents = await _context.Students
+                    .CountAsync(s => s.Status != 0 && s.ClassRoom.Lessons.Any(l => l.Id == request.LessonId), cancellationToken);
+
                 var notYetSubmitCount = totalStudents - submissions.Count;
 
                 /** Langkah 8: Mendapatkan daftar siswa yang terdaftar dalam kelas yang terkait dengan pelajaran **/
                 var studentsInClass = await _context.Students
                     .Include(s => s.ClassRoom)
-                    .Where(s => s.ClassRoom.Lessons.Any(l => l.Id == request.LessonId))
+                    .Where(s => s.Status != 0 && s.ClassRoom.Lessons.Any(l => l.Id == request.LessonId))
                     .ToListAsync(cancellationToken);
 
                 /** Langkah 9: Mendapatkan daftar siswa yang sudah mengumpulkan tugas **/
@@ -107,6 +112,5 @@ public class GetListSubmissionForTeacherGrades
                 return Result<AssignmentSubmissionListForTeacherGradeDto>.Failure($"Gagal menangani pengumpulan tugas: {ex.Message}");
             }
         }
-
     }
 }
