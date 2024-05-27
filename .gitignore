@@ -12,9 +12,9 @@
 *.user
 *.userosscache
 *.sln.docstates
-API/Upload
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+*.pdf
 
 # Mono auto generated files
 mono_crash.*
