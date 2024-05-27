@@ -17,7 +17,7 @@ public class SeedUser
                 var admin = new Admin
                 {
                     Id = Guid.NewGuid(),
-                    NameAdmin = "Ekik",
+                    NameAdmin = "Eki Saputra",
                     AppUserId = adminUser.Id,
                     User = adminUser
                 };
