@@ -28,8 +28,7 @@ public class ListLesson
         public async Task<Result<List<LessonGetAllAndByIdDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
             var lessonsWithClassNameAndTeacherName = await _context.Lessons
-                .OrderBy(x => x.Status == 0 ? 1 : 0)
-                .ThenByDescending(x => x.Status)
+                .Where(x => x.Status != 0)
                 .ProjectTo<LessonGetAllAndByIdDto>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
 
