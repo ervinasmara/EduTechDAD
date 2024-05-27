@@ -52,7 +52,7 @@ public static class ApplicationServiceExtensions
         services.AddSwaggerGen();
         services.AddDbContext<DataContext>(opt =>
         {
-            opt.UseNpgsql(config.GetConnectionString("KoneksiKePostgreSQL"));
+            opt.UseNpgsql(config.GetConnectionString("ConnectToPostgreSQL"));
         });
 
         // Menambahkan CORS Policy

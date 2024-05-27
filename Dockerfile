@@ -26,7 +26,7 @@ WORKDIR /app
 COPY --from=build-env /app/out .
 
 # Menetapkan variabel lingkungan
-ENV ConnectionStrings__KoneksiKePostgreSQL="Host=postgres_container;Database=DbLMSEduTechIBE;Username=root;Password=root;"
+ENV ConnectionStrings__ConnectToPostgreSQL="Host=postgres_container;Database=DbLMSEduTechIBE;Username=root;Password=root;"
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:80
 
