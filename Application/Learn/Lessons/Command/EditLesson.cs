@@ -59,18 +59,36 @@ public class EditLesson
                     return Result<LessonCreateAndEditDto>.Failure($"Kelas dengan nama '{requestedClassName}' tidak ditemukan");
                 }
 
-                /** Langkah 3: Update properti Lesson **/
-                lesson.LessonName = request.LessonCreateAndEditDto.LessonName;
+                /** Langkah 3: Validasi Keunikan Nama Pelajaran **/
+                var lessonNameWithClass = $"{request.LessonCreateAndEditDto.LessonName} - {requestedClassName}";
+                var isLessonNameUnique = await _context.Lessons
+                    .AllAsync(l => l.Id == request.LessonId || l.LessonName != lessonNameWithClass, cancellationToken);
+
+                if (!isLessonNameUnique)
+                {
+                    return Result<LessonCreateAndEditDto>.Failure("Nama mapel harus unik");
+                }
+
+                /** Langkah 4: Periksa apakah ada perubahan **/
+                if (lesson.LessonName == lessonNameWithClass && lesson.ClassRoomId == classroom.Id)
+                {
+                    return Result<LessonCreateAndEditDto>.Failure("Tidak ada perubahan yang dilakukan pada pelajaran");
+                }
+
+                /** Langkah 5: Update properti Lesson **/
+                lesson.LessonName = lessonNameWithClass;
                 lesson.ClassRoomId = classroom.Id;
 
-                /** Langkah 4: Simpan perubahan ke database **/
+                /** Langkah 6: Simpan perubahan ke database **/
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                /** Langkah 5: Kirimkan DTO dalam Response **/
-                /** Langkah 5.1: Map Lesson ke LessonDto **/
-                var lessonDto = _mapper.Map<LessonCreateAndEditDto>(lesson);
+                if (!result)
+                {
+                    return Result<LessonCreateAndEditDto>.Failure("Gagal untuk mengedit pelajaran");
+                }
 
-                /** Langkah 5.2: Atur properti ClassName di LessonDto **/
+                /** Langkah 7: Kirimkan DTO dalam Response **/
+                var lessonDto = _mapper.Map<LessonCreateAndEditDto>(lesson);
                 lessonDto.ClassName = classroom.ClassName;
 
                 return Result<LessonCreateAndEditDto>.Success(lessonDto);
