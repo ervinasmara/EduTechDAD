@@ -56,7 +56,7 @@ public class AttendancesController : BaseApiController
         return HandleResult(result);
     }
 
-    [AllowAnonymous]
+    [Authorize(Policy = "RequireRole1")]
     [HttpGet("download-attendance")]
     public async Task<IActionResult> DownloadAttendance([FromQuery] DownloadAttendance.AttendanceQuery query)
     {
