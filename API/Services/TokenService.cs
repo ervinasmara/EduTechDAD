@@ -32,7 +32,7 @@ public class TokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(100),
+            Expires = DateTime.UtcNow.AddDays(2),
             SigningCredentials = creds
         };
 
@@ -67,7 +67,7 @@ public class TokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(100),
+            Expires = DateTime.UtcNow.AddDays(2),
             SigningCredentials = creds
         };
 
@@ -110,7 +110,7 @@ public class TokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(100),
+            Expires = DateTime.UtcNow.AddDays(2),
             SigningCredentials = creds
         };
 
