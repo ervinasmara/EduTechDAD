@@ -58,6 +58,7 @@ public class TokenService
             new Claim("Address", teacher.Address),
             new Claim("PhoneNumber", teacher.PhoneNumber),
             new Claim("Nip", teacher.Nip),
+            new Claim("Gender", teacher.Gender.ToString()),
         };
 
         // Dan kita perlu menggunakan kunci keamanan simetris
