@@ -117,7 +117,7 @@ public class MappingProfiles : Profile
             //.ForMember(dest => dest.FileName, opt => opt.MapFrom(src => $"{src.Student.NameStudent}-{src.Assignment.AssignmentName}{Path.GetExtension(src.FilePath)}"))
             .ForMember(dest => dest.FileName, opt => opt.MapFrom((src =>
                 !string.IsNullOrEmpty(src.Student.NameStudent) && src.FilePath != null
-                    ? $"{src.Assignment.AssignmentName}{Path.GetExtension(src.FilePath)}"
+                    ? $"{src.Student.NameStudent}{src.Assignment.AssignmentName}{Path.GetExtension(src.FilePath)}"
                     : "No File")))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status == 1 ? "Sudah Dikerjakan" : "Sudah Dinilai"))
             .ForMember(dest => dest.SubmissionTimeStatus, opt => opt.MapFrom(src =>
