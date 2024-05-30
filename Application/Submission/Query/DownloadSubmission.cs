@@ -1,7 +1,6 @@
 ﻿using Application.Assignments;
 using Application.Core;
 using AutoMapper;
-using Domain.Learn.Courses;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
