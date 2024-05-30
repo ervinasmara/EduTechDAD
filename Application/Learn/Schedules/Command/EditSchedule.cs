@@ -55,8 +55,25 @@ public class EditSchedule
                 if (lesson == null)
                     return Result<ScheduleCreateAndEditDto>.Failure($"Pelajaran dengan nama '{request.ScheduleCreateAndEditDto.LessonName}' tidak ditemukan");
 
-                /** Langkah 6: Memperbarui Properti LessonId **/
-                schedule.LessonId = lesson.Id;
+                var overlappingSchedule = await _context.Schedules
+                .Where(s => s.Lesson.ClassRoomId == lesson.ClassRoomId && s.Day == request.ScheduleCreateAndEditDto.Day)
+                .Select(s => new {
+                    s.Id,
+                    s.Day,
+                    StartTime = s.StartTime,
+                    EndTime = s.EndTime,
+                    s.Lesson.ClassRoom.ClassName
+                })
+                .FirstOrDefaultAsync(s => (request.ScheduleCreateAndEditDto.StartTime < s.EndTime && request.ScheduleCreateAndEditDto.EndTime > s.StartTime) && s.Id != request.ScheduleId, cancellationToken);
+
+                if (overlappingSchedule != null)
+                {
+                    var dayName = GetDayName((int)overlappingSchedule.Day);
+                    var startTime = overlappingSchedule.StartTime.ToString(@"hh\:mm\:dd");
+                    var endTime = overlappingSchedule.EndTime.ToString(@"hh\:mm\:dd");
+                    return Result<ScheduleCreateAndEditDto>.Failure(
+                        $"Jadwal sudah ada dihari '{dayName}' pada jam '{startTime}' - '{endTime}' di kelas {overlappingSchedule.ClassName}");
+                }
 
                 /** Langkah 7: Menyimpan Perubahan ke Database **/
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
@@ -76,6 +93,21 @@ public class EditSchedule
                 /** Langkah 10: Menangani Kesalahan Jika Terjadi **/
                 return Result<ScheduleCreateAndEditDto>.Failure($"Gagal untuk mengedit jadwal: {ex.Message}");
             }
+        }
+
+        private static string GetDayName(int day)
+        {
+            return day switch
+            {
+                1 => "Senin",
+                2 => "Selasa",
+                3 => "Rabu",
+                4 => "Kamis",
+                5 => "Jumat",
+                6 => "Sabtu",
+                7 => "Minggu",
+                _ => "Tidak diketahui"
+            };
         }
     }
 }
