@@ -72,7 +72,7 @@ public class EditSchedule
                     var startTime = overlappingSchedule.StartTime.ToString(@"hh\:mm\:dd");
                     var endTime = overlappingSchedule.EndTime.ToString(@"hh\:mm\:dd");
                     return Result<ScheduleCreateAndEditDto>.Failure(
-                        $"Jadwal sudah ada dihari '{dayName}' pada jam '{startTime}' - '{endTime}' di kelas {overlappingSchedule.ClassName}");
+                        $"Jadwal sudah ada pada hari {dayName} pada jam {startTime} - {endTime} di kelas {overlappingSchedule.ClassName}");
                 }
 
                 /** Langkah 7: Menyimpan Perubahan ke Database **/

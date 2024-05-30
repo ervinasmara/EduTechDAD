@@ -63,7 +63,7 @@ public class CreateSchedule
                     {
                         return Result<ScheduleCreateAndEditDto>.Failure(
                             $"Jadwal sudah ada pada hari {dayName} " +
-                            $"pada jam {schedule.StartTime:hh\\:mm} - {schedule.EndTime:hh\\:mm} di kelas {lesson.ClassRoom.ClassName}");
+                            $"pada jam {schedule.StartTime:hh\\:mm\\:dd} - {schedule.EndTime:hh\\:mm\\:dd} di kelas {lesson.ClassRoom.ClassName}");
                     }
                 }
 
