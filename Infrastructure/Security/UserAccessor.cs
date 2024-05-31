@@ -18,6 +18,12 @@ public class UserAccessor : IUserAccessor
         return userId;
     }
 
+    public string GetNameTeacherFromToken()
+    {
+        var nameTeacher = _httpContextAccessor.HttpContext.User?.FindFirstValue("NameTeacher");
+        return nameTeacher;
+    }
+
     public string GetClassRoomIdFromToken()
     {
         var userId = _httpContextAccessor.HttpContext.User?.FindFirstValue("ClassRoomId");

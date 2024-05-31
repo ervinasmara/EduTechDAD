@@ -39,6 +39,12 @@ public class CreateCourse
                 return Result<CourseCreateDto>.Failure("TeacherId tidak ditemukan ditoken");
             }
 
+            var nameTeacher = _userAccessor.GetNameTeacherFromToken();
+            if (nameTeacher == null)
+            {
+                return Result<CourseCreateDto>.Failure("Nama Guru tidak ditemukan ditoken");
+            }
+
             /** Langkah 2: Memeriksa LessonName dan mendapatkan LessonId **/
             var lesson = await _context.Lessons
                 .Include(tl => tl.TeacherLessons)
@@ -76,6 +82,7 @@ public class CreateCourse
 
             // Setelah menyimpan file, set FilePath pada course
             course.FilePath = filePath;
+            course.NameTeacher = nameTeacher;
 
             /** Langkah 5: Menyimpan Course ke database **/
             _context.Courses.Add(course);

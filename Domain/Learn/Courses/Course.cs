@@ -6,6 +6,7 @@ namespace Domain.Learn.Courses;
 public class Course
 {
     public Guid Id { get; set; }
+    public string NameTeacher { get; set; }
     public string CourseName { get; set; }
     public string Description { get; set; }
     public string FilePath { get; set; }

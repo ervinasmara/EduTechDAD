@@ -217,8 +217,7 @@ public class MappingProfiles : Profile
             .ForMember(dest => dest.LongClassName, opt => opt.MapFrom(src => src.Lesson.ClassRoom.LongClassName))
             .ForMember(dest => dest.LessonName, opt => opt.MapFrom(src => src.Lesson.LessonName))
             .ForMember(dest => dest.FileData, opt => opt.MapFrom(src => src.FilePath))
-            .ForMember(dest => dest.NameTeacher, opt => opt.MapFrom(src =>
-                src.Lesson.TeacherLessons.Select(tl => tl.Teacher.NameTeacher).FirstOrDefault()))
+            .ForMember(dest => dest.NameTeacher, opt => opt.MapFrom(src => src.NameTeacher))
             .ForMember(dest => dest.FileName, opt => opt.MapFrom(src =>
                 !string.IsNullOrEmpty(src.CourseName) && src.FilePath != null
                     ? $"{src.CourseName}{Path.GetExtension(src.FilePath)}"
@@ -285,7 +284,9 @@ public class MappingProfiles : Profile
         CreateMap<Lesson, LessonGetAllAndByIdDto>()
             .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.ClassRoom.ClassName))
             .ForMember(dest => dest.NameTeacher, opt => opt.MapFrom(src =>
-                src.TeacherLessons.Select(tl => tl.Teacher.NameTeacher).FirstOrDefault() ?? "Belum Ada Guru"))
+                src.TeacherLessons.Any(tl => tl.Teacher.Status == 1) ?
+                src.TeacherLessons.Where(tl => tl.Teacher.Status == 1).Select(tl => tl.Teacher.NameTeacher).FirstOrDefault() :
+                "Belum Ada Guru"))
             .ForMember(dest => dest.LessonStatus, opt => opt.MapFrom(src => src.Status == 1 ? "Aktif" : "Tidak Aktif"));
 
         /** Get Lesson By ClassRoomId **/
