@@ -80,10 +80,10 @@ public class EditTeacher
 
             /**Langkah 4.3: Validasi apakah semua mata pelajaran belum dimiliki oleh guru lain **/
             var existingTeacherLessons = await _context.TeacherLessons
-               .Include(tl => tl.Lesson)
-               .Include(tl => tl.Teacher)
-               .Where(tl => teacherDto.LessonNames.Contains(tl.Lesson.LessonName) && tl.Teacher.Status == 1)
-               .ToListAsync(cancellationToken);
+                .Include(tl => tl.Lesson)
+                .Include(tl => tl.Teacher)
+                .Where(tl => teacherDto.LessonNames.Contains(tl.Lesson.LessonName) && tl.Teacher.Id != request.TeacherId && tl.Teacher.Status == 1)
+                .ToListAsync(cancellationToken);
 
             if (existingTeacherLessons.Any())
             {
