@@ -52,11 +52,48 @@ public class CreateTeacher
                 .Where(l => teacherDto.LessonNames.Contains(l.LessonName))
                 .ToListAsync(cancellationToken);
 
-            /** Langkah 4: Periksa apakah semua nama pelajaran yang dimasukkan valid **/
-            if (validLessons.Count != teacherDto.LessonNames.Count)
+            /** Langkah 3.1: Pengecekan status pelajaran **/
+            var invalidStatusLessons = validLessons.Where(l => l.Status == 0).ToList();
+            if (invalidStatusLessons.Any())
             {
-                var invalidLessonNames = teacherDto.LessonNames.Except(validLessons.Select(l => l.LessonName)).ToList();
-                return Result<RegisterTeacherDto>.Failure($"Nama pelajaran tidak valid: {string.Join(", ", invalidLessonNames)}");
+                var invalidStatusLessonNames = invalidStatusLessons.Select(l => l.LessonName).ToList();
+                return Result<RegisterTeacherDto>.Failure($"Mapel {string.Join(", ", invalidStatusLessonNames)} sudah tidak tersedia");
+            }
+
+            /** Langkah 4: Melakukan validasi terhadap nama-nama pelajaran yang dipilih **/
+            var invalidLessonNames = new List<string>();
+            foreach (var lessonName in teacherDto.LessonNames)
+            {
+                var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.LessonName == lessonName);
+                if (lesson == null)
+                {
+                    invalidLessonNames.Add(lessonName);
+                }
+            }
+
+            // Jika ada nama pelajaran yang tidak valid
+            if (invalidLessonNames.Any())
+            {
+                return Result<RegisterTeacherDto>.Failure($"Nama pelajaran {string.Join(", ", invalidLessonNames)} yang Anda pilih tidak ada");
+            }
+
+            /**Langkah 4.1: Validasi apakah semua mata pelajaran belum dimiliki oleh guru lain **/
+            var existingTeacherLessons = await _context.TeacherLessons
+               .Include(tl => tl.Lesson)
+               .Include(tl => tl.Teacher)
+               .Where(tl => teacherDto.LessonNames.Contains(tl.Lesson.LessonName) && tl.Teacher.Status == 1)
+               .ToListAsync(cancellationToken);
+
+            if (existingTeacherLessons.Any())
+            {
+                var alreadyAssignedLessons = existingTeacherLessons
+                    .Select(tl => new { tl.Lesson.LessonName, tl.Teacher.NameTeacher })
+                    .ToList();
+
+                var errorMessage = string.Join(", ", alreadyAssignedLessons
+                    .Select(t => $"Pelajaran sudah dimiliki oleh guru {t.NameTeacher}, pada mapel {t.LessonName}"));
+
+                return Result<RegisterTeacherDto>.Failure(errorMessage);
             }
 
             /** Langkah 5: Buat AppUser baru jika semua validasi berhasil **/

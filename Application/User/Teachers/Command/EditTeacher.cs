@@ -29,6 +29,8 @@ public class EditTeacher
 
         public async Task<Result<EditTeacherDto>> Handle(EditTeacherCommand request, CancellationToken cancellationToken)
         {
+            var teacherDto = request.TeacherDto;
+
             /** Langkah 1: Mencari guru berdasarkan ID **/
             var teacher = await _context.Teachers
                 .Include(t => t.TeacherLessons) // Memuat relasi TeacherLessons
@@ -44,21 +46,61 @@ public class EditTeacher
             /** Langkah 3: Memetakan data dari EditTeacherCommand ke entitas Teacher menggunakan AutoMapper **/
             _mapper.Map(request, teacher);
 
-            /** Langkah 4: Melakukan validasi terhadap nama-nama pelajaran yang dipilih **/
-            foreach (var lessonName in request.TeacherDto.LessonNames)
+            /** Langkah 4: Dapatkan daftar pelajaran yang valid dari input guru **/
+            var validLessons = await _context.Lessons
+            .Include(tl => tl.TeacherLessons)
+                .Where(l => teacherDto.LessonNames.Contains(l.LessonName))
+                .ToListAsync(cancellationToken);
+
+            /** Langkah 4.1: Pengecekan status pelajaran **/
+            var invalidStatusLessons = validLessons.Where(l => l.Status == 0).ToList();
+            if (invalidStatusLessons.Any())
+            {
+                var invalidStatusLessonNames = invalidStatusLessons.Select(l => l.LessonName).ToList();
+                return Result<EditTeacherDto>.Failure($"Mapel {string.Join(", ", invalidStatusLessonNames)} sudah tidak tersedia");
+            }
+
+            /** Langkah 4.2: Melakukan validasi terhadap nama-nama pelajaran yang dipilih **/
+            var invalidLessonNames = new List<string>();
+            foreach (var lessonName in teacherDto.LessonNames)
             {
                 var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.LessonName == lessonName);
                 if (lesson == null)
                 {
-                    return Result<EditTeacherDto>.Failure($"Nama pelajaran '{lessonName}' yang Anda pilih tidak ada");
+                    invalidLessonNames.Add(lessonName);
                 }
             }
 
+            // Jika ada nama pelajaran yang tidak valid
+            if (invalidLessonNames.Any())
+            {
+                return Result<EditTeacherDto>.Failure($"Nama pelajaran {string.Join(", ", invalidLessonNames)} yang Anda pilih tidak ada");
+            }
+
+
+            /**Langkah 4.3: Validasi apakah semua mata pelajaran belum dimiliki oleh guru lain **/
+            var existingTeacherLessons = await _context.TeacherLessons
+               .Include(tl => tl.Lesson)
+               .Include(tl => tl.Teacher)
+               .Where(tl => teacherDto.LessonNames.Contains(tl.Lesson.LessonName) && tl.Teacher.Status == 1)
+               .ToListAsync(cancellationToken);
+
+            if (existingTeacherLessons.Any())
+            {
+                var alreadyAssignedLessons = existingTeacherLessons
+                    .Select(tl => new { tl.Lesson.LessonName, tl.Teacher.NameTeacher })
+                    .ToList();
+
+                var errorMessage = string.Join(", ", alreadyAssignedLessons
+                    .Select(t => $"Pelajaran sudah dimiliki oleh guru {t.NameTeacher}, pada mapel {t.LessonName}"));
+
+                return Result<EditTeacherDto>.Failure(errorMessage);
+            }
             /** Langkah 5: Menghapus semua relasi pelajaran yang ada **/
             _context.TeacherLessons.RemoveRange(teacher.TeacherLessons);
 
             /** Langkah 6: Menambahkan kembali relasi pelajaran yang baru **/
-            foreach (var lessonName in request.TeacherDto.LessonNames)
+            foreach (var lessonName in teacherDto.LessonNames)
             {
                 var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.LessonName == lessonName);
                 if (lesson != null)
