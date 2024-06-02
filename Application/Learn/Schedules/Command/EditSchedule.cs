@@ -55,9 +55,6 @@ public class EditSchedule
                 if (lesson == null)
                     return Result<ScheduleCreateAndEditDto>.Failure($"Pelajaran dengan nama '{request.ScheduleCreateAndEditDto.LessonName}' tidak ditemukan");
 
-                // Menetapkan LessonId yang sesuai ke Schedule yang sedang diedit
-                schedule.LessonId = lesson.Id;
-
                 var overlappingSchedule = await _context.Schedules
                 .Where(s => s.Lesson.ClassRoomId == lesson.ClassRoomId && s.Day == request.ScheduleCreateAndEditDto.Day)
                 .Select(s => new {
