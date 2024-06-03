@@ -29,6 +29,8 @@ public class ListSchedule
             {
                 /** Langkah 1: Mengambil Jadwal dan Memetakkannya ke ScheduleGetDto **/
                 var schedule = await _context.Schedules
+                    .OrderBy(t => t.Day)
+                    .ThenBy(t => t.StartTime)
                     .ProjectTo<ScheduleGetDto>(_mapper.ConfigurationProvider)
                     .ToListAsync(cancellationToken);
 
