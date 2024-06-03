@@ -70,11 +70,11 @@ public class CoursesController : BaseApiController
     }
 
     /** Deactivate Course Who TeacherId **/
-    [Authorize(Policy = "RequireRole2")]
-    [HttpPut("deactivate/{id}")]
-    public async Task<IActionResult> DeleteCourse(Guid id, CancellationToken ct)
-    {
-        var result = await Mediator.Send(new DeactivateCourse.Command { CourseId = id }, ct);
-        return HandleResult(result);
-    }
+    //[Authorize(Policy = "RequireRole2")]
+    //[HttpPut("deactivate/{id}")]
+    //public async Task<IActionResult> DeleteCourse(Guid id, CancellationToken ct)
+    //{
+    //    var result = await Mediator.Send(new DeactivateCourse.Command { CourseId = id }, ct);
+    //    return HandleResult(result);
+    //}
 }
