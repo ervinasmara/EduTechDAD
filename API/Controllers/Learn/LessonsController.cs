@@ -64,12 +64,4 @@ public class LessonsController : BaseApiController
         var result = await Mediator.Send(new DeactivateLesson.Command { LessonId = id }, ct);
         return HandleResult(result);
     }
-
-    /** Delete Lesson By Admin **/
-    [Authorize(Policy = "RequireRole1")]
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteLesson(Guid id, CancellationToken ct)
-    {
-        return HandleResult(await Mediator.Send(new DeleteLesson.Command { Id = id }, ct));
-    }
 }
