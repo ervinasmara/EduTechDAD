@@ -27,6 +27,8 @@ public class ListClassRoom
         {
             /** Langkah 1: Mengambil Semua Data Ruang Kelas dari Database **/
             var classRoom = await _context.ClassRooms
+                .Where(l => l.Status != 0) // Filter ClassRoom
+                .OrderBy(l => l.UniqueNumberOfClassRoom)
                 .ToListAsync(cancellationToken);
 
             /** Langkah 2: Memetakan Data Ruang Kelas ke ClassRoomGetDto Menggunakan AutoMapper **/
