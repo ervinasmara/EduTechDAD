@@ -44,22 +44,29 @@ public class EditStudent
             /** Langkah 3: Memetakan data dari DTO ke entitas siswa **/
             _mapper.Map(request.StudentEditDto, student);
 
-            /** Langkah 4: Memetakan entitas siswa yang telah diperbarui ke DTO **/
-            var updatedStudentDto = _mapper.Map<EditStudentDto>(student);
-
-            /** Langkah 5: Memperbarui nilai properti UniqueNumberOfClassRoom di DTO **/
-            updatedStudentDto.UniqueNumberOfClassRoom = student.ClassRoom?.UniqueNumberOfClassRoom;
-
-            /** Langkah 6: Memeriksa apakah UniqueNumberOfClassRoom berubah **/
+            /** Langkah 4: Memeriksa apakah UniqueNumberOfClassRoom berubah **/
             if (student.ClassRoom?.UniqueNumberOfClassRoom != request.StudentEditDto.UniqueNumberOfClassRoom)
             {
                 var classRoom = await _context.ClassRooms.FirstOrDefaultAsync(c => c.UniqueNumberOfClassRoom == request.StudentEditDto.UniqueNumberOfClassRoom);
                 if (classRoom == null)
                 {
-                    return Result<EditStudentDto>.Failure("UniqueNumberOfClassRoom tidak valid");
+                    return Result<EditStudentDto>.Failure("Nomor Unik kelas tidak ada");
                 }
+
+                // Tambahan pengecekan status ClassRoom
+                if (classRoom.Status == 0) // 0 adalah status yang menunjukkan kelas tidak bisa digunakan
+                {
+                    return Result<EditStudentDto>.Failure("Kelas tidak bisa digunakan");
+                }
+
                 student.ClassRoom = classRoom;
             }
+
+            /** Langkah 5: Memetakan entitas siswa yang telah diperbarui ke DTO **/
+            var updatedStudentDto = _mapper.Map<EditStudentDto>(student);
+
+            /** Langkah 6: Memperbarui nilai properti UniqueNumberOfClassRoom di DTO **/
+            updatedStudentDto.UniqueNumberOfClassRoom = student.ClassRoom?.UniqueNumberOfClassRoom;
 
             /** Langkah 7: Menyimpan perubahan ke database **/
             _context.Students.Update(student);
