@@ -40,6 +40,8 @@ public class CreateSchedule
                 /** Langkah 1: Temukan Pelajaran Berdasarkan Nama Pelajaran yang Diberikan **/
                 var lesson = await _context.Lessons
                     .Include(l => l.ClassRoom)
+                    .Include(l => l.TeacherLessons)
+                        .ThenInclude(tl => tl.Teacher)
                     .FirstOrDefaultAsync(l => l.LessonName == request.ScheduleCreateAndEditDto.LessonName, cancellationToken);
 
                 /** Langkah 2: Memeriksa Ketersediaan Pelajaran **/
@@ -64,6 +66,27 @@ public class CreateSchedule
                         return Result<ScheduleCreateAndEditDto>.Failure(
                             $"Jadwal sudah ada pada hari {dayName} " +
                             $"pada jam {schedule.StartTime:hh\\:mm\\:dd} - {schedule.EndTime:hh\\:mm\\:dd} di kelas {lesson.ClassRoom.ClassName}");
+                    }
+                }
+
+                // Langkah 4: Memeriksa Apakah Jadwal Bertumpuk dengan Jadwal yang Ada untuk Guru yang Sama pada Hari yang Berbeda
+                var teacherIds = lesson.TeacherLessons.Select(tl => tl.TeacherId).ToList();
+                var teacherSchedules = await _context.Schedules
+                    .Include(s => s.Lesson)
+                        .ThenInclude(l => l.TeacherLessons)
+                    .Where(s => s.Lesson.TeacherLessons.Any(tl => teacherIds.Contains(tl.TeacherId)))
+                    .ToListAsync(cancellationToken);
+
+                foreach (var schedule in teacherSchedules)
+                {
+                    if ((newStartTime >= schedule.StartTime && newStartTime < schedule.EndTime) ||
+                        (newEndTime > schedule.StartTime && newEndTime <= schedule.EndTime) ||
+                        (newStartTime <= schedule.StartTime && newEndTime >= schedule.EndTime))
+                    {
+                        var teacher = schedule.Lesson.TeacherLessons.First(tl => teacherIds.Contains(tl.TeacherId)).Teacher;
+                        return Result<ScheduleCreateAndEditDto>.Failure(
+                            $"Guru {teacher.NameTeacher} sudah memiliki jadwal pada hari {GetDayName(schedule.Day)} " +
+                            $"pada jam {schedule.StartTime:hh\\:mm\\:ss} - {schedule.EndTime:hh\\:mm\\:ss} di kelas {schedule.Lesson.ClassRoom.ClassName}");
                     }
                 }
 
