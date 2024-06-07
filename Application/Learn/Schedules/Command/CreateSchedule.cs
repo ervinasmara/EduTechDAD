@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using AutoMapper;
+using Domain.Learn.Lessons;
 using Domain.Learn.Schedules;
 using FluentValidation;
 using MediatR;
@@ -69,49 +70,47 @@ public class CreateSchedule
                     }
                 }
 
-                // Langkah 4: Memeriksa Apakah Jadwal Bertumpuk dengan Jadwal yang Ada untuk Guru yang Sama pada Hari yang Berbeda
-                var teacherIds = lesson.TeacherLessons.Select(tl => tl.TeacherId).ToList();
-                var teacherSchedules = await _context.Schedules
-                    .Include(s => s.Lesson)
-                        .ThenInclude(l => l.TeacherLessons)
-                    .Where(s => s.Lesson.TeacherLessons.Any(tl => teacherIds.Contains(tl.TeacherId)))
+                /** Langkah 4: Memeriksa Apakah Jadwal Bertumpuk dengan Jadwal yang Ada untuk Lesson yang Sama pada Hari yang Berbeda **/
+                var lessonId = lesson.Id;
+                var scheduleExist = await _context.Schedules
+                .Include(s => s.Lesson)
+                    .Where(s => s.LessonId == lessonId)
                     .ToListAsync(cancellationToken);
 
-                foreach (var schedule in teacherSchedules)
+                foreach (var schedule in scheduleExist)
                 {
                     if ((newStartTime >= schedule.StartTime && newStartTime < schedule.EndTime) ||
                         (newEndTime > schedule.StartTime && newEndTime <= schedule.EndTime) ||
                         (newStartTime <= schedule.StartTime && newEndTime >= schedule.EndTime))
                     {
-                        var teacher = schedule.Lesson.TeacherLessons.First(tl => teacherIds.Contains(tl.TeacherId)).Teacher;
                         return Result<ScheduleCreateAndEditDto>.Failure(
-                            $"Guru {teacher.NameTeacher} sudah memiliki jadwal pada hari {GetDayName(schedule.Day)} " +
+                            $"Jadwal untuk mapel ini sudah tersedia pada hari {GetDayName(schedule.Day)} " +
                             $"pada jam {schedule.StartTime:hh\\:mm\\:ss} - {schedule.EndTime:hh\\:mm\\:ss} di kelas {schedule.Lesson.ClassRoom.ClassName}");
                     }
                 }
 
-                /** Langkah 4: Membuat Instance Jadwal dari ScheduleCreateAndEditDto dan Mengatur LessonId **/
+                /** Langkah 5: Membuat Instance Jadwal dari ScheduleCreateAndEditDto dan Mengatur LessonId **/
                 var newSchedule = _mapper.Map<Schedule>(request.ScheduleCreateAndEditDto);
                 newSchedule.LessonId = lesson.Id;
 
-                /** Langkah 5: Menambahkan Jadwal ke Database **/
+                /** Langkah 6: Menambahkan Jadwal ke Database **/
                 _context.Schedules.Add(newSchedule);
 
-                /** Langkah 6: Menyimpan Perubahan ke Database **/
+                /** Langkah 7: Menyimpan Perubahan ke Database **/
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                /** Langkah 7: Memeriksa Hasil Simpan **/
+                /** Langkah 8: Memeriksa Hasil Simpan **/
                 if (!result)
                     return Result<ScheduleCreateAndEditDto>.Failure("Gagal untuk membuat jadwal");
 
-                /** Langkah 8: Mengembalikan Hasil dalam Bentuk Success Result **/
+                /** Langkah 9: Mengembalikan Hasil dalam Bentuk Success Result **/
                 var scheduleDto = _mapper.Map<ScheduleCreateAndEditDto>(newSchedule);
 
                 return Result<ScheduleCreateAndEditDto>.Success(scheduleDto);
             }
             catch (Exception ex)
             {
-                /** Langkah 9: Menangani Kesalahan Jika Terjadi **/
+                /** Langkah 10: Menangani Kesalahan Jika Terjadi **/
                 return Result<ScheduleCreateAndEditDto>.Failure($"Gagal untuk membuat jadwal: {ex.Message}");
             }
         }

@@ -49,6 +49,8 @@ public class EditSchedule
 
                 /** Langkah 4: Mencari Pelajaran Berdasarkan Nama Pelajaran yang Diberikan **/
                 var lesson = await _context.Lessons
+                    .Include(l => l.TeacherLessons)
+                        .ThenInclude(tl => tl.Teacher)
                     .FirstOrDefaultAsync(l => l.LessonName == request.ScheduleCreateAndEditDto.LessonName, cancellationToken);
 
                 /** Langkah 5: Memeriksa Ketersediaan Pelajaran **/
@@ -58,34 +60,57 @@ public class EditSchedule
                 // Menetapkan LessonId yang sesuai ke Schedule yang sedang diedit
                 schedule.LessonId = lesson.Id;
 
+                /** Langkah 6: Memeriksa Konflik Jadwal di Kelas yang Sama **/
                 var overlappingSchedule = await _context.Schedules
-                .Where(s => s.Lesson.ClassRoomId == lesson.ClassRoomId && s.Day == request.ScheduleCreateAndEditDto.Day)
-                .Select(s => new {
-                    s.Id,
-                    s.Day,
-                    StartTime = s.StartTime,
-                    EndTime = s.EndTime,
-                    s.Lesson.ClassRoom.ClassName
-                })
-                .FirstOrDefaultAsync(s => (request.ScheduleCreateAndEditDto.StartTime < s.EndTime && request.ScheduleCreateAndEditDto.EndTime > s.StartTime) && s.Id != request.ScheduleId, cancellationToken);
+                    .Where(s => s.Lesson.ClassRoomId == lesson.ClassRoomId && s.Day == request.ScheduleCreateAndEditDto.Day)
+                    .Select(s => new {
+                        s.Id,
+                        s.Day,
+                        StartTime = s.StartTime,
+                        EndTime = s.EndTime,
+                        s.Lesson.ClassRoom.ClassName
+                    })
+                    .FirstOrDefaultAsync(s => (request.ScheduleCreateAndEditDto.StartTime < s.EndTime && request.ScheduleCreateAndEditDto.EndTime > s.StartTime) && s.Id != request.ScheduleId, cancellationToken);
 
                 if (overlappingSchedule != null)
                 {
                     var dayName = GetDayName((int)overlappingSchedule.Day);
-                    var startTime = overlappingSchedule.StartTime.ToString(@"hh\:mm\:dd");
-                    var endTime = overlappingSchedule.EndTime.ToString(@"hh\:mm\:dd");
+                    var startTime = overlappingSchedule.StartTime.ToString(@"hh\:mm\:ss");
+                    var endTime = overlappingSchedule.EndTime.ToString(@"hh\:mm\:ss");
                     return Result<ScheduleCreateAndEditDto>.Failure(
                         $"Jadwal sudah ada pada hari {dayName} pada jam {startTime} - {endTime} di kelas {overlappingSchedule.ClassName}");
                 }
 
-                /** Langkah 7: Menyimpan Perubahan ke Database **/
+                /** Langkah 7: Memeriksa Konflik Jadwal dengan Guru pada Hari yang Berbeda **/
+                var lessonId = lesson.Id;
+                var lessonSchedules = await _context.Schedules
+                    .Include(s => s.Lesson)
+                        .ThenInclude(l => l.ClassRoom)
+                    .Where(s => s.LessonId == lessonId && s.Id != request.ScheduleId)
+                    .ToListAsync(cancellationToken);
+
+                foreach (var lessonSchedule in lessonSchedules)
+                {
+                    if ((request.ScheduleCreateAndEditDto.StartTime >= lessonSchedule.StartTime && request.ScheduleCreateAndEditDto.StartTime < lessonSchedule.EndTime) ||
+                        (request.ScheduleCreateAndEditDto.EndTime > lessonSchedule.StartTime && request.ScheduleCreateAndEditDto.EndTime <= lessonSchedule.EndTime) ||
+                        (request.ScheduleCreateAndEditDto.StartTime <= lessonSchedule.StartTime && request.ScheduleCreateAndEditDto.EndTime >= lessonSchedule.EndTime))
+                    {
+                        var dayName = GetDayName(lessonSchedule.Day);
+                        var startTime = lessonSchedule.StartTime.ToString(@"hh\:mm\:ss");
+                        var endTime = lessonSchedule.EndTime.ToString(@"hh\:mm\:ss");
+                        return Result<ScheduleCreateAndEditDto>.Failure(
+                            $"Jadwal sudah ada untuk pelajaran ini pada hari {dayName} pada jam {startTime} - {endTime} di kelas {lessonSchedule.Lesson.ClassRoom.ClassName}");
+                    }
+                }
+
+                /** Langkah 8: Menyimpan Perubahan ke Database **/
                 var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                /** Langkah 8: Memeriksa Hasil Simpan **/
+                /** Langkah 9: Memeriksa Hasil Simpan **/
                 if (!result)
                     return Result<ScheduleCreateAndEditDto>.Failure("Gagal untuk mengedit jadwal");
 
-                /** Langkah 9: Membuat DTO Respons dan Mengembalikan **/
+                /** Langkah 10: Membuat DTO Respons dan Mengembalikan **/
                 var scheduleDto = _mapper.Map<ScheduleCreateAndEditDto>(schedule);
                 scheduleDto.LessonName = lesson.LessonName; // Set LessonName in response
 
@@ -93,7 +118,7 @@ public class EditSchedule
             }
             catch (Exception ex)
             {
-                /** Langkah 10: Menangani Kesalahan Jika Terjadi **/
+                /** Langkah 11: Menangani Kesalahan Jika Terjadi **/
                 return Result<ScheduleCreateAndEditDto>.Failure($"Gagal untuk mengedit jadwal: {ex.Message}");
             }
         }
